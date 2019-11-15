@@ -16,6 +16,7 @@ class Gate
 {
     TopoVec2 pos;
     TopoVec2 normalVec;
+    double possibility = 1.0;
 
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);
@@ -26,7 +27,9 @@ public:
 
     const TopoVec2& getNormalVec() const;
 
+    double getPossibility() const;
 
+    void setPossibility(double possibility);
 };
 
 }

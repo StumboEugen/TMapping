@@ -18,3 +18,13 @@ const tmap::TopoVec2& tmap::Gate::getNormalVec() const
 {
     return normalVec;
 }
+
+void tmap::Gate::setPossibility(double possibility)
+{
+    Gate::possibility = possibility;
+}
+
+double tmap::Gate::getPossibility() const
+{
+    return possibility;
+}

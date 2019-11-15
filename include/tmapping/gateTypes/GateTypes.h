@@ -9,4 +9,11 @@
 #include "GateWay.h"
 #include "Door.h"
 
+#include <memory>
+
+namespace tmap
+{
+    using GatePtr = std::unique_ptr<Gate>;
+}
+
 #endif //TMAPPING_GATETYPES_H
