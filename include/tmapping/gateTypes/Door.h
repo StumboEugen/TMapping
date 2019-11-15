@@ -6,6 +6,7 @@
 #define TMAPPING_DOOR_H
 
 #include "Gate.h"
+#include "../landmarkTypes/LandmarkTypes.h"
 
 namespace tmap
 {
@@ -13,6 +14,7 @@ namespace tmap
 class Door : public Gate
 {
     bool oepned;
+    StrLM doorMark;
 
 public:
     Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned);

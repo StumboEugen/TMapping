@@ -26,3 +26,8 @@ void Exp::addGate(GatePtr pGate)
     gates.emplace_back(std::move(pGate));
 }
 
+void Exp::addLandmark(PLMPtr pLandmark)
+{
+    posLandmarks.emplace_back(std::move(pLandmark));
+}
+

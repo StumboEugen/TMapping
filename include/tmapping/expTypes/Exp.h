@@ -7,7 +7,9 @@
 
 #include <vector>
 #include <memory>
-#include "tmapping/gateTypes/GateTypes.h"
+
+#include "../gateTypes/GateTypes.h"
+#include "../landmarkTypes/LandmarkTypes.h"
 
 namespace tmap
 {
@@ -19,6 +21,7 @@ class Exp
     // 离开时对应的Gate, -1表示还没离开
     int leftGate = -1;
     std::vector<GatePtr> gates;
+    std::vector<PLMPtr> posLandmarks;
 
 public:
     virtual ExpType type() = 0;
@@ -30,6 +33,8 @@ public:
     const std::vector<GatePtr>& getGates() const;
 
     void addGate(GatePtr pGate);
+
+    void addLandmark(PLMPtr pLandmark);
 
 };
 

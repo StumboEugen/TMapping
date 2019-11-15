@@ -8,5 +8,6 @@
 #include "tools/TopoTools.h"
 #include "gateTypes/GateTypes.h"
 #include "expTypes/ExpTypes.h"
+#include "landmarkTypes/LandmarkTypes.h"
 
 #endif //TMAPPING_TMAPPING_H

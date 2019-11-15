@@ -10,4 +10,10 @@
 #include "Intersection.h"
 #include "SmallRoom.h"
 
+namespace tmap
+{
+    using ExpPtr = std::unique_ptr<Exp>;
+}
+
+
 #endif //TMAPPING_EXPTYPES_H
