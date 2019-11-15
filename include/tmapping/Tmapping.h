@@ -6,5 +6,6 @@
 #define TMAPPING_TMAPPING_H
 
 #include "tools/TopoTools.h"
+#include "gateTypes/GateTypes.h"
 
 #endif //TMAPPING_TMAPPING_H

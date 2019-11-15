@@ -14,8 +14,6 @@ using namespace tmap;
 
 int main(int argc, char **argv)
 {
-    TopoVec2 vec{1, 2};
-    TopoVec2 vec2{1, 0};
-    cout << vec + vec2 << endl;
-    return 0;
+    GateWay gate{{1, 2}, {2, 3}};
+    cout << gate.getNormalVec() - gate.getPos() << endl;
 }
