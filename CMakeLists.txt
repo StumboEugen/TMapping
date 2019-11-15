@@ -173,13 +173,13 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 
 file(GLOB Topo_UI_FORM RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-        include/topo/UI/*.ui)
+    include/tmapping/UI/*.ui)
 
 file(GLOB Topo_UI_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-        include/topo/UI/*.h include/topo/UI/*.cpp)
+    include/tmapping/UI/*.h include/tmapping/UI/*.cpp)
 
-file(GLOB TopoFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-        include/topo/*.cpp include/topo/*.h)
+file(GLOB_RECURSE TopoFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    include/tmapping/*.cpp include/tmapping/*.h)
 
 file(GLOB JsonFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         include/json/*.cpp include/json/*.h)
@@ -216,4 +216,7 @@ add_library(jsonCpp ${JsonFILES})
 #add_dependencies(FakeOB ${PROJECT_NAME}_gencpp)
 #add_dependencies(localController ${PROJECT_NAME}_gencpp)
 
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp ${TopoFILES})
+
+#target_link_libraries(main topoLayer)
+#target_link_libraries(main topoLayer)
