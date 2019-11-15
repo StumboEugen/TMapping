@@ -10,4 +10,6 @@
 #include "expTypes/ExpTypes.h"
 #include "landmarkTypes/LandmarkTypes.h"
 
+#include "ExpCollection.h"
+
 #endif //TMAPPING_TMAPPING_H
