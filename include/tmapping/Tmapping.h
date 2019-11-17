@@ -11,5 +11,6 @@
 #include "landmarkTypes/LandmarkTypes.h"
 
 #include "ExpCollection.h"
+#include "StructedMap.h"
 
 #endif //TMAPPING_TMAPPING_H
