@@ -19,7 +19,7 @@ class StrLM : public Landmark
 public:
     LandmarkType type() override { return LandmarkType::StrLM; }
 
-    explicit StrLM(std::string str);
+    explicit StrLM(std::string str = "");
 
     const std::string& getStr() const;
 };

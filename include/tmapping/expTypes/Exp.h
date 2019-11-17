@@ -20,8 +20,8 @@ class Exp
 {
     // 离开时对应的Gate, -1表示还没离开
     int leftGate = -1;
-    std::vector<GatePtr> gates;
-    std::vector<PLMPtr> posLandmarks;
+    std::vector<GateUnPtr> gates;
+    std::vector<PLMUnPtr> posLandmarks;
 
 public:
     virtual ExpType type() = 0;
@@ -30,11 +30,11 @@ public:
 
     int getLeftGate() const;
 
-    const std::vector<GatePtr>& getGates() const;
+    const std::vector<GateUnPtr>& getGates() const;
 
-    void addGate(GatePtr pGate);
+    void addGate(GateUnPtr pGate);
 
-    void addLandmark(PLMPtr pLandmark);
+    void addLandmark(PLMUnPtr pLandmark);
 
 };
 

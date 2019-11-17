@@ -12,7 +12,9 @@
 
 namespace tmap
 {
-    using ExpPtr = std::unique_ptr<Exp>;
+    using ExpPtr = std::shared_ptr<Exp>;
+    using ExpUnPtr = std::unique_ptr<Exp>;
+    using ExpWePtr = std::weak_ptr<Exp>;
 }
 
 

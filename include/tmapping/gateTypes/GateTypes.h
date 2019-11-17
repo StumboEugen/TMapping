@@ -13,7 +13,9 @@
 
 namespace tmap
 {
-    using GatePtr = std::unique_ptr<Gate>;
+    using GatePtr = std::shared_ptr<Gate>;
+    using GateUnPtr = std::unique_ptr<Gate>;
+    using GateWePtr = std::weak_ptr<Gate>;
 }
 
 #endif //TMAPPING_GATETYPES_H

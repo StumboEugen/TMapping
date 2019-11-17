@@ -16,17 +16,17 @@ int tmap::Exp::getLeftGate() const
     return leftGate;
 }
 
-const std::vector<std::unique_ptr<Gate>>& tmap::Exp::getGates() const
+const std::vector<GateUnPtr>& tmap::Exp::getGates() const
 {
     return gates;
 }
 
-void Exp::addGate(GatePtr pGate)
+void Exp::addGate(GateUnPtr pGate)
 {
     gates.emplace_back(std::move(pGate));
 }
 
-void Exp::addLandmark(PLMPtr pLandmark)
+void Exp::addLandmark(PLMUnPtr pLandmark)
 {
     posLandmarks.emplace_back(std::move(pLandmark));
 }
