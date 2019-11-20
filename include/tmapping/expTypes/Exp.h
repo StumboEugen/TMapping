@@ -18,17 +18,23 @@ enum class ExpType{Intersection, Corridor, Stair, BigRoom, SmallRoom};
 
 class Exp
 {
+    // 进入时对应的Gate, -1表示这个为出发点
+    int32_t enterGate = -1;
     // 离开时对应的Gate, -1表示还没离开
-    int leftGate = -1;
+    int32_t leftGate = -1;
     std::vector<GateUnPtr> gates;
     std::vector<PLMUnPtr> posLandmarks;
 
 public:
     virtual ExpType type() = 0;
 
-    void setLeftGate(int leftGate);
+    void setLeftGate(int32_t leftGate);
 
-    int getLeftGate() const;
+    int32_t getLeftGate() const;
+
+    void setEnterGate(int32_t enterGate);
+
+    int32_t getEnterGate() const;
 
     const std::vector<GateUnPtr>& getGates() const;
 

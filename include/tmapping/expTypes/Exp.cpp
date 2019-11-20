@@ -6,12 +6,12 @@
 
 using namespace tmap;
 
-void tmap::Exp::setLeftGate(int leftGate)
+void tmap::Exp::setLeftGate(int32_t leftGate)
 {
     Exp::leftGate = leftGate;
 }
 
-int tmap::Exp::getLeftGate() const
+int32_t tmap::Exp::getLeftGate() const
 {
     return leftGate;
 }
@@ -29,5 +29,15 @@ void Exp::addGate(GateUnPtr pGate)
 void Exp::addLandmark(PLMUnPtr pLandmark)
 {
     posLandmarks.emplace_back(std::move(pLandmark));
+}
+
+void Exp::setEnterGate(int32_t enterGate)
+{
+    Exp::enterGate = enterGate;
+}
+
+int32_t Exp::getEnterGate() const
+{
+    return enterGate;
 }
 
