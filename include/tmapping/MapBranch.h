@@ -21,19 +21,17 @@ using MapBranchUnPtr = std::unique_ptr<MapBranch>;
 
 enum class MapBranchStatus {EXPIRED, MOVE2NEW, MOVE2OLD};
 
-class MapBranch
+class MapBranch : public std::enable_shared_from_this<MapBranch>
 {
     /// 出生在哪个Exp
     const size_t bornedAt;
     /// 是哪个MapBranch生成的
-    MapBranch* const father;
+    const MapBranchPtr father;
     /// Branch的UUID序号
     const size_t nSerial;
 
     /// 不包括 child's child
-    std::vector<MapBranch*> children;
-    /// 存活的后代数量
-    size_t nAliveChildren = 0;
+    std::vector<MapBranchWePtr> children;
     /// 记录后代在何处出生, children[bornPlace[k]] 以及之后的branch都是在exps[k + bornedAt]以及其之后出生的
     std::vector<size_t> firstChildAtBirthExp;
     /// 用于记录branch上哪些Exp已经经过回环匹配
@@ -44,10 +42,15 @@ class MapBranch
     MapBranchStatus status = MapBranchStatus::MOVE2NEW;
     /// 当前Branch的概率
     double confidence = 1.0;
+    /// 与 confidence相关, 需要知道当前构型中有多少数量的TopoNode
+    size_t nTopoNode = 1;
 
+    MapBranch(size_t bornedAt, MapBranchPtr father, size_t nSerial, double confidence);
 public:
-    /// 构造函数, 构造时会自动在father注册自己相关的部分信息
-    MapBranch(size_t bornedAt, MapBranch* father, size_t nSerial, double confidence);
+
+    static MapBranchPtr getAdamBranch();
+
+    MapBranchPtr bornOne(size_t newBornedAt, size_t newSerial, double newConfidence);
 
     void setExpired();
 };
