@@ -2,8 +2,8 @@
 // Created by stumbo on 2019/11/15.
 //
 
-#ifndef TMAPPING_EXPData_H
-#define TMAPPING_EXPData_H
+#ifndef TMAPPING_EXPDATA_H
+#define TMAPPING_EXPDATA_H
 
 #include <vector>
 #include <memory>
@@ -14,7 +14,7 @@
 namespace tmap
 {
 
-enum class ExpType{Intersection, Corridor, Stair, BigRoom, SmallRoom};
+enum class ExpDataType{Intersection, Corridor, Stair, BigRoom, SmallRoom};
 
 /// 代表观测得到的一次地形数据, 比如一个路口, 一个房间的信息
 class ExpData
@@ -23,7 +23,7 @@ class ExpData
     std::vector<PLMUnPtr> posLandmarks;
 
 public:
-    virtual ExpType type() = 0;
+    virtual ExpDataType type() = 0;
 
     const std::vector<GateUnPtr>& getGates() const;
 
@@ -36,4 +36,4 @@ public:
 }
 
 
-#endif //TMAPPING_EXPData_H
+#endif //TMAPPING_EXPDATA_H

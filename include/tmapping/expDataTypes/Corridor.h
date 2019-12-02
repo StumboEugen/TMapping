@@ -17,7 +17,7 @@ class Corridor : public ExpData
 public:
     explicit Corridor(bool completed);
 
-    ExpType type() override { return ExpType::Corridor; }
+    ExpDataType type() override { return ExpDataType::Corridor; }
 
 };
 }

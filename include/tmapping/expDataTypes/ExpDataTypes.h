@@ -2,8 +2,8 @@
 // Created by stumbo on 2019/11/15.
 //
 
-#ifndef TMAPPING_EXPTYPES_H
-#define TMAPPING_EXPTYPES_H
+#ifndef TMAPPING_EXPDATATYPES_H
+#define TMAPPING_EXPDATATYPES_H
 
 #include "ExpData.h"
 #include "Corridor.h"
@@ -18,4 +18,4 @@ namespace tmap
 }
 
 
-#endif //TMAPPING_EXPTYPES_H
+#endif //TMAPPING_EXPDATATYPES_H

@@ -7,7 +7,7 @@
 
 #include "tools/TopoTools.h"
 #include "gateTypes/GateTypes.h"
-#include "expTypes/ExpTypes.h"
+#include "expDataTypes/ExpDataTypes.h"
 #include "landmarkTypes/LandmarkTypes.h"
 
 #include "ExpCollection.h"

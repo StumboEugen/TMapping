@@ -6,7 +6,7 @@
 #define TMAPPING_STRUCTEDMAP_H
 
 #include <vector>
-#include "expTypes/ExpTypes.h"
+#include "expDataTypes/ExpDataTypes.h"
 #include "gateTypes/GateTypes.h"
 #include "tools/TopoVec2.h"
 
@@ -17,12 +17,13 @@ class StructedMap
 {
     struct TopoNode
     {
-        std::vector<ExpPtr> relatedExps;
+        // TODO exp的感念变化, 重构这个部分
+        std::vector<ExpDataPtr> relatedExps;
         std::vector<TopoVec2> poseTransOfExps;
         /// 包含有所有有效gate的并集
         std::vector<GateUnPtr> gates;
         std::vector<TopoNode*> connections;
-        ExpType expType;
+        ExpDataType expType;
     };
 
     struct AgentPos

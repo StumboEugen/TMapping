@@ -5,8 +5,7 @@
 #ifndef TMAPPING_EXPCOLLECTION_H
 #define TMAPPING_EXPCOLLECTION_H
 
-#include "expTypes/ExpTypes.h"
-#include <vector>
+#include "expDataTypes/ExpDataTypes.h"
 #include <memory>
 #include <unordered_map>
 #include <set>
@@ -16,7 +15,7 @@ namespace tmap
 
 class ExpCollection
 {
-    std::vector<ExpPtr> experiences;
+    std::vector<ExpDataPtr> experiences;
     std::unordered_map<int, std::set<Intersection*>> intersections;
     // TODO 合适的分类标准
 

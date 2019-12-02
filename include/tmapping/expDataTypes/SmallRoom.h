@@ -15,7 +15,7 @@ class SmallRoom : public ExpData
 
 
 public:
-    ExpType type() override { return ExpType::SmallRoom; }
+    ExpDataType type() override { return ExpDataType::SmallRoom; }
 };
 }
 
