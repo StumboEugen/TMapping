@@ -10,9 +10,13 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <memory>
 
-#include "json/json.h"
+#define FILE_AND_LINE __FILE__ << ':' << __LINE__
 
+
+namespace tmap
+{
 static constexpr double convEdgePerMeter = 0.02;
 static constexpr double stdDevEdgePerMeter = 0.1 * M_SQRT2;
 static constexpr double stdDevEdgePerMeterOneAx = 0.1;
@@ -37,5 +41,17 @@ static constexpr char TOPO_STD_SERVICE_NAME_SAVEMAP[] = "topoSrv/SaveMap";
 static constexpr char TOPO_STD_SERVICE_NAME_GETMAPS[] = "topoSrv/GetMaps";
 static constexpr char TOPO_STD_SERVICE_NAME_PATHPLANNING[] = "topoSrv/PathPlanning";
 static constexpr char TOPO_STD_SERVICE_NAME_ASKINGNEXTSTEP[] = "topoSrv/NextPathStep";
+
+class MapTwig;
+
+using MapTwigPtr = std::shared_ptr<MapTwig>;
+using MapTwigWePtr = std::weak_ptr<MapTwig>;
+using MapTwigUnPtr = std::unique_ptr<MapTwig>;
+
+class MergedExp;
+
+using MergedExpWePtr = std::weak_ptr<MergedExp>;
+using MergedExpPtr = std::shared_ptr<MergedExp>;
+}
 
 #endif //TMAPPING_TOPOPARAMS_H

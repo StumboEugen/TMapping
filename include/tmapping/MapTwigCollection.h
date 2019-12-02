@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 #include <vector>
-#include "MapTwig.h"
+#include "tools/TopoParams.h"
 
 namespace tmap
 {

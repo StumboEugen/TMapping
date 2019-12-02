@@ -10,20 +10,10 @@
 #include <unordered_set>
 #include <map>
 
+#include "tools/TopoParams.h"
+
 namespace tmap
 {
-
-class MapTwig;
-
-using MapTwigPtr = std::shared_ptr<MapTwig>;
-using MapTwigWePtr = std::weak_ptr<MapTwig>;
-using MapTwigUnPtr = std::unique_ptr<MapTwig>;
-
-class MergedExp;
-
-using MergedExpWePtr = std::weak_ptr<MergedExp>;
-using MergedExpPtr = std::shared_ptr<MergedExp>;
-
 
 enum class MapBranchStatus {EXPIRED, MOVE2NEW, MOVE2OLD};
 

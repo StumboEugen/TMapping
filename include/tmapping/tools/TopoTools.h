@@ -7,7 +7,6 @@
 
 #include "TopoParams.h"
 #include "TopoVec2.h"
-
-#define FILE_AND_LINE __FILE__ << ':' << __LINE__
+#include "BitsHash.h"
 
 #endif //TMAPPING_TOPOTOOLS_H
