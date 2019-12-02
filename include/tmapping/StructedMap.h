@@ -6,9 +6,10 @@
 #define TMAPPING_STRUCTEDMAP_H
 
 #include <vector>
-#include "expDataTypes/ExpDataTypes.h"
-#include "gateTypes/GateTypes.h"
+
+#include "tools/TopoParams.h"
 #include "tools/TopoVec2.h"
+#include "expDataTypes/ExpDataTypes.h"
 
 namespace tmap
 {
@@ -17,11 +18,7 @@ class StructedMap
 {
     struct TopoNode
     {
-        // TODO exp的感念变化, 重构这个部分
-        std::vector<ExpDataPtr> relatedExps;
-        std::vector<TopoVec2> poseTransOfExps;
-        /// 包含有所有有效gate的并集
-        std::vector<GateUnPtr> gates;
+        MergedExpPtr relatedExp;
         std::vector<TopoNode*> connections;
         ExpDataType expType;
     };
