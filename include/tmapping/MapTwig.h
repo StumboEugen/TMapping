@@ -15,9 +15,9 @@ namespace tmap
 
 class MapTwig;
 
-using MapBranchPtr = std::shared_ptr<MapTwig>;
-using MapBranchWePtr = std::weak_ptr<MapTwig>;
-using MapBranchUnPtr = std::unique_ptr<MapTwig>;
+using MapTwigPtr = std::shared_ptr<MapTwig>;
+using MapTwigWePtr = std::weak_ptr<MapTwig>;
+using MapTwigUnPtr = std::unique_ptr<MapTwig>;
 
 class MergedExp;
 
@@ -32,12 +32,12 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 出生在哪个Exp
     const size_t borndAt;
     /// 是哪个MapBranch生成的
-    const MapBranchPtr father;
+    const MapTwigPtr father;
     /// Branch的UUID序号
     const size_t nSerial;
 
     /// 不包括 child's child
-    std::vector<MapBranchWePtr> children;
+    std::vector<MapTwigWePtr> children;
     /// 记录分歧的位置, 在何处分歧分离的(和后代的borneAt是相同的)
     size_t dieAt = 0;
     /// 与过去经历重复的 exp
@@ -52,13 +52,13 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 与 confidence相关, 需要知道当前构型中有多少数量的TopoNode
     size_t nTopoNode = 1;
 
-    MapTwig(size_t bornAt, MapBranchPtr father, size_t nSerial, double confidence);
+    MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
 
 public:
 
-    static MapBranchPtr getAdamBranch();
+    static MapTwigPtr getAdamBranch();
 
-    MapBranchPtr bornOne(size_t newSerial, double newConfidence);
+    MapTwigPtr bornOne(size_t newSerial, double newConfidence);
 
     void setExpired();
 

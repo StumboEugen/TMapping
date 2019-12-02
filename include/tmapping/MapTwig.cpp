@@ -8,25 +8,25 @@
 
 using namespace std;
 
-tmap::MapBranchPtr tmap::MapTwig::getAdamBranch()
+tmap::MapTwigPtr tmap::MapTwig::getAdamBranch()
 {
-    MapBranchPtr adam(new MapTwig(0, nullptr, 0, 1.0));
+    MapTwigPtr adam(new MapTwig(0, nullptr, 0, 1.0));
     return adam;
 }
 
-tmap::MapTwig::MapTwig(size_t bornAt, MapBranchPtr father,
+tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
                        size_t nSerial, double confidence) : borndAt(bornAt),
                                                             father(std::move(father)),
                                                             nSerial(nSerial),
                                                             confidence(confidence)
 {}
 
-tmap::MapBranchPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
+tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
 {
     if (status != MapBranchStatus::EXPIRED) {
         cerr << FILE_AND_LINE << " You didn't born a branch from a EXPIRED branch!" << endl;
     }
-    MapBranchPtr newTwig(
+    MapTwigPtr newTwig(
             new MapTwig(this->dieAt, shared_from_this(), newSerial, newConfidence));
     /// 在后代列表后插入这个新的后代
     this->children.emplace_back(newTwig);
