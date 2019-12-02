@@ -5,16 +5,16 @@
 #ifndef TMAPPING_EXPTYPES_H
 #define TMAPPING_EXPTYPES_H
 
-#include "Exp.h"
+#include "ExpData.h"
 #include "Corridor.h"
 #include "Intersection.h"
 #include "SmallRoom.h"
 
 namespace tmap
 {
-    using ExpPtr = std::shared_ptr<Exp>;
-    using ExpUnPtr = std::unique_ptr<Exp>;
-    using ExpWePtr = std::weak_ptr<Exp>;
+    using ExpDataPtr = std::shared_ptr<ExpData>;
+    using ExpDataUnPtr = std::unique_ptr<ExpData>;
+    using ExpDataWePtr = std::weak_ptr<ExpData>;
 }
 
 

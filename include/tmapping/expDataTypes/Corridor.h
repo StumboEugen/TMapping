@@ -5,12 +5,12 @@
 #ifndef TMAPPING_CORRIDOR_H
 #define TMAPPING_CORRIDOR_H
 
-#include "Exp.h"
+#include "ExpData.h"
 
 namespace tmap
 {
 
-class Corridor : public Exp
+class Corridor : public ExpData
 {
     bool completed;
 

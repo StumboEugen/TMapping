@@ -5,12 +5,12 @@
 #ifndef TMAPPING_INTERSECTION_H
 #define TMAPPING_INTERSECTION_H
 
-#include "Exp.h"
+#include "ExpData.h"
 
 namespace tmap
 {
 
-class Intersection : public Exp
+class Intersection : public ExpData
 {
 
 public:

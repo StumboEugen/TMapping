@@ -5,12 +5,12 @@
 #ifndef TMAPPING_SMALLROOM_H
 #define TMAPPING_SMALLROOM_H
 
-#include "Exp.h"
+#include "ExpData.h"
 
 namespace tmap
 {
 
-class SmallRoom : public Exp
+class SmallRoom : public ExpData
 {
 
 
