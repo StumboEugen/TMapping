@@ -18,12 +18,12 @@ tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
                        size_t nSerial, double confidence) : borndAt(bornAt),
                                                             father(std::move(father)),
                                                             nSerial(nSerial),
-                                                            confidence(confidence)
+                                                            mConfidence(confidence)
 {}
 
 tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
 {
-    if (status != MapBranchStatus::EXPIRED) {
+    if (status != MapTwigStatus::EXPIRED) {
         cerr << FILE_AND_LINE << " You didn't born a branch from a EXPIRED branch!" << endl;
     }
     MapTwigPtr newTwig(
@@ -35,13 +35,29 @@ tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
 
 void tmap::MapTwig::setExpired()
 {
-    if (status == MapBranchStatus::EXPIRED) {
+    if (status == MapTwigStatus::EXPIRED) {
         cerr << FILE_AND_LINE << " You expired a mapBranch more than once!" << endl;
     }
-    status = MapBranchStatus::EXPIRED;
+    status = MapTwigStatus::EXPIRED;
 }
 
 void tmap::MapTwig::setNTopoNode(size_t NTopoNode)
 {
     MapTwig::nTopoNode = NTopoNode;
+}
+
+tmap::MapTwigStatus tmap::MapTwig::getStatus() const
+{
+    return status;
+}
+
+const tmap::MergedExpPtr& tmap::MapTwig::getTheArrivingSimiliarExp() const
+{
+    return theArrivingSimiliarExp;
+}
+
+double tmap::MapTwig::xCoe(double coe)
+{
+    mConfidence *= coe;
+    return mConfidence;
 }

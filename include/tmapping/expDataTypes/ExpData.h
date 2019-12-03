@@ -23,7 +23,7 @@ class ExpData
     std::vector<PLMUnPtr> posLandmarks;
 
 public:
-    virtual ExpDataType type() = 0;
+    virtual ExpDataType type() const = 0;
 
     const std::vector<GateUnPtr>& getGates() const;
 
@@ -32,6 +32,14 @@ public:
     void addLandmark(PLMUnPtr pLandmark);
 
     size_t findTheCloestGate(const TopoVec2& gatePos);
+
+    /**
+     * @brief 计算两个ExpData是否类似
+     * @param another 另一个用于比较的ExpData实例
+     * @param selfWeight this的比重, 1:1就是1, 1:4就是0.25, 5:1就是5
+     * @return 可能性系数, 如果为0表示完全不可能
+     */
+    double alike(const ExpData& another, double selfWeight = 1.0) const;
 };
 
 }

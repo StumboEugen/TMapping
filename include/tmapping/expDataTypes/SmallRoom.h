@@ -15,7 +15,7 @@ class SmallRoom : public ExpData
 
 
 public:
-    ExpDataType type() override { return ExpDataType::SmallRoom; }
+    ExpDataType type() const override { return ExpDataType::SmallRoom; }
 };
 }
 

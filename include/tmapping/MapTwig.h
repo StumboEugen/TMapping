@@ -15,7 +15,7 @@
 namespace tmap
 {
 
-enum class MapBranchStatus {EXPIRED, MOVE2NEW, MOVE2OLD};
+enum class MapTwigStatus {EXPIRED, MOVE2NEW, MOVE2OLD};
 
 class MapTwig : public std::enable_shared_from_this<MapTwig>
 {
@@ -32,13 +32,13 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     size_t dieAt = 0;
     /// 与过去经历重复的 exp
     std::vector<MergedExpPtr> multiPassedExps;
-    /// 当 status 为 MapBranchStatus::MOVE2OLD 的时候记录相似的Exp在哪里
+    /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
     // TODO 注意单独匹配的情况, 这里是个父类指针
     MergedExpPtr theArrivingSimiliarExp = nullptr;
     /// 当前MapBranch的状态
-    MapBranchStatus status = MapBranchStatus::MOVE2NEW;
+    MapTwigStatus status = MapTwigStatus::MOVE2NEW;
     /// 当前Branch的概率
-    double confidence = 1.0;
+    double mConfidence = 1.0;
     /// 与 confidence相关, 需要知道当前构型中有多少数量的TopoNode
     size_t nTopoNode = 1;
 
@@ -53,6 +53,12 @@ public:
     void setExpired();
 
     void setNTopoNode(size_t NTopoNode);
+
+    MapTwigStatus getStatus() const;
+
+    const MergedExpPtr& getTheArrivingSimiliarExp() const;
+
+    double xCoe(double coe);
 };
 
 }

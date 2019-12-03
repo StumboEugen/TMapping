@@ -16,17 +16,20 @@ namespace tmap
 
 class Exp
 {
-    ExpDataPtr data;
+    ExpDataPtr mData;
     /// 进入时对应的Gate, -1表示这个为出发点
-    int32_t enterGate = -1;
+    int32_t mEnterGate = -1;
     /// 离开时对应的Gate, -1表示还没离开
-    int32_t leftGate = -1;
+    int32_t mLeftGate = -1;
     /// 时间上的排序序列
     std::size_t nSerial = 0;
     std::size_t nBuiltTwig;
-    std::unordered_map<BitsHash, MergedExpWePtr> mergedExps;
+    std::unordered_map<BitsHash, MergedExpWePtr> mMergedExps;
 
     friend class ExpCollection;
+
+public:
+    const ExpDataPtr& expData() const;
 };
 }
 

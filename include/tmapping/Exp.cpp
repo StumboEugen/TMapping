@@ -3,3 +3,10 @@
 //
 
 #include "Exp.h"
+
+using namespace tmap;
+
+const ExpDataPtr& Exp::expData() const
+{
+    return mData;
+}

@@ -45,3 +45,13 @@ size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
     return res;
 }
 
+double ExpData::alike(const ExpData& another, double selfWeight) const
+{
+    /// TODO 完成两个未对齐数据的匹配工作
+    if (another.type() == this->type()) {
+        return 1.0;
+    } else {
+        return 0.0;
+    }
+}
+

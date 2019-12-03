@@ -7,11 +7,18 @@
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
-    experiences.back()->leftGate = leftGate;
+    mExperiencesData.back()->mLeftGate = leftGate;
 }
 
 void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
 {
-    auto cloestGate = experiences.back()->data->findTheCloestGate(gatePos);
+    auto cloestGate = mExperiencesData.back()->mData->findTheCloestGate(gatePos);
     setLeftGateOfCurrent(cloestGate);
+}
+
+size_t tmap::ExpCollection::registExp(tmap::ExpPtr expPtr)
+{
+    expPtr->nSerial = mExperiencesData.size();
+    mExperiencesData.push_back(std::move(expPtr));
+    return mExperiencesData.size();
 }

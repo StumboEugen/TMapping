@@ -7,6 +7,8 @@
 
 #include "expDataTypes/ExpDataTypes.h"
 #include "tools/TopoTools.h"
+#include "Exp.h"
+
 #include <memory>
 #include <unordered_map>
 #include <set>
@@ -16,14 +18,18 @@ namespace tmap
 
 class ExpCollection
 {
-    std::vector<ExpPtr> experiences;
+    size_t mSerial;
+    std::vector<ExpPtr> mExperiencesData;
     std::unordered_map<int, std::set<Intersection*>> intersections;
     // TODO 合适的分类标准
 
 public:
     void setLeftGateOfCurrent(size_t leftGate);
     void setLeftGateOfCurrent(const TopoVec2& gatePos);
+
+    size_t registExp(ExpPtr expPtr);
 };
+
 }
 
 

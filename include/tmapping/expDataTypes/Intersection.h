@@ -14,7 +14,7 @@ class Intersection : public ExpData
 {
 
 public:
-    ExpDataType type() override { return ExpDataType::Intersection; }
+    ExpDataType type() const override { return ExpDataType::Intersection; }
 
 };
 }

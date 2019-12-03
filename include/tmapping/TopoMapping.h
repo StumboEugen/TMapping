@@ -15,14 +15,16 @@ namespace tmap
 
 class TopoMapping
 {
-    ExpCollection experiences;
-    MapTwigCollection twigs;
+    ExpCollection mExperiences;
+    MapTwigCollection twigCollection;
 
 public:
     void addNewExp(ExpDataPtr newExpData);
 
     void setLeftGate(size_t gateID);
     void setLeftGate(TopoVec2 gatePos);
+
+    void arriveNewExp(ExpPtr newExp);
 };
 }
 

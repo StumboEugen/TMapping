@@ -17,7 +17,15 @@ class MergedExp
 {
     std::vector<ExpDataPtr> relatedExps;
     std::vector<MapTwigWePtr> relatedMaps;
-    ExpDataPtr mergedExp;
+
+    /// 融合后的实际Exp数据
+    /// @warning 如果是单个Exp融合而成的, 这个ptr指向的就是原始的ExpDataPtr
+    ExpDataPtr mergedExpData;
+
+public:
+    double alike(const MergedExp& another);
+
+    double alike(const ExpData& expData);
 };
 
 }

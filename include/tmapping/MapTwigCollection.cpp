@@ -4,7 +4,9 @@
 
 #include "MapTwigCollection.h"
 
-const std::unordered_map<size_t, tmap::MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps() const
+using namespace tmap;
+
+std::unordered_set<MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps()
 {
     return aliveMaps;
 }
