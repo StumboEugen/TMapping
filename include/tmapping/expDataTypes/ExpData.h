@@ -31,6 +31,7 @@ public:
 
     void addLandmark(PLMUnPtr pLandmark);
 
+    size_t findTheCloestGate(const TopoVec2& gatePos);
 };
 
 }

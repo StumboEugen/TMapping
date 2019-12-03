@@ -25,6 +25,8 @@ class Exp
     std::size_t nSerial = 0;
     std::size_t nBuiltTwig;
     std::unordered_map<BitsHash, MergedExpWePtr> mergedExps;
+
+    friend class ExpCollection;
 };
 }
 

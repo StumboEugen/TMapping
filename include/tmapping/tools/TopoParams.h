@@ -52,6 +52,11 @@ class MergedExp;
 
 using MergedExpWePtr = std::weak_ptr<MergedExp>;
 using MergedExpPtr = std::shared_ptr<MergedExp>;
+
+class Exp;
+
+using ExpWePtr = std::weak_ptr<Exp>;
+using ExpPtr = std::shared_ptr<Exp>;
 }
 
 #endif //TMAPPING_TOPOPARAMS_H
