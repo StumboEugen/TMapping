@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <map>
 #include <set>
 
 namespace tmap
@@ -20,14 +21,13 @@ class ExpCollection
 {
     size_t mSerial;
     std::vector<ExpPtr> mExperiencesData;
-    std::unordered_map<int, std::set<Intersection*>> intersections;
-    // TODO 合适的分类标准
+    std::map<ExpDataType, std::vector<Exp*>> mClassification;
 
 public:
     void setLeftGateOfCurrent(size_t leftGate);
     void setLeftGateOfCurrent(const TopoVec2& gatePos);
 
-    size_t registExp(ExpPtr expPtr);
+    void addNewExpAndFindLoopClosures(ExpPtr expPtr);
 };
 
 }

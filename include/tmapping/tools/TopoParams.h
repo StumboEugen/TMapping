@@ -46,6 +46,8 @@ static constexpr char TOPO_STD_SERVICE_NAME_GETMAPS[] = "topoSrv/GetMaps";
 static constexpr char TOPO_STD_SERVICE_NAME_PATHPLANNING[] = "topoSrv/PathPlanning";
 static constexpr char TOPO_STD_SERVICE_NAME_ASKINGNEXTSTEP[] = "topoSrv/NextPathStep";
 
+static constexpr double firstPossibilityTollerance = 0.5;
+
 class MapTwig;
 
 using MapTwigPtr = std::shared_ptr<MapTwig>;

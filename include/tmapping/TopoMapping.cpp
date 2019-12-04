@@ -30,7 +30,6 @@ void tmap::TopoMapping::setLeftGate(TopoVec2 gatePos)
 void tmap::TopoMapping::arriveNewExp(tmap::ExpPtr newExp)
 {
     unordered_set<MapTwigPtr> explorers;
-    mExperiences.registExp(newExp);
 
     for (auto & oneAliveTwig : twigCollection.getAliveMaps()) {
         switch (oneAliveTwig->getStatus()) {
@@ -43,11 +42,14 @@ void tmap::TopoMapping::arriveNewExp(tmap::ExpPtr newExp)
             case MapTwigStatus::MOVE2OLD:
                 double coe = oneAliveTwig->getTheArrivingSimiliarExp()->alike(*newExp->expData());
                 if (coe == 0.0) {
-                    twigCollection.getAliveMaps().erase(oneAliveTwig);
+                    twigCollection.killAliveMap(oneAliveTwig);
+                    /// 由于传递的是引用, 此处结束后, oneAliveTwig已经被删除
                 } else {
                     oneAliveTwig->xCoe(coe);
                 }
                 break;
         }
     }
+
+
 }

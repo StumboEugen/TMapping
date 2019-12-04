@@ -24,7 +24,7 @@ class MapTwigCollection
 public:
     std::unordered_set<MapTwigPtr>& getAliveMaps();
 
-
+    void killAliveMap(MapTwigPtr map2kill);
 };
 
 }
