@@ -17,6 +17,10 @@
 
 namespace tmap
 {
+
+/// maybe one thousand years later, 128 could run out
+using gateID = int8_t;
+
 static constexpr double convEdgePerMeter = 0.02;
 static constexpr double stdDevEdgePerMeter = 0.1 * M_SQRT2;
 static constexpr double stdDevEdgePerMeterOneAx = 0.1;
