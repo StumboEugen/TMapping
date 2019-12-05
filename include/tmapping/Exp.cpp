@@ -10,3 +10,8 @@ const ExpDataPtr& Exp::expData() const
 {
     return mData;
 }
+
+size_t Exp::serial() const
+{
+    return nSerial;
+}

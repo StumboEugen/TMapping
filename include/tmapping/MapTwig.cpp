@@ -29,14 +29,14 @@ tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
     MapTwigPtr newTwig(
             new MapTwig(this->dieAt, shared_from_this(), newSerial, newConfidence));
     /// 在后代列表后插入这个新的后代
-    this->children.emplace_back(newTwig);
+    this->mChildren.emplace_back(newTwig);
     return newTwig;
 }
 
 void tmap::MapTwig::setExpired()
 {
     if (status == MapTwigStatus::EXPIRED) {
-        cerr << FILE_AND_LINE << " You expired a mapBranch more than once!" << endl;
+        cerr << FILE_AND_LINE << " You expired a mapTwig more than once!" << endl;
     }
     status = MapTwigStatus::EXPIRED;
 }
@@ -60,4 +60,14 @@ double tmap::MapTwig::xCoe(double coe)
 {
     mConfidence *= coe;
     return mConfidence;
+}
+
+const vector<tmap::MapTwigWePtr>& tmap::MapTwig::getChildren() const
+{
+    return mChildren;
+}
+
+const vector<tmap::MergedExpPtr>& tmap::MapTwig::getLoopClosures() const
+{
+    return mLoopClosures;
 }

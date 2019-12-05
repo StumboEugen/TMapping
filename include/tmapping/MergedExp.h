@@ -13,10 +13,18 @@
 namespace tmap
 {
 
+/// TODO 检查是否可以构造出一种相互依赖的树形关系
 class MergedExp
 {
-    std::vector<ExpPtr> relatedExps;
-    std::vector<MapTwigWePtr> relatedMaps;
+    /// 相关的几个Exp
+    std::vector<ExpPtr> mRelatedExps;
+    /// 使用这个MergedExp的Twig们(可能已经被废弃了)
+    std::vector<MapTwigWePtr> mRelatedMaps;
+
+    /// 构造的时候不会把LastSearchResult用RelatedMaps填满, 因此需要这个bool来判断last result空的时候代表什么
+    bool hasSearchedLoopClosure;
+    /// 每次的搜索不需要从头开始, 从末端开始就可以了
+    std::vector<MapTwigWePtr> mLastSearchResult;
 
     class Fast2DGateID_ {
         size_t mDimX;
@@ -40,9 +48,19 @@ class MergedExp
     ExpDataPtr mergedExpData;
 
 public:
-    double alike(const MergedExp& another);
+    double alike(const MergedExp& another) const;
 
-    double alike(const ExpData& expData);
+    double alike(const ExpData& expData) const;
+
+    size_t lastExpSerial() const;
+
+    bool isLastButOneExpSerial(size_t serial2Check) const;
+
+    /**
+     * @brief 找到MOVE2NEW的末端Twig
+     * @return 与此MergedExp可能的闭环的末端MapTwig
+     */
+    std::vector<MapTwigPtr> getLoopClosureMaps();
 };
 
 }

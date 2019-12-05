@@ -30,6 +30,8 @@ class Exp
 
 public:
     const ExpDataPtr& expData() const;
+
+    size_t serial() const;
 };
 }
 
