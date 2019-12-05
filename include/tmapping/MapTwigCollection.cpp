@@ -8,13 +8,16 @@
 
 using namespace tmap;
 
-std::unordered_set<MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps()
+std::vector<MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps()
 {
-    return aliveMaps;
+    return mAliveMaps;
 }
 
-void MapTwigCollection::killAliveMap(MapTwigPtr map2kill)
+MapTwigPtr MapTwigCollection::bornOne(const MapTwigPtr& father, double xConf)
 {
-    map2kill->setExpired();
-    aliveMaps.erase(map2kill);
+    mNextGeneration.reserve(mAliveMaps.size());
+    MapTwigPtr newTwig = father->bornOne(nextSerialN++, father->getConfidence() * xConf);
+    mNextGeneration.push_back(newTwig);
+
+    return newTwig;
 }

@@ -8,6 +8,7 @@
 #include "expDataTypes/ExpDataTypes.h"
 #include "tools/TopoTools.h"
 #include "Exp.h"
+#include "MapTwigCollection.h"
 
 #include <memory>
 #include <unordered_map>
@@ -27,7 +28,8 @@ public:
     void setLeftGateOfCurrent(size_t leftGate);
     void setLeftGateOfCurrent(const TopoVec2& gatePos);
 
-    void addNewExpAndFindLoopClosures(ExpPtr expPtr);
+    void addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
+                                     tmap::MapTwigCollection& twigMaster);
 };
 
 }

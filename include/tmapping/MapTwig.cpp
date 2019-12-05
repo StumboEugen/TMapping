@@ -8,7 +8,7 @@
 
 using namespace std;
 
-tmap::MapTwigPtr tmap::MapTwig::getAdamBranch()
+tmap::MapTwigPtr tmap::MapTwig::getAdamTwig()
 {
     MapTwigPtr adam(new MapTwig(0, nullptr, 0, 1.0));
     return adam;
@@ -27,7 +27,7 @@ tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
         cerr << FILE_AND_LINE << " You didn't born a branch from a EXPIRED branch!" << endl;
     }
     MapTwigPtr newTwig(
-            new MapTwig(this->dieAt, shared_from_this(), newSerial, newConfidence));
+            new MapTwig(this->mDieAt, shared_from_this(), newSerial, newConfidence));
     /// 在后代列表后插入这个新的后代
     this->mChildren.emplace_back(newTwig);
     return newTwig;
@@ -39,11 +39,6 @@ void tmap::MapTwig::setExpired()
         cerr << FILE_AND_LINE << " You expired a mapTwig more than once!" << endl;
     }
     status = MapTwigStatus::EXPIRED;
-}
-
-void tmap::MapTwig::setNTopoNode(size_t NTopoNode)
-{
-    MapTwig::nTopoNode = NTopoNode;
 }
 
 tmap::MapTwigStatus tmap::MapTwig::getStatus() const
@@ -70,4 +65,24 @@ const vector<tmap::MapTwigWePtr>& tmap::MapTwig::getChildren() const
 const vector<tmap::MergedExpPtr>& tmap::MapTwig::getLoopClosures() const
 {
     return mLoopClosures;
+}
+
+bool tmap::MapTwig::hasChildren() const
+{
+    return !mChildren.empty();
+}
+
+double tmap::MapTwig::getConfidence() const
+{
+    return mConfidence;
+}
+
+void tmap::MapTwig::nodeCountPlus()
+{
+    nTopoNode++;
+}
+
+void tmap::MapTwig::setDieAt(size_t dieAt)
+{
+    mDieAt = dieAt;
 }

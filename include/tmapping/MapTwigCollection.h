@@ -17,14 +17,17 @@ class MapTwigCollection
     /// 下一个新的MapTwig的Serial ID
     size_t nextSerialN = 0;
     /// 指向当前依旧存活的地图分支的最新(尾端)MapTwig
-    std::unordered_set<MapTwigPtr> aliveMaps;
+    std::vector<MapTwigPtr> mAliveMaps;
     /// 所有MapTwig的weakPtr
-    std::vector<MapTwigWePtr> MapTwigs;
+    std::vector<MapTwigWePtr> mMapTwigs;
+    /// 方便高速地处理下一代的问题
+    std::vector<MapTwigPtr> mNextGeneration;
 
 public:
-    std::unordered_set<MapTwigPtr>& getAliveMaps();
+    std::vector<MapTwigPtr>& getAliveMaps();
 
-    void killAliveMap(MapTwigPtr map2kill);
+    /// 生产后代Twig, 自动加入nextGeneration, 自动serial编号, 自动设置父子关系
+    MapTwigPtr bornOne(const MapTwigPtr& father, double xConf);
 };
 
 }

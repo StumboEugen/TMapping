@@ -5,7 +5,7 @@
 #ifndef TMAPPING_INCLUDE_TMAPPING_EXP_H
 #define TMAPPING_INCLUDE_TMAPPING_EXP_H
 
-#include <unordered_map>
+#include <vector>
 
 #include "expDataTypes/ExpDataTypes.h"
 #include "tools/BitsHash.h"
@@ -24,7 +24,7 @@ class Exp
     /// 时间上的排序序列
     std::size_t nSerial = 0;
     std::size_t nBuiltTwig;
-    std::unordered_map<BitsHash, MergedExpWePtr> mMergedExps;
+    std::vector<MergedExpWePtr> mMergedExps;
 
     friend class ExpCollection;
 

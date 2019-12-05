@@ -5,6 +5,7 @@
 #include "ExpCollection.h"
 #include "Exp.h"
 #include "MergedExp.h"
+#include "MapTwig.h"
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
@@ -17,32 +18,55 @@ void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
     setLeftGateOfCurrent(cloestGate);
 }
 
-void tmap::ExpCollection::addNewExpAndFindLoopClosures(tmap::ExpPtr expPtr)
+void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
+                                                      tmap::MapTwigCollection& twigMaster)
 {
+    expPtr->nSerial = mExperiencesData.size();
+
     auto & vecSameType = mClassification[expPtr->expData()->type()];
 
     for (size_t i = vecSameType.size() - 1; i >= 0; ++i) {
-        auto sameTypeExp = vecSameType[i];
+        Exp* sameTypeExp = vecSameType[i];
         double poss1 = sameTypeExp->expData()->alike(*expPtr->expData(), 1);
         if (poss1 < TOLLERANCE_1ST_MATCH_EXP) {
             continue;
         }
 
         //TODO 不要忘了单独闭环的情况
-        auto & mergedExpCollection = sameTypeExp->mMergedExps;
-        for (auto iter = mergedExpCollection.begin(); iter != mergedExpCollection.end();) {
-            auto mergedExp = iter->second.lock();
+        auto& mergedExps = sameTypeExp->mMergedExps;
+        for (const auto& iter : mergedExps) {
+            auto mergedExp = iter.lock();
             if (mergedExp) {
                 double poss2 = mergedExp->alike(*expPtr->expData());
                 if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                    /// VERY IMPORTANT PART
+                    MergedExpPtr theNewMerged;
+                    auto closureTwigs = mergedExp->getLoopClosureMaps();
+                    if (!closureTwigs.empty()) {
+                        /// TODO 准备构造新的MergedExp
+//                        theNewMerged
+                    }
+                    for (auto & twig2born : closureTwigs) {
+                        if (!twig2born->hasChildren()) {
+                            twig2born->setDieAt(expPtr->nSerial);
+                            auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
+                            newTwigAssumingNew->nodeCountPlus();
+                        }
+                        auto twigWithClosure = twigMaster.bornOne(twig2born, poss2);
+                    }
                 }
-                ++iter;
+            } /// TODO根据没用的数量来判断要不要重新做这个表
+        }
+
+        /// 清理mergedExps尾端已经没用的部分
+        while (!mergedExps.empty()) {
+            if (mergedExps.back().expired()) {
+                mergedExps.pop_back();
             } else {
-                iter = mergedExpCollection.erase(iter);
+                break;
             }
         }
     }
 
-    expPtr->nSerial = mExperiencesData.size();
     mExperiencesData.push_back(std::move(expPtr));
 }
