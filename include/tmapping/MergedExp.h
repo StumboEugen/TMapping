@@ -13,11 +13,11 @@
 namespace tmap
 {
 
-/// TODO 检查是否可以构造出一种相互依赖的树形关系
 class MergedExp
 {
-    /// 相关的几个Exp
-    std::vector<ExpPtr> mRelatedExps;
+    MergedExpPtr mFather;
+    /// 在此mergedExp新加入的Exp
+    ExpPtr mRelatedExp;
     /// 使用这个MergedExp的Twig们(可能有的已经被废弃了)
     std::vector<MapTwigWePtr> mRelatedMaps;
 
@@ -26,26 +26,15 @@ class MergedExp
     /// 每次的搜索不需要从头开始, 从末端开始就可以了
     std::vector<MapTwigWePtr> mLastSearchResult;
 
-    class Fast2DGateID_ {
-        size_t mDimX;
-        size_t mDimY;
-        std::vector<gateID> data;
-
-    public:
-
-        gateID& at(size_t x, size_t y);
-
-        const gateID& at(size_t x, size_t y) const;
-
-        Fast2DGateID_(size_t mDimX, size_t mDimY);
-    };
-    /// 令k = mGatesMapping.at(2,3) 意味着
-    /// mergedExpData->gates[3] 和 relatedExp->gates[2] 对应同一个 Gate
-    Fast2DGateID_ mGatesMapping;
+    /// 令k = mGatesMapping[j],
+    /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate
+    std::vector<size_t> mGatesMapping;
 
     /// 融合后的实际ExpData数据
     /// @note 如果是单个ExpData融合而成的, 这个ptr指向的就是原始的ExpDataPtr
     ExpDataPtr mergedExpData;
+
+    size_t nMergedExps;
 
 public:
     double alike(const MergedExp& another) const;

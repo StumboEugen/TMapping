@@ -13,28 +13,29 @@ using namespace tmap;
 
 double tmap::MergedExp::alike(const tmap::MergedExp& another) const
 {
-    double weight = this->mRelatedExps.size();
-    weight /= another.mRelatedExps.size();
+    double weight = this->nMergedExps;
+    weight /= another.nMergedExps;
     return mergedExpData->alike(*another.mergedExpData, weight);
 }
 
 double tmap::MergedExp::alike(const ExpData& expData) const
 {
-    return mergedExpData->alike(expData, this->mRelatedExps.size());
+    return mergedExpData->alike(expData, this->nMergedExps);
 }
 
 size_t tmap::MergedExp::lastExpSerial() const
 {
-    return mRelatedExps.back()->serial();
+    return mRelatedExp->serial();
 }
 
 bool tmap::MergedExp::isLastButOneExpSerial(size_t serial2Check) const
 {
-    size_t size = mRelatedExps.size();
-    if (size < 2) {
-        return false;
+    if (mFather) {
+        if (mFather->mRelatedExp->serial() == serial2Check) {
+            return true;
+        }
     }
-    return mRelatedExps[size - 2]->serial() == serial2Check;
+    return false;
 }
 
 static void TOOLFUN_extractSharedFromWeak(vector<MapTwigPtr>& to, vector<MapTwigWePtr>& from) {
@@ -103,28 +104,4 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::getLoopClosureMaps()
     }
 
     return res;
-}
-
-
-tmap::MergedExp::Fast2DGateID_::Fast2DGateID_(size_t dimX, size_t dimY) : mDimX(dimX),
-                                                                          mDimY(dimY),
-                                                                          data(dimX * dimY)
-{}
-
-tmap::gateID& tmap::MergedExp::Fast2DGateID_::at(size_t x, size_t y)
-{
-    if (x >= mDimX || y >= mDimY) {
-        cerr << FILE_AND_LINE << " Out of range!" << endl;
-        throw;
-    }
-    return data[x * mDimY + y];
-}
-
-const tmap::gateID& tmap::MergedExp::Fast2DGateID_::at(size_t x, size_t y) const
-{
-    if (x >= mDimX || y >= mDimY) {
-        cerr << FILE_AND_LINE << " Out of range!" << endl;
-        throw;
-    }
-    return data[x * mDimY + y];
 }
