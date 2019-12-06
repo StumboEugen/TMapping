@@ -26,12 +26,18 @@ class Exp
     std::size_t nBuiltTwig;
     std::vector<MergedExpWePtr> mMergedExps;
 
-    friend class ExpCollection;
-
 public:
     const ExpDataPtr& expData() const;
 
     size_t serial() const;
+
+    void setSerial(size_t serial);
+
+    void setLeftGate(int32_t leftGate);
+
+    const std::vector<MergedExpWePtr>& getMergedExps() const;
+
+    void cleanUpMergedExps();
 };
 }
 

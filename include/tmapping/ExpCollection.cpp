@@ -9,19 +9,19 @@
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
-    mExperiencesData.back()->mLeftGate = leftGate;
+    mExperiencesData.back()->setLeftGate(leftGate);
 }
 
 void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
 {
-    auto cloestGate = mExperiencesData.back()->mData->findTheCloestGate(gatePos);
+    auto cloestGate = mExperiencesData.back()->expData()->findTheCloestGate(gatePos);
     setLeftGateOfCurrent(cloestGate);
 }
 
 void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
                                                       tmap::MapTwigCollection& twigMaster)
 {
-    expPtr->nSerial = mExperiencesData.size();
+    expPtr->setSerial(mExperiencesData.size());
 
     auto & vecSameType = mClassification[expPtr->expData()->type()];
 
@@ -33,7 +33,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
         }
 
         //TODO 不要忘了单独闭环的情况
-        auto& mergedExps = sameTypeExp->mMergedExps;
+        auto& mergedExps = sameTypeExp->getMergedExps();
         for (const auto& iter : mergedExps) {
             auto mergedExp = iter.lock();
             if (mergedExp) {
@@ -48,7 +48,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
                     }
                     for (auto & twig2born : closureTwigs) {
                         if (!twig2born->hasChildren()) {
-                            twig2born->setDieAt(expPtr->nSerial);
+                            twig2born->setDieAt(expPtr->serial());
                             auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
                             newTwigAssumingNew->nodeCountPlus();
                         }
@@ -56,17 +56,10 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
                                 matchResult->possibility);
                     }
                 }
-            } /// TODO根据没用的数量来判断要不要重新做这个表
+            } /// TODO 根据没用的数量来判断要不要重新做这个表
         }
 
-        /// 清理mergedExps尾端已经没用的部分
-        while (!mergedExps.empty()) {
-            if (mergedExps.back().expired()) {
-                mergedExps.pop_back();
-            } else {
-                break;
-            }
-        }
+        sameTypeExp->cleanUpMergedExps();
     }
 
     mExperiencesData.push_back(std::move(expPtr));
