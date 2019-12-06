@@ -105,3 +105,22 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::getLoopClosureMaps()
 
     return res;
 }
+
+MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult)
+        : mFather(std::move(father)),
+          nMergedExps(father->nMergedExps + 1),
+          mRelatedExp(std::move(newExp)),
+          mMergedExpData(std::move(matchResult->mergedExpData)),
+          mTrans(matchResult->displacement),
+          mGatesMapping(std::move(matchResult->gateMapping2this))
+{}
+
+MergedExp::MergedExp(ExpPtr fatherExp)
+        : mFather(nullptr),
+          mMergedExpData(fatherExp->expData()),
+          mRelatedExp(std::move(fatherExp)),
+          nMergedExps(1),
+          mTrans()
+{
+
+}
