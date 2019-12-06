@@ -10,12 +10,4 @@
 #include "Intersection.h"
 #include "SmallRoom.h"
 
-namespace tmap
-{
-    using ExpDataPtr = std::shared_ptr<ExpData>;
-    using ExpDataUnPtr = std::unique_ptr<ExpData>;
-    using ExpDataWePtr = std::weak_ptr<ExpData>;
-}
-
-
 #endif //TMAPPING_EXPDATATYPES_H

@@ -11,16 +11,16 @@
 using namespace std;
 using namespace tmap;
 
-double tmap::MergedExp::alike(const tmap::MergedExp& another) const
+MatchResult tmap::MergedExp::detailedMatching(const tmap::MergedExp& another) const
 {
     double weight = this->nMergedExps;
     weight /= another.nMergedExps;
-    return mergedExpData->alike(*another.mergedExpData, weight);
+    return mMergedExpData->detailedMatch(*another.mMergedExpData, weight);
 }
 
-double tmap::MergedExp::alike(const ExpData& expData) const
+MatchResult tmap::MergedExp::detailedMatching(const ExpData& expData) const
 {
-    return mergedExpData->alike(expData, this->nMergedExps);
+    return mMergedExpData->detailedMatch(expData, this->nMergedExps);
 }
 
 size_t tmap::MergedExp::lastExpSerial() const

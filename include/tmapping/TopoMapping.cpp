@@ -40,12 +40,13 @@ void tmap::TopoMapping::arriveNewExp(tmap::ExpPtr newExp)
                 explorers.insert(oneAliveTwig);
                 break;
             case MapTwigStatus::MOVE2OLD:
-                double coe = oneAliveTwig->getTheArrivingSimiliarExp()->alike(*newExp->expData());
-                if (coe == 0.0) {
+                auto matchResult = oneAliveTwig->getTheArrivingSimiliarExp()->detailedMatching(
+                        *newExp->expData());
+                if (matchResult->possibility == 0.0) {
 //                    twigCollection.killAliveMap(oneAliveTwig);  ///准备采用next_generation的模式
                     /// 由于传递的是引用, 此处结束后, oneAliveTwig已经被删除
                 } else {
-                    oneAliveTwig->xCoe(coe);
+                    oneAliveTwig->xCoe(matchResult->possibility);
                 }
                 break;
         }

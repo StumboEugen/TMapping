@@ -37,9 +37,9 @@ class MergedExp
     size_t nMergedExps;
 
 public:
-    double alike(const MergedExp& another) const;
+    MatchResult detailedMatching(const MergedExp& another) const;
 
-    double alike(const ExpData& expData) const;
+    MatchResult detailedMatching(const ExpData& expData) const;
 
     size_t lastExpSerial() const;
 

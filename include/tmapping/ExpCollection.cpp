@@ -27,7 +27,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
 
     for (size_t i = vecSameType.size() - 1; i >= 0; ++i) {
         Exp* sameTypeExp = vecSameType[i];
-        double poss1 = sameTypeExp->expData()->alike(*expPtr->expData(), 1);
+        double poss1 = sameTypeExp->expData()->quickMatch(*expPtr->expData(), 1);
         if (poss1 < TOLLERANCE_1ST_MATCH_EXP) {
             continue;
         }
@@ -37,8 +37,8 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
         for (const auto& iter : mergedExps) {
             auto mergedExp = iter.lock();
             if (mergedExp) {
-                double poss2 = mergedExp->alike(*expPtr->expData());
-                if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                auto matchResult = mergedExp->detailedMatching(*expPtr->expData());
+                if (matchResult->possibility > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
                     /// VERY IMPORTANT PART
                     MergedExpPtr theNewMerged;
                     auto closureTwigs = mergedExp->getLoopClosureMaps();
@@ -52,7 +52,8 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
                             auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
                             newTwigAssumingNew->nodeCountPlus();
                         }
-                        auto twigWithClosure = twigMaster.bornOne(twig2born, poss2);
+                        auto twigWithClosure = twigMaster.bornOne(twig2born,
+                                matchResult->possibility);
                     }
                 }
             } /// TODO根据没用的数量来判断要不要重新做这个表
