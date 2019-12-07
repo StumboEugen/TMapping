@@ -51,7 +51,7 @@ void Exp::cleanUpMergedExps()
     mMergedExps.swap(newList);
 }
 
-void Exp::addMergedIns(const MergedExpPtr& newMerged)
+void Exp::addMergedExpIns(const MergedExpPtr& newMerged)
 {
     mMergedExps.emplace_back(newMerged);
 }

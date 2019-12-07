@@ -45,7 +45,7 @@ public:
 
     void cleanUpMergedExps();
 
-    void addMergedIns(const MergedExpPtr& newMerged);
+    void addMergedExpIns(const MergedExpPtr& newMerged);
 };
 }
 

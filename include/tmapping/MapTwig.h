@@ -41,14 +41,13 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 与过去经历重复的 exp
     std::vector<MergedExpPtr> mLoopClosures;
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
-    // TODO 注意单独匹配的情况, 这里是个父类指针
     MergedExpPtr theArrivingSimiliarExp = nullptr;
     /// 当前MapBranch的状态
     MapTwigStatus status = MapTwigStatus::MOVE2NEW;
     /// 当前Branch的概率
     double mConfidence = 1.0;
     /// 与 confidence相关, 需要知道当前构型中有多少数量的TopoNode
-    size_t nTopoNode = 1;
+    size_t nTopoNode;
 
     MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
 
@@ -62,7 +61,7 @@ public:
 
     MapTwigStatus getStatus() const;
 
-    const MergedExpPtr& getTheArrivingSimiliarExp() const;
+    const MergedExpPtr& getTheArrivingSimiliarMergedExp() const;
 
     double xCoe(double coe);
 

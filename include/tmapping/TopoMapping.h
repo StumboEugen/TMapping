@@ -24,7 +24,7 @@ public:
     void setLeftGate(size_t gateID);
     void setLeftGate(TopoVec2 gatePos);
 
-    void arriveNewExp(ExpPtr newExp);
+    void arriveNewExp(const ExpPtr& newExp);
 };
 }
 

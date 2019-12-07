@@ -58,7 +58,6 @@ public:
 
     MatchResult detailedMatching(const MergedExp& another) const;
 
-    /// TODO 检查调用者的顺序状态
     MatchResult detailedMatching(const ExpData& expData) const;
 
     size_t lastExpSerial() const;
@@ -78,6 +77,9 @@ public:
     void addRelatedMapTwig(const MapTwigPtr& twigPtr);
 
     void reserveTwigs(size_t n);
+
+    /// 获取最新的child, 从而方便MOVE2OLD的MapTwig找到对应的MergedExp
+    const MergedExpWePtr& theNewestChild() const;
 };
 
 }

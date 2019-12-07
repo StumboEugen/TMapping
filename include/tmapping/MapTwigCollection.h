@@ -28,6 +28,8 @@ public:
 
     /// 生产后代Twig, 自动加入nextGeneration, 自动serial编号, 自动设置父子关系
     MapTwigPtr bornOne(const MapTwigPtr& father, double xConf);
+
+    void add2NextGeneration(MapTwigPtr&& mapTwig);
 };
 
 }

@@ -33,10 +33,8 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
         }
 
         /// 需要确保这个mergedExp在当前函数里保持存活
-        auto currentSingleMergedExp = MergedExp::bornFromExp(newExp);
-        newExp->theSingleMergedExp() = currentSingleMergedExp;
+        MergedExpPtr currentSingleMergedExp = MergedExp::bornFromExp(newExp);
 
-        //TODO 不要忘了单独闭环的情况
         size_t expiredCount = 0;
         auto& mergedExps = sameTypeExp->getMergedExps();
         for (const auto& iter : mergedExps) {
@@ -50,7 +48,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                     if (!closureTwigs.empty()) {
                         auto newMergedExp = mergedExp->bornOne(
                                 newExp, std::move(currentMatchResult));
-                        newExp->addMergedIns(newMergedExp);
+                        newExp->addMergedExpIns(newMergedExp);
                         newMergedExp->reserveTwigs(closureTwigs.size());
                         for (auto & twig2born : closureTwigs) {
                             if (!twig2born->hasChildren()) {

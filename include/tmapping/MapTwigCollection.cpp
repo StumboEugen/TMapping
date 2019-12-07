@@ -21,3 +21,8 @@ MapTwigPtr MapTwigCollection::bornOne(const MapTwigPtr& father, double xConf)
 
     return newTwig;
 }
+
+void MapTwigCollection::add2NextGeneration(MapTwigPtr&& mapTwig)
+{
+    mNextGeneration.emplace_back(std::move(mapTwig));
+}

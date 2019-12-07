@@ -134,7 +134,13 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
 
 MergedExpPtr MergedExp::bornFromExp(ExpPtr fatherExp)
 {
-    return tmap::MergedExpPtr(new MergedExp(std::move(fatherExp)));
+    auto theFirstStoredInExp = fatherExp->theSingleMergedExp().lock();
+    if (theFirstStoredInExp) {
+        return theFirstStoredInExp;
+    } else {
+        theFirstStoredInExp.reset(new MergedExp(std::move(fatherExp)));
+        return theFirstStoredInExp;
+    }
 }
 
 void MergedExp::addRelatedMapTwig(const MapTwigPtr& twigPtr)
@@ -145,5 +151,10 @@ void MergedExp::addRelatedMapTwig(const MapTwigPtr& twigPtr)
 void MergedExp::reserveTwigs(size_t n)
 {
     mRelatedMaps.reserve(n);
+}
+
+const MergedExpWePtr& MergedExp::theNewestChild() const
+{
+    return mNewestChild;
 }
 

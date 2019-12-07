@@ -5,6 +5,7 @@
 #include "MapTwig.h"
 #include "Tmapping.h"
 #include <iostream>
+#include "MergedExp.h"
 
 using namespace std;
 
@@ -19,7 +20,13 @@ tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
                                                             father(std::move(father)),
                                                             nSerial(nSerial),
                                                             mConfidence(confidence)
-{}
+{
+    if (father) {
+        nTopoNode = father->nTopoNode;
+    } else {
+        nTopoNode = 1;
+    }
+}
 
 tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
 {
@@ -43,7 +50,7 @@ tmap::MapTwigStatus tmap::MapTwig::getStatus() const
     return status;
 }
 
-const tmap::MergedExpPtr& tmap::MapTwig::getTheArrivingSimiliarExp() const
+const tmap::MergedExpPtr& tmap::MapTwig::getTheArrivingSimiliarMergedExp() const
 {
     return theArrivingSimiliarExp;
 }
