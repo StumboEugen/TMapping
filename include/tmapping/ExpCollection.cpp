@@ -37,6 +37,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
         newExp->theSingleMergedExp() = currentSingleMergedExp;
 
         //TODO 不要忘了单独闭环的情况
+        size_t expiredCount = 0;
         auto& mergedExps = sameTypeExp->getMergedExps();
         for (const auto& iter : mergedExps) {
             auto mergedExp = iter.lock();
@@ -67,10 +68,14 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                         }
                     }
                 }
-            } /// TODO 根据没用的数量来判断要不要重新做这个表
+            } else {
+                expiredCount++;
+            }
         }
 
-        sameTypeExp->cleanUpMergedExps();
+        if (expiredCount > mergedExps.size() / 2) {
+            sameTypeExp->cleanUpMergedExps();
+        }
     }
 
     mExperiencesData.push_back(std::move(newExp));

@@ -5,6 +5,7 @@
 #include "Exp.h"
 
 using namespace tmap;
+using namespace std;
 
 Exp::Exp(ExpDataPtr expData, int32_t enterGateID)
         : mData(std::move(expData)),
@@ -39,13 +40,15 @@ const std::vector<MergedExpWePtr>& Exp::getMergedExps() const
 
 void Exp::cleanUpMergedExps()
 {
-    while (!mMergedExps.empty()) {
-        if (mMergedExps.back().expired()) {
-            mMergedExps.pop_back();
-        } else {
-            break;
+    auto size = mMergedExps.size();
+    vector<MergedExpWePtr> newList(size);
+    newList.emplace_back(std::move(mMergedExps.front()));
+    for (std::size_t i = 1; i < size; ++i) {
+        if (!mMergedExps[i].expired()) {
+            newList.emplace_back(std::move(mMergedExps[i]));
         }
     }
+    mMergedExps.swap(newList);
 }
 
 void Exp::addMergedIns(const MergedExpPtr& newMerged)
