@@ -112,7 +112,8 @@ MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult
           mRelatedExp(std::move(newExp)),
           mMergedExpData(std::move(matchResult->mergedExpData)),
           mTrans(matchResult->displacement),
-          mGatesMapping(std::move(matchResult->gateMapping2this))
+          mGatesMapping(std::move(matchResult->gateMapping2this)),
+          mPossConf(matchResult->possibility)
 {}
 
 MergedExp::MergedExp(ExpPtr fatherExp)
@@ -121,6 +122,17 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           mRelatedExp(std::move(fatherExp)),
           nMergedExps(1),
           mTrans()
-{
+{}
 
+MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
+{
+    MergedExpPtr res(new MergedExp(
+            shared_from_this(), std::move(newExp), std::move(matchResult)));
+    mNewChild = res;
+    return res;
+}
+
+MergedExpPtr MergedExp::bornFromExp(ExpPtr fatherExp)
+{
+    return tmap::MergedExpPtr(new MergedExp(std::move(fatherExp)));
 }

@@ -13,7 +13,7 @@
 namespace tmap
 {
 
-class MergedExp
+class MergedExp : public std::enable_shared_from_this<MergedExp>
 {
     /// 记录从哪个mergedExp分裂而来的, 可能为null
     MergedExpPtr mFather;
@@ -44,7 +44,18 @@ class MergedExp
     /// @note 如果是单个ExpData融合而成的, 这个ptr指向的就是原始的ExpDataPtr
     ExpDataPtr mMergedExpData;
 
+    /// 最近一次分裂出的后代, 为了便于MOVE2OLD
+    MergedExpWePtr mNewChild;
+
+    /// 这次融合的概率降低系数
+    double mPossConf = 0.0;
+
+    MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult);
+
+    explicit MergedExp(ExpPtr fatherExp);
+
 public:
+
     MatchResult detailedMatching(const MergedExp& another) const;
 
     MatchResult detailedMatching(const ExpData& expData) const;
@@ -59,9 +70,9 @@ public:
      */
     std::vector<MapTwigPtr> getLoopClosureMaps();
 
-    MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult);
+    MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult);
 
-    MergedExp(ExpPtr fatherExp);
+    static MergedExpPtr bornFromExp(ExpPtr fatherExp);
 };
 
 }
