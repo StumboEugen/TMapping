@@ -6,6 +6,12 @@
 
 using namespace tmap;
 
+Exp::Exp(ExpDataPtr expData, int32_t enterGateID)
+        : mData(std::move(expData)),
+          mEnterGate(enterGateID),
+          mMergedExps(1)
+{}
+
 const ExpDataPtr& Exp::expData() const
 {
     return mData;

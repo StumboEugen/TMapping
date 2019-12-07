@@ -16,17 +16,23 @@ namespace tmap
 
 class Exp
 {
-    ExpDataPtr mData;
+    const ExpDataPtr mData;
     /// 进入时对应的Gate, -1表示这个为出发点
     int32_t mEnterGate = -1;
     /// 离开时对应的Gate, -1表示还没离开
     int32_t mLeftGate = -1;
     /// 时间上的排序序列
     std::size_t nSerial = 0;
-    std::size_t nBuiltTwig;
+    /// 到此Exp创建过的MapTwig数量
+    std::size_t nBuiltTwig = 0;
+    /// 记录着包含这个Exp的所有融合假设(不包括将来的), 第一个为single mergedExp
     std::vector<MergedExpWePtr> mMergedExps;
 
 public:
+    Exp(ExpDataPtr  expData, int32_t enterGateID);
+
+    MergedExpWePtr& getTheSingleMergedExp();
+
     const ExpDataPtr& expData() const;
 
     size_t serial() const;
