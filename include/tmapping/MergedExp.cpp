@@ -48,7 +48,7 @@ static void TOOLFUN_extractSharedFromWeak(vector<MapTwigPtr>& to, vector<MapTwig
     }
 }
 
-vector<tmap::MapTwigPtr> tmap::MergedExp::getLoopClosureMaps()
+vector<tmap::MapTwigPtr> tmap::MergedExp::getMostRecentLoopClosureMaps()
 {
     vector<MapTwigPtr> res;
     vector<MapTwigPtr> DFS_Stack;
@@ -128,7 +128,7 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
 {
     MergedExpPtr res(new MergedExp(
             shared_from_this(), std::move(newExp), std::move(matchResult)));
-    mNewChild = res;
+    mNewestChild = res;
     return res;
 }
 
@@ -136,3 +136,14 @@ MergedExpPtr MergedExp::bornFromExp(ExpPtr fatherExp)
 {
     return tmap::MergedExpPtr(new MergedExp(std::move(fatherExp)));
 }
+
+void MergedExp::addRelatedMapTwig(const MapTwigPtr& twigPtr)
+{
+    mRelatedMaps.emplace_back(twigPtr);
+}
+
+void MergedExp::reserveTwigs(size_t n)
+{
+    mRelatedMaps.reserve(n);
+}
+

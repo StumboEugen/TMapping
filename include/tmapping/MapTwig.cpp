@@ -23,11 +23,8 @@ tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
 
 tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
 {
-    if (status != MapTwigStatus::EXPIRED) {
-        cerr << FILE_AND_LINE << " You didn't born a branch from a EXPIRED branch!" << endl;
-    }
-    MapTwigPtr newTwig(
-            new MapTwig(this->mDieAt, shared_from_this(), newSerial, newConfidence));
+    MapTwigPtr newTwig(new MapTwig(
+                    this->mDieAt, shared_from_this(), newSerial, newConfidence));
     /// 在后代列表后插入这个新的后代
     this->mChildren.emplace_back(newTwig);
     return newTwig;
@@ -85,4 +82,9 @@ void tmap::MapTwig::nodeCountPlus()
 void tmap::MapTwig::setDieAt(size_t dieAt)
 {
     mDieAt = dieAt;
+}
+
+void tmap::MapTwig::addMergedExp(tmap::MergedExpPtr newMerged)
+{
+    mLoopClosures.emplace_back(std::move(newMerged));
 }

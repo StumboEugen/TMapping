@@ -18,42 +18,53 @@ void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
     setLeftGateOfCurrent(cloestGate);
 }
 
-void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
+void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                                       tmap::MapTwigCollection& twigMaster)
 {
-    expPtr->setSerial(mExperiencesData.size());
+    newExp->setSerial(mExperiencesData.size());
 
-    auto & vecSameType = mClassification[expPtr->expData()->type()];
+    auto & vecSameType = mClassification[newExp->expData()->type()];
 
     for (size_t i = vecSameType.size() - 1; i >= 0; ++i) {
         Exp* sameTypeExp = vecSameType[i];
-        double poss1 = sameTypeExp->expData()->quickMatch(*expPtr->expData(), 1);
+        double poss1 = sameTypeExp->expData()->quickMatch(*newExp->expData(), 1);
         if (poss1 < TOLLERANCE_1ST_MATCH_EXP) {
             continue;
         }
+
+        /// 需要确保这个mergedExp在当前函数里保持存活
+        auto currentSingleMergedExp = MergedExp::bornFromExp(newExp);
+        newExp->theSingleMergedExp() = currentSingleMergedExp;
 
         //TODO 不要忘了单独闭环的情况
         auto& mergedExps = sameTypeExp->getMergedExps();
         for (const auto& iter : mergedExps) {
             auto mergedExp = iter.lock();
             if (mergedExp) {
-                auto matchResult = mergedExp->detailedMatching(*expPtr->expData());
-                if (matchResult->possibility > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                auto currentMatchResult = mergedExp->detailedMatching(*newExp->expData());
+                auto poss2 = currentMatchResult->possibility;
+                if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
                     /// VERY IMPORTANT PART
-                    MergedExpPtr theNewMerged;
-                    auto closureTwigs = mergedExp->getLoopClosureMaps();
+                    auto closureTwigs = mergedExp->getMostRecentLoopClosureMaps();
                     if (!closureTwigs.empty()) {
-                        /// TODO 准备构造新的MergedExp
-//                        theNewMerged
-                    }
-                    for (auto & twig2born : closureTwigs) {
-                        if (!twig2born->hasChildren()) {
-                            twig2born->setDieAt(expPtr->serial());
-                            auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
-                            newTwigAssumingNew->nodeCountPlus();
+                        auto newMergedExp = mergedExp->bornOne(
+                                newExp, std::move(currentMatchResult));
+                        newExp->addMergedIns(newMergedExp);
+                        newMergedExp->reserveTwigs(closureTwigs.size());
+                        for (auto & twig2born : closureTwigs) {
+                            if (!twig2born->hasChildren()) {
+                                /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
+                                twig2born->setDieAt(newExp->serial());
+                                /// 这里产生后代后, father的status不会变化, 从而不会影响其他mergedExp对MapTwig的搜索
+                                auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
+                                newTwigAssumingNew->nodeCountPlus();
+                                newTwigAssumingNew->addMergedExp(currentSingleMergedExp);
+                                currentSingleMergedExp->addRelatedMapTwig(newTwigAssumingNew);
+                            }
+                            auto twigWithClosure = twigMaster.bornOne(twig2born, poss2);
+                            twigWithClosure->addMergedExp(newMergedExp);
+                            newMergedExp->addRelatedMapTwig(twigWithClosure);
                         }
-                        auto twigWithClosure = twigMaster.bornOne(twig2born,
-                                matchResult->possibility);
                     }
                 }
             } /// TODO 根据没用的数量来判断要不要重新做这个表
@@ -62,5 +73,5 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
         sameTypeExp->cleanUpMergedExps();
     }
 
-    mExperiencesData.push_back(std::move(expPtr));
+    mExperiencesData.push_back(std::move(newExp));
 }

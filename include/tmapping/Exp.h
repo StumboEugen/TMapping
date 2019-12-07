@@ -31,7 +31,7 @@ class Exp
 public:
     Exp(ExpDataPtr  expData, int32_t enterGateID);
 
-    MergedExpWePtr& getTheSingleMergedExp();
+    MergedExpWePtr& theSingleMergedExp();
 
     const ExpDataPtr& expData() const;
 
@@ -44,6 +44,8 @@ public:
     const std::vector<MergedExpWePtr>& getMergedExps() const;
 
     void cleanUpMergedExps();
+
+    void addMergedIns(const MergedExpPtr& newMerged);
 };
 }
 

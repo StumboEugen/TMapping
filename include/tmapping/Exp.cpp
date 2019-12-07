@@ -47,3 +47,13 @@ void Exp::cleanUpMergedExps()
         }
     }
 }
+
+void Exp::addMergedIns(const MergedExpPtr& newMerged)
+{
+    mMergedExps.emplace_back(newMerged);
+}
+
+MergedExpWePtr& Exp::theSingleMergedExp()
+{
+    return mMergedExps.front();
+}

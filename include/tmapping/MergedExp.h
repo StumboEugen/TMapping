@@ -45,7 +45,7 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     ExpDataPtr mMergedExpData;
 
     /// 最近一次分裂出的后代, 为了便于MOVE2OLD
-    MergedExpWePtr mNewChild;
+    MergedExpWePtr mNewestChild;
 
     /// 这次融合的概率降低系数
     double mPossConf = 0.0;
@@ -58,6 +58,7 @@ public:
 
     MatchResult detailedMatching(const MergedExp& another) const;
 
+    /// TODO 检查调用者的顺序状态
     MatchResult detailedMatching(const ExpData& expData) const;
 
     size_t lastExpSerial() const;
@@ -68,11 +69,15 @@ public:
      * @brief 找到MOVE2NEW的末端Twig
      * @return 与此MergedExp可能的闭环的末端MapTwig
      */
-    std::vector<MapTwigPtr> getLoopClosureMaps();
+    std::vector<MapTwigPtr> getMostRecentLoopClosureMaps();
 
     MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult);
 
     static MergedExpPtr bornFromExp(ExpPtr fatherExp);
+
+    void addRelatedMapTwig(const MapTwigPtr& twigPtr);
+
+    void reserveTwigs(size_t n);
 };
 
 }

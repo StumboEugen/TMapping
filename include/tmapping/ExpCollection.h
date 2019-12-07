@@ -28,7 +28,7 @@ public:
     void setLeftGateOfCurrent(size_t leftGate);
     void setLeftGateOfCurrent(const TopoVec2& gatePos);
 
-    void addNewExpAndAddLoopClosures(tmap::ExpPtr expPtr,
+    void addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                      tmap::MapTwigCollection& twigMaster);
 };
 

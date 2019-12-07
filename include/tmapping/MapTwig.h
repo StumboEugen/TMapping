@@ -77,6 +77,8 @@ public:
     void nodeCountPlus();
 
     void setDieAt(size_t dieAt);
+
+    void addMergedExp(MergedExpPtr newMerged);
 };
 
 }
