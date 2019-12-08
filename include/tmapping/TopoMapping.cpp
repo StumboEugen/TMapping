@@ -76,7 +76,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     }
 
     if (newExp->serial() == 0) {
-        auto adam = MapTwig::getAdamTwig();
+        auto adam = twigCollection.generateAdam();
         adam->addMergedExp(theSingleMergedExp);
         theSingleMergedExp->addRelatedMapTwig(adam);
         twigCollection.add2NextGeneration(std::move(adam));

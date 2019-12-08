@@ -15,11 +15,18 @@ std::vector<MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps()
 
 MapTwigPtr MapTwigCollection::bornOne(const MapTwigPtr& father, double xConf)
 {
-    mNextGeneration.reserve(mAliveMaps.size());
     MapTwigPtr newTwig = father->bornOne(nextSerialN++, father->getConfidence() * xConf);
     mNextGeneration.push_back(newTwig);
-
+    mMapTwigs.emplace_back(newTwig);
     return newTwig;
+}
+
+MapTwigPtr MapTwigCollection::generateAdam()
+{
+    auto adam = MapTwig::getAdamTwig();
+    mNextGeneration.push_back(adam);
+    mMapTwigs.emplace_back(adam);
+    return adam;
 }
 
 void MapTwigCollection::add2NextGeneration(MapTwigPtr&& mapTwig)
