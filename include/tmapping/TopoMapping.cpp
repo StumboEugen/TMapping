@@ -61,7 +61,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                     auto matchResult = oldSimiliarExp->detailedMatching(*newExp->expData());
                     double poss = matchResult->possibility;
                     if (poss > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
-                        oneAliveTwig->xCoe(poss);
+                        oneAliveTwig->xConfidenceCoe(poss);
                         auto newMergedExp =
                                 theShouldBeMergedPtr->bornOne(newExp, std::move(matchResult));
                         newExp->addMergedExpIns(newMergedExp);
@@ -82,5 +82,5 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         twigCollection.add2NextGeneration(std::move(adam));
     }
 
-    ///TODO twig转移nextGeneration, 同时可以做排序工作
+    twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);
 }

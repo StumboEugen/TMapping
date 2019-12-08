@@ -32,6 +32,8 @@ public:
     MapTwigPtr generateAdam();
 
     void add2NextGeneration(MapTwigPtr&& mapTwig);
+
+    size_t nextgCompleteAdding(size_t nSurviver, size_t experienceCount);
 };
 
 }

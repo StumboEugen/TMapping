@@ -48,6 +48,8 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     double mConfidence = 1.0;
     /// 与 confidence相关, 需要知道当前构型中有多少数量的TopoNode
     size_t nTopoNode;
+    /// 上次计算得到的快速概率
+    double mLastGlobalResult = -1.0;
 
     MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
 
@@ -63,7 +65,16 @@ public:
 
     const MergedExpPtr& getTheArrivingSimiliarMergedExp() const;
 
-    double xCoe(double coe);
+    double xConfidenceCoe(double coe);
+
+    /**
+     * @brief 生成进行全局排序的概率分数, 在调用 resetLastGlobalConfidenceResult() 之前实际只计算一次
+     * @param log_nExp 由调用者给予的log(nExp), 因为在单步内, nExp为固定数
+     * @return mConfidence * exp(-nTopoNode * log(nExp))
+     */
+    double calGlobalPoss(double log_nExp);
+
+    void resetLastGlobalConfidenceResult();
 
     const std::vector<MapTwigWePtr>& getChildren() const;
 

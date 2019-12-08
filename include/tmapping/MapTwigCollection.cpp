@@ -6,7 +6,10 @@
 
 #include "MapTwig.h"
 
+#include <algorithm>
+
 using namespace tmap;
+using namespace std;
 
 std::vector<MapTwigPtr>& tmap::MapTwigCollection::getAliveMaps()
 {
@@ -32,4 +35,30 @@ MapTwigPtr MapTwigCollection::generateAdam()
 void MapTwigCollection::add2NextGeneration(MapTwigPtr&& mapTwig)
 {
     mNextGeneration.emplace_back(std::move(mapTwig));
+}
+
+size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienceCount)
+{
+    if (nSurviver == 0 || nSurviver > mNextGeneration.size()) {
+        nSurviver = mNextGeneration.size();
+    }
+
+    for (auto& twig : mNextGeneration) {
+        twig->resetLastGlobalConfidenceResult();
+    }
+
+    double logN = log(experienceCount);
+    auto comp = [logN](const MapTwigPtr& a, const MapTwigPtr& b) {
+        return a->calGlobalPoss(logN) > b->calGlobalPoss(logN);
+    };
+
+    partial_sort(mNextGeneration.begin(),
+                 mNextGeneration.begin() + nSurviver,
+                 mNextGeneration.end(), comp);
+
+    mNextGeneration.erase(mNextGeneration.begin() + nSurviver, mNextGeneration.end());
+
+    mAliveMaps.swap(mNextGeneration);
+    mNextGeneration.clear();
+    return nSurviver;
 }

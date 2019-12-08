@@ -18,6 +18,8 @@ class TopoMapping
     ExpCollection mExperiences;
     MapTwigCollection twigCollection;
 
+    size_t mSurviverSetting = 0;
+
 public:
     void addNewExp(ExpDataPtr newExpData);
 

@@ -4,8 +4,9 @@
 
 #include "MapTwig.h"
 #include "Tmapping.h"
-#include <iostream>
 #include "MergedExp.h"
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -55,7 +56,7 @@ const tmap::MergedExpPtr& tmap::MapTwig::getTheArrivingSimiliarMergedExp() const
     return theArrivingSimiliarExp;
 }
 
-double tmap::MapTwig::xCoe(double coe)
+double tmap::MapTwig::xConfidenceCoe(double coe)
 {
     mConfidence *= coe;
     return mConfidence;
@@ -94,4 +95,17 @@ void tmap::MapTwig::setDieAt(size_t dieAt)
 void tmap::MapTwig::addMergedExp(tmap::MergedExpPtr newMerged)
 {
     mLoopClosures.emplace_back(std::move(newMerged));
+}
+
+void tmap::MapTwig::resetLastGlobalConfidenceResult()
+{
+    mLastGlobalResult = -1.0;
+}
+
+double tmap::MapTwig::calGlobalPoss(double log_nExp)
+{
+    if (mLastGlobalResult == -1.0) {
+        mLastGlobalResult = mConfidence * exp( -nTopoNode * log_nExp);
+    }
+    return mLastGlobalResult;
 }
