@@ -22,33 +22,32 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     const ExpPtr mRelatedExp;
 
     /// 使用这个MergedExp的Twig们(可能有的已经被废弃了)
-    std::vector<MapTwigWePtr> mRelatedMaps;
+    std::vector<MapTwigWePtr> mRelatedMaps{};
 
     /// 这个融合体是多少Exp融合而成的
-    size_t nMergedExps;
+    const size_t nMergedExps;
 
     /// 构造的时候不会把LastSearchResult用RelatedMaps填满, 因此需要这个bool来判断last result空的时候代表什么
     bool hasSearchedLoopClosure = false;
-
     /// 每次的搜索不需要从头开始, 从上次的结果开始就可以了
-    std::vector<MapTwigWePtr> mLastSearchResult;
-
-    /// 令k = mGatesMapping[j],
-    /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate
-    std::vector<size_t> mGatesMapping;
-
-    /// mFather->mMergedExpData相对于this->mMergedExpData的位移
-    TopoVec2 mTrans;
+    std::vector<MapTwigWePtr> mLastSearchResult{};
 
     /// 融合后的实际ExpData数据
     /// @note 如果是单个ExpData融合而成的, 这个ptr指向的就是原始的ExpDataPtr
     ExpDataPtr mMergedExpData;
 
-    /// 最近一次分裂出的后代, 为了便于MOVE2OLD
-    MergedExpWePtr mNewestChild;
+    /// mFather->mMergedExpData相对于this->mMergedExpData的位移
+    TopoVec2 mTrans;
+
+    /// 令k = mGatesMapping[j],
+    /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate
+    std::vector<size_t> mGatesMapping;
 
     /// 这次融合的概率降低系数
-    double mPossConf = 0.0;
+    double mPossDecConf;
+
+    /// 最近一次分裂出的后代, 为了便于MOVE2OLD
+    MergedExpWePtr mNewestChild{};
 
     MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult);
 
@@ -80,6 +79,8 @@ public:
 
     /// 获取最新的child, 从而方便MOVE2OLD的MapTwig找到对应的MergedExp
     const MergedExpWePtr& theNewestChild() const;
+
+    double getPossDecConf() const;
 };
 
 }

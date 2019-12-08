@@ -56,12 +56,12 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                 if (theShouldBeMergedPtr &&
                         theShouldBeMergedPtr->lastExpSerial() == newExp->serial()) {
                     oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
+                    //TODO BUG POSS NOT X
                     theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);
                 } else {
                     auto matchResult = oldSimiliarExp->detailedMatching(*newExp->expData());
                     double poss = matchResult->possibility;
                     if (poss > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
-                        oneAliveTwig->xConfidenceCoe(poss);
                         auto newMergedExp =
                                 theShouldBeMergedPtr->bornOne(newExp, std::move(matchResult));
                         newExp->addMergedExpIns(newMergedExp);

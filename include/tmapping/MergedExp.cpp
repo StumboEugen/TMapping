@@ -108,20 +108,22 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::getMostRecentLoopClosureMaps()
 
 MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult)
         : mFather(std::move(father)),
-          nMergedExps(father->nMergedExps + 1),
           mRelatedExp(std::move(newExp)),
+          nMergedExps(father->nMergedExps + 1),
           mMergedExpData(std::move(matchResult->mergedExpData)),
           mTrans(matchResult->displacement),
           mGatesMapping(std::move(matchResult->gateMapping2this)),
-          mPossConf(matchResult->possibility)
+          mPossDecConf(matchResult->possibility)
 {}
 
 MergedExp::MergedExp(ExpPtr fatherExp)
         : mFather(nullptr),
-          mMergedExpData(fatherExp->expData()),
           mRelatedExp(std::move(fatherExp)),
           nMergedExps(1),
-          mTrans()
+          mMergedExpData(fatherExp->expData()),
+          mTrans(),
+          mGatesMapping(),
+          mPossDecConf(1.0)
 {}
 
 MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
@@ -156,5 +158,10 @@ void MergedExp::reserveTwigs(size_t n)
 const MergedExpWePtr& MergedExp::theNewestChild() const
 {
     return mNewestChild;
+}
+
+double MergedExp::getPossDecConf() const
+{
+    return mPossDecConf;
 }
 

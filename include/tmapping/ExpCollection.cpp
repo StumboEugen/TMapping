@@ -55,13 +55,13 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                 /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
                                 twig2born->setDieAt(newExp->serial());
                                 /// 这里产生后代后, father的status不会变化, 从而不会影响其他mergedExp对MapTwig的搜索
-                                auto newTwigAssumingNew = twigMaster.bornOne(twig2born, 1.0);
+                                auto newTwigAssumingNew = twigMaster.bornOne(twig2born,
+                                                                             currentSingleMergedExp);
                                 newTwigAssumingNew->nodeCountPlus();
-                                newTwigAssumingNew->addMergedExp(currentSingleMergedExp);
                                 currentSingleMergedExp->addRelatedMapTwig(newTwigAssumingNew);
                             }
-                            auto twigWithClosure = twigMaster.bornOne(twig2born, poss2);
-                            twigWithClosure->addMergedExp(newMergedExp);
+                            auto twigWithClosure = twigMaster.bornOne(twig2born,
+                                                                      newMergedExp);
                             newMergedExp->addRelatedMapTwig(twigWithClosure);
                         }
                     }

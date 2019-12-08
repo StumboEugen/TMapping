@@ -53,19 +53,19 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
 
     MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
 
+    double xConfidenceCoe(double coe);
+
 public:
 
     static MapTwigPtr getAdamTwig();
 
-    MapTwigPtr bornOne(size_t newSerial, double newConfidence);
+    tmap::MapTwigPtr bornOne(size_t newSerial);
 
     void setExpired();
 
     MapTwigStatus getStatus() const;
 
     const MergedExpPtr& getTheArrivingSimiliarMergedExp() const;
-
-    double xConfidenceCoe(double coe);
 
     /**
      * @brief 生成进行全局排序的概率分数, 在调用 resetLastGlobalConfidenceResult() 之前实际只计算一次
@@ -88,6 +88,10 @@ public:
 
     void setDieAt(size_t dieAt);
 
+    /**
+     * @brief 为此MapTwig添加新的融合假设, @note this->mConfidence的修正会在此函数中被调用, 无需外部调用
+     * @param newMerged 新的融合假设
+     */
     void addMergedExp(MergedExpPtr newMerged);
 };
 

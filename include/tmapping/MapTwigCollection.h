@@ -26,8 +26,8 @@ class MapTwigCollection
 public:
     std::vector<MapTwigPtr>& getAliveMaps();
 
-    /// 生产后代Twig, 自动加入nextGeneration, 自动serial编号, 自动设置父子关系
-    MapTwigPtr bornOne(const MapTwigPtr& father, double xConf);
+    /// 生产后代Twig, 自动加入this->nextGeneration, 自动serial编号, 自动设置父子关系, 自动为MapTwig添加新的MergedExp
+    MapTwigPtr bornOne(const MapTwigPtr& father, const MergedExpPtr& newMerged);
 
     MapTwigPtr generateAdam();
 

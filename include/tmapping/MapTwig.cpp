@@ -29,10 +29,13 @@ tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
     }
 }
 
-tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial, double newConfidence)
+tmap::MapTwigPtr tmap::MapTwig::bornOne(size_t newSerial)
 {
     MapTwigPtr newTwig(new MapTwig(
-                    this->mDieAt, shared_from_this(), newSerial, newConfidence));
+            this->mDieAt,
+            shared_from_this(),
+            newSerial,
+            this->mConfidence));
     /// 在后代列表后插入这个新的后代
     this->mChildren.emplace_back(newTwig);
     return newTwig;
@@ -94,6 +97,7 @@ void tmap::MapTwig::setDieAt(size_t dieAt)
 
 void tmap::MapTwig::addMergedExp(tmap::MergedExpPtr newMerged)
 {
+    xConfidenceCoe(newMerged->getPossDecConf());
     mLoopClosures.emplace_back(std::move(newMerged));
 }
 
