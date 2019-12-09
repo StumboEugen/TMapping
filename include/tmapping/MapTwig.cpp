@@ -70,9 +70,9 @@ const vector<tmap::MapTwigWePtr>& tmap::MapTwig::getChildren() const
     return mChildren;
 }
 
-const vector<tmap::MergedExpPtr>& tmap::MapTwig::getLoopClosures() const
+const vector<tmap::MergedExpPtr>& tmap::MapTwig::getExpUsages() const
 {
-    return mLoopClosures;
+    return mExpUsages;
 }
 
 bool tmap::MapTwig::hasChildren() const
@@ -98,7 +98,7 @@ void tmap::MapTwig::setDieAt(size_t dieAt)
 void tmap::MapTwig::addMergedExp(tmap::MergedExpPtr newMerged)
 {
     xConfidenceCoe(newMerged->getPossDecConf());
-    mLoopClosures.emplace_back(std::move(newMerged));
+    mExpUsages.emplace_back(std::move(newMerged));
 }
 
 void tmap::MapTwig::resetLastGlobalConfidenceResult()

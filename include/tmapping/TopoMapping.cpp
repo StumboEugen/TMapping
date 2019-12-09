@@ -54,7 +54,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                 const auto& oldSimiliarExp = oneAliveTwig->getTheArrivingSimiliarMergedExp();
                 auto theShouldBeMergedPtr = oldSimiliarExp->theNewestChild().lock();
                 if (theShouldBeMergedPtr &&
-                        theShouldBeMergedPtr->lastExpSerial() == newExp->serial()) {
+                        theShouldBeMergedPtr->serialOfLastExp() == newExp->serial()) {
                     oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
                     //TODO BUG POSS NOT X
                     theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);

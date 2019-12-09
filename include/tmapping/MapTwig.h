@@ -39,7 +39,7 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 记录分歧的位置, 在何处分歧分离的(和后代的borneAt是相同的)
     size_t mDieAt = 0;
     /// 与过去经历重复的 exp
-    std::vector<MergedExpPtr> mLoopClosures;
+    std::vector<MergedExpPtr> mExpUsages;
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
     MergedExpPtr theArrivingSimiliarExp = nullptr;
     /// 当前MapBranch的状态
@@ -78,7 +78,7 @@ public:
 
     const std::vector<MapTwigWePtr>& getChildren() const;
 
-    const std::vector<MergedExpPtr>& getLoopClosures() const;
+    const std::vector<MergedExpPtr>& getExpUsages() const;
 
     bool hasChildren() const;
 

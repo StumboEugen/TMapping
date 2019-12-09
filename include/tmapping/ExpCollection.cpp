@@ -49,12 +49,12 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                     (currentMatchResult->gateMapping2this[newExp->getEnterGate()]) )
                 {
                     /// VERY IMPORTANT PART
-                    auto closureTwigs = mergedExp->getMostRecentLoopClosureMaps();
+                    auto closureTwigs = mergedExp->findTwigsUsingThis();
                     if (!closureTwigs.empty()) {
                         auto newMergedExp = mergedExp->bornOne(
                                 newExp, std::move(currentMatchResult));
                         newExp->addMergedExpIns(newMergedExp);
-                        newMergedExp->reserveTwigs(closureTwigs.size());
+                        newMergedExp->reserveTwigs(closureTwigs.size() + 1);
                         for (auto & twig2born : closureTwigs) {
                             if (!twig2born->hasChildren()) {
                                 /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
