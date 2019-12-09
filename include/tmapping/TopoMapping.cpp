@@ -56,7 +56,6 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                 if (theShouldBeMergedPtr &&
                         theShouldBeMergedPtr->serialOfLastExp() == newExp->serial()) {
                     oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
-                    //TODO BUG POSS NOT X
                     theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);
                 } else {
                     auto matchResult = oldSimiliarExp->detailedMatching(*newExp->expData());
@@ -83,4 +82,6 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     }
 
     twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);
+
+    /// TODO 构建可理解拓扑地图的工作
 }

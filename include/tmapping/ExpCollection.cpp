@@ -9,6 +9,7 @@
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
+    /// TODO 寻找MOVE2OLD的对应MergedExp
     mExperiencesData.back()->setLeftGate(leftGate);
 }
 
