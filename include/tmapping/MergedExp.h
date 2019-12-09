@@ -40,7 +40,8 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     TopoVec2 mTrans;
 
     /// 令k = mGatesMapping[j],
-    /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate
+    /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate.
+    /// 如果 mFather == nullptr, 则该成员为空
     std::vector<size_t> mGatesMapping;
 
     /// 这次融合的概率降低系数
@@ -81,6 +82,13 @@ public:
     const MergedExpWePtr& theNewestChild() const;
 
     double getPossDecConf() const;
+
+    /**
+     * @brief 检查指定的Gate是否已经被作为入口或者出口过了
+     * @param gateID 检查的gateID, 相对于this而言
+     * @return true表示被占用, false表示没有被占用
+     */
+    bool checkIfGateIsOccupied(size_t gateID);
 };
 
 }

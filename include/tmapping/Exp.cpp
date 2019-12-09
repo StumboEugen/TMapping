@@ -60,3 +60,13 @@ MergedExpWePtr& Exp::theSingleMergedExp()
 {
     return mMergedExps.front();
 }
+
+int32_t Exp::getEnterGate() const
+{
+    return mEnterGate;
+}
+
+int32_t Exp::getLeftGate() const
+{
+    return mLeftGate;
+}

@@ -46,6 +46,10 @@ public:
     void cleanUpMergedExps();
 
     void addMergedExpIns(const MergedExpPtr& newMerged);
+
+    int32_t getEnterGate() const;
+
+    int32_t getLeftGate() const;
 };
 }
 

@@ -42,7 +42,12 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
             if (mergedExp) {
                 auto currentMatchResult = mergedExp->detailedMatching(*newExp->expData());
                 auto poss2 = currentMatchResult->possibility;
-                if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                if ( /// 相似概率要高于一定的阈值
+                    poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP
+                &&   /// 而且这个入口没有被之前的出入口占用, 闭环必须发生在没有走过的gate
+                    !mergedExp->checkIfGateIsOccupied
+                    (currentMatchResult->gateMapping2this[newExp->getEnterGate()]) )
+                {
                     /// VERY IMPORTANT PART
                     auto closureTwigs = mergedExp->getMostRecentLoopClosureMaps();
                     if (!closureTwigs.empty()) {

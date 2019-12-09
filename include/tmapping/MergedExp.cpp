@@ -165,3 +165,25 @@ double MergedExp::getPossDecConf() const
     return mPossDecConf;
 }
 
+bool MergedExp::checkIfGateIsOccupied(size_t gateID)
+{
+    /// 先检查this的是否被占用了
+    if (gateID == mRelatedExp->getEnterGate() ||
+        gateID == mRelatedExp->getLeftGate()) {
+        return true;
+    }
+    /// 为后续的单向遍历搜索做准备
+    size_t relatedFatherGate = gateID;
+    MergedExpPtr& father = mFather;
+    while (father != nullptr) {
+        /// father存在, 检查是否在father里面被占用
+        relatedFatherGate = father->mGatesMapping[relatedFatherGate];
+        const auto & relatedExp = father->mRelatedExp;
+        if (relatedFatherGate == relatedExp->getEnterGate() ||
+            relatedFatherGate == relatedExp->getLeftGate()) {
+            return true;
+        }
+        father = father->mFather;
+    }
+    return false;
+}
