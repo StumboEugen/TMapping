@@ -16,6 +16,7 @@ namespace tmap
 
 class Exp
 {
+    /// 对应实际的测量数据
     const ExpDataPtr mData;
     /// 进入时对应的Gate, -1表示这个为出发点
     int32_t mEnterGate = -1;

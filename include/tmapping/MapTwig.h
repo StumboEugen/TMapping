@@ -41,7 +41,7 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 与过去经历重复的 exp
     std::vector<MergedExpPtr> mExpUsages;
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
-    MergedExpPtr theArrivingSimiliarExp = nullptr;
+    MergedExpPtr theArrivingSimiliarExp{};
     /// 当前MapBranch的状态
     MapTwigStatus status = MapTwigStatus::MOVE2NEW;
     /// 当前Branch的概率
@@ -51,6 +51,8 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 上次计算得到的快速概率
     double mLastGlobalResult = -1.0;
 
+private: //constructor
+
     MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
 
     double xConfidenceCoe(double coe);
@@ -59,7 +61,12 @@ public:
 
     static MapTwigPtr getAdamTwig();
 
-    tmap::MapTwigPtr bornOne(size_t newSerial);
+    /**
+     * @brief 从某个MapTwig产生一个新的后代, 自动建立父子关系, 传递概率, 设置this的死亡(但是不动status)
+     * @param newSerial 新后代的Serial代号
+     * @return 产生的Twig后代
+     */
+    MapTwigPtr bornOne(size_t newSerial);
 
     void setExpired();
 
@@ -74,6 +81,9 @@ public:
      */
     double calGlobalPoss(double log_nExp);
 
+    /**
+     * @brief 清除上一次计算得到的全局概率, 从而能够产生新的概率(唯一方法)
+     */
     void resetLastGlobalConfidenceResult();
 
     const std::vector<MapTwigWePtr>& getChildren() const;
