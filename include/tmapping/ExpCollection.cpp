@@ -81,5 +81,6 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
         }
     }
 
+    vecSameType.push_back(newExp.get());
     mExperiencesData.push_back(std::move(newExp));
 }
