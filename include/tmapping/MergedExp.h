@@ -111,12 +111,20 @@ public:
 
     double getPossDecConf() const;
 
+    /// 路口占用检查
+    struct GateConflictResult {
+        /// 发生占用的Exp
+        const Exp* conflictExp;
+        /// 是进入conflictExp还是离开时的门发生冲突
+        bool enter;
+    };
+
     /**
      * @brief 检查指定的Gate是否已经被作为入口或者出口过了
      * @param gateID 检查的gateID, 相对于this而言
      * @return true表示被占用, false表示没有被占用
      */
-    bool checkIfGateIsOccupied(size_t gateID);
+    GateConflictResult checkGateConflict(size_t gateID);
 };
 
 }

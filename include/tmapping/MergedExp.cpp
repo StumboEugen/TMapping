@@ -165,13 +165,23 @@ double MergedExp::getPossDecConf() const
     return mPossDecConf;
 }
 
-bool MergedExp::checkIfGateIsOccupied(size_t gateID)
+MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
 {
+    GateConflictResult res{};
+
     /// 先检查this的是否被占用了
-    if (gateID == mRelatedExp->getEnterGate() ||
-        gateID == mRelatedExp->getLeftGate()) {
-        return true;
+    if (gateID == mRelatedExp->getEnterGate()) {
+        res.conflictExp = mRelatedExp.get();
+        res.enter = true;
+        return res;
     }
+
+    if (gateID == mRelatedExp->getLeftGate()) {
+        res.conflictExp = mRelatedExp.get();
+        res.enter = false;
+        return res;
+    }
+
     /// 为后续的单向遍历搜索做准备
     size_t relatedFatherGate = gateID;
     MergedExpPtr& father = mFather;
@@ -179,11 +189,20 @@ bool MergedExp::checkIfGateIsOccupied(size_t gateID)
         /// father存在, 检查是否在father里面被占用
         relatedFatherGate = father->mGatesMapping[relatedFatherGate];
         const auto & relatedExp = father->mRelatedExp;
-        if (relatedFatherGate == relatedExp->getEnterGate() ||
-            relatedFatherGate == relatedExp->getLeftGate()) {
-            return true;
+
+        if (relatedFatherGate == relatedExp->getEnterGate()) {
+            res.conflictExp = father->mRelatedExp.get();
+            res.enter = false;
+            return res;
         }
+
+        if (relatedFatherGate == relatedExp->getLeftGate()) {
+            res.conflictExp = father->mRelatedExp.get();
+            res.enter = false;
+            return res;
+        }
+
         father = father->mFather;
     }
-    return false;
+    return res;
 }

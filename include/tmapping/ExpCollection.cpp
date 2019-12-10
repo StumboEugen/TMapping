@@ -9,8 +9,9 @@
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
+    const auto& backExp = mExperiencesData.back();
     /// TODO 寻找MOVE2OLD的对应MergedExp
-    mExperiencesData.back()->setLeftGate(leftGate);
+    backExp->setLeftGate(leftGate);
 }
 
 void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
@@ -43,32 +44,40 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
             if (mergedExp) {
                 auto currentMatchResult = mergedExp->detailedMatching(*newExp->expData());
                 auto poss2 = currentMatchResult->possibility;
-                if ( /// 相似概率要高于一定的阈值
-                    poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP
-                &&   /// 而且这个入口没有被之前的出入口占用, 闭环必须发生在没有走过的gate
-                    !mergedExp->checkIfGateIsOccupied
-                    (currentMatchResult->gateMapping2this[newExp->getEnterGate()]) )
+                /// 相似概率要高于一定的阈值
+                if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP)
                 {
-                    /// VERY IMPORTANT PART
-                    auto closureTwigs = mergedExp->findTwigsUsingThis();
-                    if (!closureTwigs.empty()) {
-                        auto newMergedExp = mergedExp->bornOne(
-                                newExp, std::move(currentMatchResult));
-                        newExp->addMergedExpIns(newMergedExp);
-                        newMergedExp->reserveTwigs(closureTwigs.size() + 1);
-                        for (auto & twig2born : closureTwigs) {
-                            if (!twig2born->hasChildren()) {
-                                /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
-                                twig2born->setDieAt(newExp->serial());
-                                /// 这里产生后代后, father的status不会变化, 从而不会影响其他mergedExp对MapTwig的搜索
-                                auto newTwigAssumingNew = twigMaster.bornOne(twig2born,
-                                                                             currentSingleMergedExp);
-                                newTwigAssumingNew->nodeCountPlus();
-                                currentSingleMergedExp->addRelatedMapTwig(newTwigAssumingNew);
+                    auto conflictRes = mergedExp->checkGateConflict
+                            (currentMatchResult->gateMapping2this[newExp->getEnterGate()]);
+                    /// 而且这个入口不能和之前的出入口发生冲突, 闭环必须发生在没有走过的gate上
+
+                    if (conflictRes.conflictExp != nullptr)
+                    {
+                        /// 并没有发生gate上的冲突, 于是开始找使用这个MergedExp的末端MapTwig
+                        auto closureTwigs = mergedExp->findTwigsUsingThis();
+                        if (!closureTwigs.empty())
+                        {
+                            auto newMergedExp = mergedExp->bornOne(
+                                    newExp, std::move(currentMatchResult));
+                            newExp->addMergedExpIns(newMergedExp);
+                            newMergedExp->reserveTwigs(closureTwigs.size() + 1);
+                            for (auto& twig2born : closureTwigs)
+                            {
+                                if (!twig2born->hasChildren())
+                                {
+                                    /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
+                                    twig2born->setDieAt(newExp->serial());
+                                    /// 这里产生后代后, father的status不会变化, 从而不会影响其他mergedExp对MapTwig的搜索
+                                    auto newTwigAssumingNew = twigMaster.bornOne(twig2born,
+                                            currentSingleMergedExp);
+                                    newTwigAssumingNew->nodeCountPlus();
+                                    currentSingleMergedExp->addRelatedMapTwig(
+                                            newTwigAssumingNew);
+                                }
+                                auto twigWithClosure = twigMaster.bornOne(twig2born,
+                                                                          newMergedExp);
+                                newMergedExp->addRelatedMapTwig(twigWithClosure);
                             }
-                            auto twigWithClosure = twigMaster.bornOne(twig2born,
-                                                                      newMergedExp);
-                            newMergedExp->addRelatedMapTwig(twigWithClosure);
                         }
                     }
                 }
