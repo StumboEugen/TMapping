@@ -30,7 +30,7 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 出生在哪个Exp
     const size_t borndAt;
     /// 是哪个MapBranch生成的
-    const MapTwigPtr father;
+    const MapTwigPtr mFather;
     /// Branch的UUID序号
     const size_t nSerial;
 
@@ -41,7 +41,9 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 与过去经历重复的 exp
     std::vector<MergedExpPtr> mExpUsages;
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
-    MergedExpPtr theArrivingSimiliarExp{};
+    MergedExpPtr mExpOfArrivingSimilar{};
+    /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录对应相似Exp的gate是哪个
+    size_t mGateOfSimilar;
     /// 当前MapBranch的状态
     MapTwigStatus status = MapTwigStatus::MOVE2NEW;
     /// 当前Branch的概率
@@ -74,6 +76,8 @@ public:
 
     const MergedExpPtr& getTheArrivingSimiliarMergedExp() const;
 
+    size_t gateOfSimilarMergedExp() const;
+
     /**
      * @brief 生成进行全局排序的概率分数, 在调用 resetLastGlobalConfidenceResult() 之前实际只计算一次
      * @param log_nExp 由调用者给予的log(nExp), 因为在单步内, nExp为固定数
@@ -101,8 +105,13 @@ public:
     /**
      * @brief 为此MapTwig添加新的融合假设, @note this->mConfidence的修正会在此函数中被调用, 无需外部调用
      * @param newMerged 新的融合假设
+     * @todo 自动化在mergedExp中注册this
      */
     void addMergedExp(MergedExpPtr newMerged);
+
+    void setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t arrivingGate);
+
+    void setMove2new();
 };
 
 }

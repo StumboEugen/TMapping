@@ -37,6 +37,8 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     /// 令k = mGatesMapping[j],
     /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate.
     /// 如果 mFather == nullptr, 则该成员为空
+    /// @TODO 更改存储类型, 暗示对应gate的占用情况, 从而加速gate的占用情况搜索, 需要修改MergedExp在Exp注册的逻辑
+    /// 需要在Exp setleftGate的时候添加信息, 需要修改匹配结果结合上一次的信息, 性价比不高, 暂时不做
     std::vector<size_t> mGatesMapping;
 
     /// 这次融合的概率降低系数
@@ -86,6 +88,7 @@ public:
      * @param newExp 需要额外融合的新Exp
      * @param matchResult 上次匹配的结果, 包含有融合后的ExpData信息以及gate对应关系
      * @return 新的MergedExp
+     * @TODO 自动化在newExp注册
      */
     MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult);
 
@@ -125,6 +128,19 @@ public:
      * @return true表示被占用, false表示没有被占用
      */
     GateConflictResult checkGateConflict(size_t gateID);
+
+    /**
+     * @brief 这一层封装是为了保持mRelatedTwigs的不暴露
+     * @param arrivingSimiliarExp 对应的实际Exp
+     * @param atGate 下次匹配对应的gate
+     */
+    void setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate);
+
+    void setRelatedTwigsNextMove2new() const;
+
+    int64_t findReverseGateMapping(size_t gateOfFather) const;
+
+    size_t gateMapping2Father(size_t gateOfThis);
 };
 
 }

@@ -48,6 +48,9 @@ size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
 MatchResult ExpData::detailedMatch(const ExpData& another, double selfWeight) const
 {
     /// TODO 完成两个未对齐数据的匹配工作
+    /// 要求: MatchResult->gatesMapping是从 [another's gate] = this's gate
+    /// MatchResult->mergedExpData 的gate序号和another完全相同
+    /// selfWeight指的是this的权重, 比如selfWeight=3, 说明this可能是3次结果融合而成的
 
 }
 

@@ -10,7 +10,22 @@
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
     const auto& backExp = mExperiencesData.back();
-    /// TODO 寻找MOVE2OLD的对应MergedExp
+    for (const auto & mergedExpWeak : backExp->getMergedExps()) {
+        if (!mergedExpWeak.expired()) {
+            auto mergedExp = mergedExpWeak.lock();
+            auto gatesOccRes = mergedExp->checkGateConflict(leftGate);
+            if (gatesOccRes.conflictExp != nullptr) {
+                const auto& similarExp = mExperiencesData.at(
+                        gatesOccRes.conflictExp->serial() + (gatesOccRes.enter ? -1 : 1));
+                size_t theGoingRelatedGate = gatesOccRes.enter ?
+                                             similarExp->getLeftGate() :
+                                             similarExp->getEnterGate();
+                mergedExp->setRelatedTwigsNextMove2old(similarExp, theGoingRelatedGate);
+            } else {
+                mergedExp->setRelatedTwigsNextMove2new();
+            }
+        }
+    }
     backExp->setLeftGate(leftGate);
 }
 

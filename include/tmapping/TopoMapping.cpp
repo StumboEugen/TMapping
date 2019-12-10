@@ -53,16 +53,33 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
             case MapTwigStatus::MOVE2OLD:
                 const auto& oldSimiliarExp = oneAliveTwig->getTheArrivingSimiliarMergedExp();
                 auto theShouldBeMergedPtr = oldSimiliarExp->theNewestChild().lock();
+
+                /// 下面这个if是为了确认对应的MergedExp是否已经生成了
                 if (theShouldBeMergedPtr &&
-                        theShouldBeMergedPtr->serialOfLastExp() == newExp->serial()) {
-                    oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
-                    theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);
+                theShouldBeMergedPtr->serialOfLastExp() == newExp->serial())
+                {
+                    /// 已经生成了, 检查一下gate的一致性问题
+                    if (theShouldBeMergedPtr->gateMapping2Father(newExp->getEnterGate()) ==
+                    oneAliveTwig->gateOfSimilarMergedExp())
+                    {
+                        /// 一致性通过, 直接相互建立引用
+                        oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
+                        theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);
+                        twigCollection.add2NextGeneration(std::move(oneAliveTwig));
+                    } else {
+                        /// 一致性不通过, 废弃
+                        oneAliveTwig->setExpired();
+                    }
                 } else {
+                    /// 对应的MergedExp没有生成, 自己尝试生成, 先进行匹配
                     auto matchResult = oldSimiliarExp->detailedMatching(*newExp->expData());
                     double poss = matchResult->possibility;
-                    if (poss > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                    bool gateCorrect = matchResult->gateMapping2this[newExp->getEnterGate()] ==
+                            oneAliveTwig->gateOfSimilarMergedExp();
+                    if (gateCorrect && poss > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
+                        /// 一致性通过而且匹配概率也符合阈值, 生成对应的mergedExp
                         auto newMergedExp =
-                                theShouldBeMergedPtr->bornOne(newExp, std::move(matchResult));
+                                oldSimiliarExp->bornOne(newExp, std::move(matchResult));
                         newExp->addMergedExpIns(newMergedExp);
                         oneAliveTwig->addMergedExp(newMergedExp);
                         newMergedExp->addRelatedMapTwig(oneAliveTwig);
@@ -71,7 +88,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         oneAliveTwig->setExpired();
                     }
                 }
-        }
+        } /// switch end
     }
 
     if (newExp->serial() == 0) {

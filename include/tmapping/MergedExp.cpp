@@ -54,7 +54,7 @@ bool MergedExp::isChildOf(const MergedExp* possibileFather) const
 }
 
 static void TOOLFUN_extractSharedFromWeak(vector<MapTwigPtr>& to, vector<MapTwigWePtr>& from) {
-    to.reserve(from.capacity());
+    to.reserve(from.size() * 2);
     for (const auto & oldWePtr: from) {
         auto shPtr = oldWePtr.lock();
         if (shPtr) {
@@ -205,4 +205,43 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
         father = father->mFather;
     }
     return res;
+}
+
+void MergedExp::setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate)
+{
+    for (const auto& relatedTwigWe : mRelatedMaps) {
+        if (!relatedTwigWe.expired()) {
+            auto relatedTwig = relatedTwigWe.lock();
+            relatedTwig->setTheSimilarMergedExpForNextTime(arrivingSimiliarExp, atGate);
+        }
+    }
+}
+
+void MergedExp::setRelatedTwigsNextMove2new() const
+{
+    for (const auto & relatedTwigWe : mRelatedMaps) {
+        if (!relatedTwigWe.expired()) {
+            relatedTwigWe.lock()->setMove2new();
+        }
+    }
+}
+
+int64_t MergedExp::findReverseGateMapping(size_t gateOfFather) const
+{
+    int64_t res = -1;
+    auto mapSize = mGatesMapping.size();
+    for (size_t i = 0; i < mapSize; ++i) {
+        if (mGatesMapping[i] == gateOfFather) {
+            res = i;
+            return res;
+        }
+    }
+
+    cerr << FILE_AND_LINE << " find reverse gate FAIL, this should not happen!" << endl;
+    return res;
+}
+
+size_t MergedExp::gateMapping2Father(size_t gateOfThis)
+{
+    return mGatesMapping[gateOfThis];
 }

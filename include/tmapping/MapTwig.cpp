@@ -9,6 +9,7 @@
 #include <cmath>
 
 using namespace std;
+using namespace tmap;
 
 tmap::MapTwigPtr tmap::MapTwig::getAdamTwig()
 {
@@ -18,7 +19,7 @@ tmap::MapTwigPtr tmap::MapTwig::getAdamTwig()
 
 tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
                        size_t nSerial, double confidence) : borndAt(bornAt),
-                                                            father(std::move(father)),
+                                                            mFather(std::move(father)),
                                                             nSerial(nSerial),
                                                             mConfidence(confidence)
 {
@@ -56,7 +57,7 @@ tmap::MapTwigStatus tmap::MapTwig::getStatus() const
 
 const tmap::MergedExpPtr& tmap::MapTwig::getTheArrivingSimiliarMergedExp() const
 {
-    return theArrivingSimiliarExp;
+    return mExpOfArrivingSimilar;
 }
 
 double tmap::MapTwig::xConfidenceCoe(double coe)
@@ -112,4 +113,44 @@ double tmap::MapTwig::calGlobalPoss(double log_nExp)
         mLastGlobalResult = mConfidence * exp( -nTopoNode * log_nExp);
     }
     return mLastGlobalResult;
+}
+
+void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t arrivingGate)
+{
+    status = MapTwigStatus::MOVE2OLD;
+
+    /// 构建从this到targetExp对应的MapTwig的链条
+    vector<MapTwig*> chainToFather;
+    MapTwig* current = this;
+    std::size_t targetSerial = targetExp->serial();
+    while (current->borndAt > targetSerial) {
+        chainToFather.push_back(current);
+        current = current->mFather.get();
+    }
+    chainToFather.push_back(current);
+    /// 构建完毕
+
+    /// 从过去往现在查找, 找到对应的Exp最新的MergedExp, 并记录下来
+    auto& theSimilarMergedExp = current->mExpUsages.at(targetSerial - current->borndAt);
+    for (auto iter = chainToFather.rbegin(); iter != chainToFather.rend(); ++iter) {
+        for (const auto& mergedExp : (*iter)->mExpUsages) {
+            if (mergedExp->isChildOf(theSimilarMergedExp.get())) {
+                /// TODO 这里会平白无故增加工作量, 未来可能考虑匹配结果要存储一张双向的映射表
+                arrivingGate = mergedExp->findReverseGateMapping(arrivingGate);
+                theSimilarMergedExp = mergedExp;
+            }
+        }
+    }
+    mExpOfArrivingSimilar = theSimilarMergedExp;
+    mGateOfSimilar = arrivingGate;
+}
+
+size_t MapTwig::gateOfSimilarMergedExp() const
+{
+    return mGateOfSimilar;
+}
+
+void MapTwig::setMove2new()
+{
+    status = MapTwigStatus::MOVE2NEW;
 }
