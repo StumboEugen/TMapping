@@ -5,6 +5,7 @@
 #include "MapTwigCollection.h"
 
 #include "MapTwig.h"
+#include "MergedExp.h"
 
 #include <algorithm>
 

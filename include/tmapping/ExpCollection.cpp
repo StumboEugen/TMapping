@@ -42,20 +42,19 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
 
     auto & vecSameType = mClassification[newExp->expData()->type()];
 
-    for (size_t i = vecSameType.size() - 1; i >= 0; ++i) {
-        Exp* sameTypeExp = vecSameType[i];
+    for (auto& sameTypeExp : vecSameType) {
         double poss1 = sameTypeExp->expData()->quickMatch(*newExp->expData(), 1);
         if (poss1 < TOLLERANCE_1ST_MATCH_EXP) {
             continue;
         }
 
         /// 需要确保这个mergedExp在当前函数里保持存活
-        MergedExpPtr currentSingleMergedExp = MergedExp::bornFromExp(newExp);
+        MergedExpPtr currentSingleMergedExp = MergedExp::singleMergedFromExp(newExp);
 
         size_t expiredCount = 0;
         auto& mergedExps = sameTypeExp->getMergedExps();
-        for (const auto& iter : mergedExps) {
-            auto mergedExp = iter.lock();
+        for (const auto& mergedExpWe : mergedExps) {
+            auto mergedExp = mergedExpWe.lock();
             if (mergedExp) {
                 auto currentMatchResult = mergedExp->detailedMatching(*newExp->expData());
                 auto poss2 = currentMatchResult->possibility;
@@ -75,13 +74,15 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                             auto newMergedExp = mergedExp->bornOne(
                                     newExp, std::move(currentMatchResult));
                             newMergedExp->reserveTwigs(closureTwigs.size() + 1);
+                            /// 为每个使用mergedExp的Twig构造形成实质闭环的Twig后代
                             for (auto& twig2born : closureTwigs)
                             {
                                 if (!twig2born->hasChildren())
                                 {
-                                    /// 这是第一个分叉, 除了本闭环之外还要负责生成always new
+                                    /// 这是第一个分叉, 除了闭环之外还要负责生成always new的假设
                                     twig2born->setDieAt(newExp->serial());
-                                    /// 这里产生后代后, father的status不会变化, 从而不会影响其他mergedExp对MapTwig的搜索
+                                    /// 这里产生后代后, father的status不会变化,
+                                    /// 从而不会影响其他mergedExp对MapTwig的搜索 findTwigsUsingThis()
                                     auto newTwigAssumingNew = twigMaster.bornOne(twig2born,
                                             currentSingleMergedExp);
                                     newTwigAssumingNew->nodeCountPlus();

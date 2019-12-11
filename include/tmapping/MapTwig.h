@@ -17,7 +17,8 @@ namespace tmap
 
 /// 标明当前Twig的状态
 enum class MapTwigStatus {
-    /// 当前MapTwig已经停止了生长, 但是后代分支还存在, 需要this的连接与数据, 所以this还活着
+    /// 当前MapTwig已经停止了生长(因为MOVE2OLD发生矛盾或者MOVE2NEW发生了分歧理解),
+    /// 但是可能后代分支还存在, 需要this的连接与数据, 所以this还活着
     EXPIRED,
     /// 当前MapTwig正在走向一个没有去过的位置, 有可能能产生分支
     MOVE2NEW,
@@ -70,6 +71,9 @@ public:
      */
     MapTwigPtr bornOne(size_t newSerial);
 
+    /**
+     * @see MapTwigStatus::EXPIRED
+     */
     void setExpired();
 
     MapTwigStatus getStatus() const;

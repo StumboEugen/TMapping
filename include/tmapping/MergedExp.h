@@ -102,7 +102,7 @@ public:
      * @param fatherExp
      * @return
      */
-    static MergedExpPtr bornFromExp(ExpPtr fatherExp);
+    static MergedExpPtr singleMergedFromExp(ExpPtr fatherExp);
 
     void addRelatedMapTwig(const MapTwigPtr& twigPtr);
 

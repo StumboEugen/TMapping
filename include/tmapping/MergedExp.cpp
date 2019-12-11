@@ -99,10 +99,11 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
 
         switch (currentTwig->getStatus()) {
             case MapTwigStatus::EXPIRED:
+                /// 这意味着有后续的twig, 将后代插入currentTwig继续DFS
+
                 /// currentTwig是引用, pop后会析构, 因此删除前要先复制出来
                 expiredCurrentTwig = std::move(DFS_Stack.back());
                 DFS_Stack.pop_back();
-                /// 这意味着有后续的twig, 将后代插入currentTwig继续DFS
                 for (const auto & child : expiredCurrentTwig->getChildren()) {
                     if (!child.expired()) {
                         ///这个分支没有废弃, 继续进行搜索
@@ -114,13 +115,14 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
                 /// 这是一个可能的闭环, 但是闭环发生在current的后代上, 所以依旧把current放入last result
                 mLastSearchResult.emplace_back(currentTwig);
                 res.emplace_back(std::move(DFS_Stack.back()));
+                DFS_Stack.pop_back();
                 break;
             case MapTwigStatus::MOVE2OLD:
                 /// 因为MOVE2OLD, current是不可能进行闭环的, 但是有可能将来会闭环, 所以下次还要上搜索
                 mLastSearchResult.emplace_back(currentTwig);
+                DFS_Stack.pop_back();
                 break;
             }
-        DFS_Stack.pop_back();
     }
 
     return res;
@@ -136,7 +138,7 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
     return res;
 }
 
-MergedExpPtr MergedExp::bornFromExp(ExpPtr fatherExp)
+MergedExpPtr MergedExp::singleMergedFromExp(ExpPtr fatherExp)
 {
     auto theFirstStoredInExp = fatherExp->theSingleMergedExp().lock();
     if (theFirstStoredInExp) {

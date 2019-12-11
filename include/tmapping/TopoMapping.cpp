@@ -31,7 +31,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 {
     mExperiences.addNewExpAndAddLoopClosures(newExp, twigCollection);
 
-    MergedExpPtr theSingleMergedExp = MergedExp::bornFromExp(newExp);
+    MergedExpPtr theSingleMergedExp = MergedExp::singleMergedFromExp(newExp);
 
     for (auto & oneAliveTwig : twigCollection.getAliveMaps()) {
         switch (oneAliveTwig->getStatus()) {
@@ -52,19 +52,19 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                 break;
             case MapTwigStatus::MOVE2OLD:
                 const auto& oldSimiliarExp = oneAliveTwig->getTheArrivingSimiliarMergedExp();
-                auto theShouldBeMergedPtr = oldSimiliarExp->theNewestChild().lock();
+                auto theNewMergedExpShouldBe = oldSimiliarExp->theNewestChild().lock();
 
                 /// 下面这个if是为了确认对应的MergedExp是否已经生成了
-                if (theShouldBeMergedPtr &&
-                theShouldBeMergedPtr->serialOfLastExp() == newExp->serial())
+                if (theNewMergedExpShouldBe &&
+                    theNewMergedExpShouldBe->serialOfLastExp() == newExp->serial())
                 {
-                    /// 已经生成了, 检查一下gate的一致性问题
-                    if (theShouldBeMergedPtr->gateMapping2Father(newExp->getEnterGate()) ==
-                    oneAliveTwig->gateOfSimilarMergedExp())
+                    /// 已经生成了, 检查一下gate的一致性问题(实际到达的gate是否能映射到历史上对应的gate)
+                    if (theNewMergedExpShouldBe->gateMapping2Father(newExp->getEnterGate()) ==
+                        oneAliveTwig->gateOfSimilarMergedExp())
                     {
                         /// 一致性通过, 直接相互建立引用
-                        oneAliveTwig->addMergedExp(theShouldBeMergedPtr);
-                        theShouldBeMergedPtr->addRelatedMapTwig(oneAliveTwig);
+                        oneAliveTwig->addMergedExp(theNewMergedExpShouldBe);
+                        theNewMergedExpShouldBe->addRelatedMapTwig(oneAliveTwig);
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));
                     } else {
                         /// 一致性不通过, 废弃
