@@ -20,6 +20,7 @@ MapTwigPtr MapTwigCollection::bornOne(const MapTwigPtr& father, const MergedExpP
 {
     MapTwigPtr newTwig = father->bornOne(nextSerialN++);
     newTwig->addMergedExp(newMerged);
+    newMerged->addRelatedMapTwig(newTwig);
     mNextGeneration.push_back(newTwig);
     mMapTwigs.emplace_back(newTwig);
     return newTwig;

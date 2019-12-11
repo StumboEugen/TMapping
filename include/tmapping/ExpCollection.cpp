@@ -85,12 +85,9 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                     auto newTwigAssumingNew = twigMaster.bornOne(twig2born,
                                             currentSingleMergedExp);
                                     newTwigAssumingNew->nodeCountPlus();
-                                    currentSingleMergedExp->addRelatedMapTwig(
-                                            newTwigAssumingNew);
                                 }
                                 auto twigWithClosure = twigMaster.bornOne(twig2born,
                                                                           newMergedExp);
-                                newMergedExp->addRelatedMapTwig(twigWithClosure);
                             }
                         }
                     }
