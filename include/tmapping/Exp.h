@@ -44,7 +44,10 @@ public:
 
     const std::vector<MergedExpWePtr>& getMergedExps() const;
 
-    void cleanUpMergedExps();
+    /**
+     * @brief 清理没有用的MergedExp, 对于Exp而言这是一个比较容易发生的情况
+     */
+    void cleanUpExpiredMergedExps();
 
     void addMergedExpIns(const MergedExpPtr& newMerged);
 

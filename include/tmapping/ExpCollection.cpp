@@ -98,7 +98,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
         }
 
         if (expiredCount > mergedExps.size() / 2) {
-            sameTypeExp->cleanUpMergedExps();
+            sameTypeExp->cleanUpExpiredMergedExps();
         }
     }
 

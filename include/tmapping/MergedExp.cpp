@@ -211,20 +211,33 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
 
 void MergedExp::setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate)
 {
+    size_t nExpired = 0;
+
     for (const auto& relatedTwigWe : mRelatedMaps) {
         if (!relatedTwigWe.expired()) {
             auto relatedTwig = relatedTwigWe.lock();
             relatedTwig->setTheSimilarMergedExpForNextTime(arrivingSimiliarExp, atGate);
+        } else {
+            nExpired++;
         }
+    }
+    if (nExpired > mRelatedMaps.size() / 2) {
+        cleanUpExpiredRelatedTwigs();
     }
 }
 
-void MergedExp::setRelatedTwigsNextMove2new() const
+void MergedExp::setRelatedTwigsNextMove2new()
 {
+    size_t nExpired = 0;
     for (const auto & relatedTwigWe : mRelatedMaps) {
         if (!relatedTwigWe.expired()) {
             relatedTwigWe.lock()->setMove2new();
+        } else {
+            nExpired++;
         }
+    }
+    if (nExpired > mRelatedMaps.size() / 2) {
+        cleanUpExpiredRelatedTwigs();
     }
 }
 
@@ -246,4 +259,16 @@ int64_t MergedExp::findReverseGateMapping(size_t gateOfFather) const
 size_t MergedExp::gateMapping2Father(size_t gateOfThis)
 {
     return mGatesMapping[gateOfThis];
+}
+
+void MergedExp::cleanUpExpiredRelatedTwigs()
+{
+    vector<MapTwigWePtr> cleanRes;
+    cleanRes.reserve(mRelatedMaps.size() / 2);
+    for (auto & twig : mRelatedMaps) {
+        if (!twig.expired()) {
+            cleanRes.emplace_back(std::move(twig));
+        }
+    }
+    mRelatedMaps.swap(cleanRes);
 }

@@ -59,6 +59,10 @@ private: // constructor
 
     explicit MergedExp(ExpPtr fatherExp);
 
+private: // method
+
+    void cleanUpExpiredRelatedTwigs();
+
 public:
 
     /**
@@ -135,7 +139,7 @@ public:
      */
     void setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate);
 
-    void setRelatedTwigsNextMove2new() const;
+    void setRelatedTwigsNextMove2new();
 
     int64_t findReverseGateMapping(size_t gateOfFather) const;
 

@@ -38,10 +38,11 @@ const std::vector<MergedExpWePtr>& Exp::getMergedExps() const
     return mMergedExps;
 }
 
-void Exp::cleanUpMergedExps()
+void Exp::cleanUpExpiredMergedExps()
 {
     auto size = mMergedExps.size();
-    vector<MergedExpWePtr> newList(size);
+    vector<MergedExpWePtr> newList;
+    newList.reserve(mMergedExps.size() / 2);
     newList.emplace_back(std::move(mMergedExps.front()));
     for (std::size_t i = 1; i < size; ++i) {
         if (!mMergedExps[i].expired()) {
