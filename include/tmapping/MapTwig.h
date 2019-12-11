@@ -105,7 +105,6 @@ public:
     /**
      * @brief 为此MapTwig添加新的融合假设, @note this->mConfidence的修正会在此函数中被调用, 无需外部调用
      * @param newMerged 新的融合假设
-     * @todo 自动化在mergedExp中注册this
      */
     void addMergedExp(MergedExpPtr newMerged);
 
