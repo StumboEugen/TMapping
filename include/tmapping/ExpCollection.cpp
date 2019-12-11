@@ -74,7 +74,6 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                         {
                             auto newMergedExp = mergedExp->bornOne(
                                     newExp, std::move(currentMatchResult));
-                            newExp->addMergedExpIns(newMergedExp);
                             newMergedExp->reserveTwigs(closureTwigs.size() + 1);
                             for (auto& twig2born : closureTwigs)
                             {

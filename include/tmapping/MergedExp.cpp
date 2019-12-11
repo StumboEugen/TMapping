@@ -128,9 +128,11 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
 
 MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
 {
+    Exp* expBareP = newExp.get();
     MergedExpPtr res(new MergedExp(
             shared_from_this(), std::move(newExp), std::move(matchResult)));
     mNewestChild = res;
+    expBareP->addMergedExpIns(res);
     return res;
 }
 

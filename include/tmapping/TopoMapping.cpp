@@ -80,7 +80,6 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         /// 一致性通过而且匹配概率也符合阈值, 生成对应的mergedExp
                         auto newMergedExp =
                                 oldSimiliarExp->bornOne(newExp, std::move(matchResult));
-                        newExp->addMergedExpIns(newMergedExp);
                         oneAliveTwig->addMergedExp(newMergedExp);
                         newMergedExp->addRelatedMapTwig(oneAliveTwig);
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));

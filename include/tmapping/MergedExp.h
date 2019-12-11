@@ -84,11 +84,10 @@ public:
     std::vector<MapTwigPtr> findTwigsUsingThis();
 
     /**
-     * @brief 生成一个和this MergedExp有关的后代Exp
+     * @brief 生成一个和this MergedExp有关的后代MergedExp, 自动在newExp注册新的MergedExp
      * @param newExp 需要额外融合的新Exp
      * @param matchResult 上次匹配的结果, 包含有融合后的ExpData信息以及gate对应关系
      * @return 新的MergedExp
-     * @TODO 自动化在newExp注册
      */
     MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult);
 
