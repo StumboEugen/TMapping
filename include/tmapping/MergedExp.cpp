@@ -188,7 +188,7 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
 
     /// 为后续的单向遍历搜索做准备
     size_t relatedFatherGate = gateID;
-    MergedExpPtr& father = mFather;
+    MergedExp* father = mFather.get();
     while (father != nullptr) {
         /// father存在, 检查是否在father里面被占用
         relatedFatherGate = father->mGatesMapping[relatedFatherGate];
@@ -206,7 +206,7 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
             return res;
         }
 
-        father = father->mFather;
+        father = father->mFather.get();
     }
     return res;
 }
