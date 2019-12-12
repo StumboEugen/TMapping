@@ -119,7 +119,7 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t 
 {
     status = MapTwigStatus::MOVE2OLD;
 
-    /// 构建从this到targetExp对应的MapTwig的链条
+    /// 构建从this到targetExp对应的MapTwig的链条, (serial为递减的顺序, 越来越年轻)
     vector<MapTwig*> chainToFather;
     MapTwig* current = this;
     std::size_t targetSerial = targetExp->serial();
@@ -130,12 +130,12 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t 
     chainToFather.push_back(current);
     /// 构建完毕
 
-    /// 从过去往现在查找, 找到对应的Exp最新的MergedExp, 并记录下来
+    /// 从过去往现在查找, 找到对应的Exp最新的MergedExp, 并记录下来 TODO need testing
     auto& theSimilarMergedExp = current->mExpUsages.at(targetSerial - current->borndAt);
     for (auto iter = chainToFather.rbegin(); iter != chainToFather.rend(); ++iter) {
         for (const auto& mergedExp : (*iter)->mExpUsages) {
             if (mergedExp->isChildOf(theSimilarMergedExp.get())) {
-                /// TODO 这里会平白无故增加工作量, 未来可能考虑匹配结果要存储一张双向的映射表
+                /// TODO 这里会平白无故增加工作量, 未来可能考虑匹配结果要存储一张双向的映射表 profiling
                 arrivingGate = mergedExp->findReverseGateMapping(arrivingGate);
                 theSimilarMergedExp = mergedExp;
             }

@@ -10,11 +10,13 @@
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {
     const auto& backExp = mExperiencesData.back();
+    /// 遍历尾端Exp的所有mergedExp使用情况, 查找是否发生移动到已通过点的情况
     for (const auto & mergedExpWeak : backExp->getMergedExps()) {
         if (!mergedExpWeak.expired()) {
             auto mergedExp = mergedExpWeak.lock();
             auto gatesOccRes = mergedExp->checkGateConflict(leftGate);
             if (gatesOccRes.conflictExp != nullptr) {
+                /// 发生gate的冲突, 找到相连的其他Exp以及对应gate, 用于设置mergedExp相关Map的similarNext
                 const auto& similarExp = mExperiencesData.at(
                         gatesOccRes.conflictExp->serial() + (gatesOccRes.enter ? -1 : 1));
                 size_t theGoingRelatedGate = gatesOccRes.enter ?
@@ -22,6 +24,7 @@ void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
                                              similarExp->getEnterGate();
                 mergedExp->setRelatedTwigsNextMove2old(similarExp, theGoingRelatedGate);
             } else {
+                /// 没有发生, 说明正在移动前往一个新的Exp
                 mergedExp->setRelatedTwigsNextMove2new();
             }
         }
