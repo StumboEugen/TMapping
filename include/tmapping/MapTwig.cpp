@@ -6,6 +6,7 @@
 #include "Tmapping.h"
 #include "MergedExp.h"
 #include "Exp.h"
+#include "StructedMap.h"
 #include <iostream>
 #include <cmath>
 
@@ -154,4 +155,101 @@ size_t MapTwig::gateOfSimilarMergedExp() const
 void MapTwig::setMove2new()
 {
     status = MapTwigStatus::MOVE2NEW;
+}
+
+StructedMap MapTwig::makeMap(const ExpCollection& exps) const
+{
+    if (status == MapTwigStatus::EXPIRED) {
+        cerr << FILE_AND_LINE << " You are making a map from an expired twig!" << endl;
+    }
+    
+    struct __realGateIndex{
+        uint32_t enterGate = -1;
+        uint32_t leaveGate = -1;
+    };
+
+    auto expSize = mExpUsages.back()->serialOfLastExp();
+    vector<MapNodePtr> nodePs{expSize};
+    vector<__realGateIndex> realGates{expSize};
+    vector<MapNodePtr> mapNodePtrs;
+    mapNodePtrs.reserve(expSize);
+
+    const MapTwig* current = this;
+    while (current != nullptr) {
+        for (auto iter = mExpUsages.rbegin(); iter != mExpUsages.rend(); ++iter) {
+            auto& mergedExp = *iter;
+            size_t childSerial = mergedExp->serialOfLastExp();
+            auto& relatedNodePtr = nodePs[childSerial];
+            if (relatedNodePtr == nullptr) {
+                /// 如果对应的Node不存在, 说明这个mergedExp是第一次被加入
+                relatedNodePtr = make_shared<MapNode>();
+                relatedNodePtr->relatedMergedExp = mergedExp;
+                size_t nGates = mergedExp->getTheLastExp()->expData()->nGates();
+                relatedNodePtr->links.assign(nGates, MapNode::Link{});
+                mapNodePtrs.emplace_back(relatedNodePtr);
+
+                /// TODO 牵涉到gatesMapping
+                vector<size_t> gatesMap{nGates};
+                for (int i = 0; i < nGates; ++i) {
+                    gatesMap[i] = i;
+                }
+                int32_t enterGate = mergedExp->getTheLastExp()->getEnterGate();
+                int32_t leaveGate = mergedExp->getTheLastExp()->getLeaveGate();
+                if (enterGate != -1) {
+                    realGates[childSerial].enterGate = gatesMap[enterGate];
+                }
+                if (leaveGate != -1) {
+                    realGates[childSerial].leaveGate = gatesMap[leaveGate];
+                }
+                mergedExp->mapGates(gatesMap);
+
+                /// 让 mergedExp 的所有 father 对应序号的 NodeP 都指向刚刚由 mergedExp 生成的 relatedNodePtr
+                MergedExp* fatherMergedExp = mergedExp->getFather().get();
+                while (fatherMergedExp != nullptr) {
+                    size_t oneFatherSerial = fatherMergedExp->getTheLastExp()->serial();
+                    nodePs[oneFatherSerial] = relatedNodePtr;
+
+                    /// 记录这个位置的gate真实映射关系
+                    enterGate = fatherMergedExp->getTheLastExp()->getEnterGate();
+                    leaveGate = fatherMergedExp->getTheLastExp()->getLeaveGate();
+                    if (enterGate != -1) {
+                        realGates[oneFatherSerial].enterGate = gatesMap[enterGate];
+                    }
+                    realGates[oneFatherSerial].leaveGate = gatesMap[leaveGate];
+                    fatherMergedExp->mapGates(gatesMap);
+
+                    /// 下一个father
+                    fatherMergedExp = fatherMergedExp->getFather().get();
+                }
+            } else {
+                /// 对应的Node已经被生成过了, 说明current mergedExp的child在这个Map里, 说明current对于map而言是不完整的
+                continue;
+            }
+        }
+        current = current->mFather.get();
+    }
+    
+    /// DEBUG TEST: 检查nodePsVec是否都被充满了
+    for (const auto& nodeP : nodePs) {
+        if (nodeP == nullptr) {
+            cerr << FILE_AND_LINE << "ERROR!" << endl;
+            throw;
+        }
+    }
+
+    for (int i = 0; i < expSize - 1; ++i) {
+        auto leaveGate = realGates[i].leaveGate;
+        auto enterGate = realGates[i + 1].enterGate;
+        auto& leaveLink = nodePs[i]->links[leaveGate];
+        auto& enterLink = nodePs[i + 1]->links[enterGate];
+        leaveLink.to = nodePs[i + 1];
+        enterLink.to = nodePs[i];
+        leaveLink.at = enterGate;
+        enterLink.at = leaveGate;
+    }
+
+    auto structedMap = make_shared<StructedMapImpl>();
+    structedMap->setNodes(mapNodePtrs);
+
+    return structedMap;
 }

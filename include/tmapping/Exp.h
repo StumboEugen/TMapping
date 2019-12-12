@@ -20,7 +20,7 @@ class Exp
     /// 进入时对应的Gate, -1表示这个为出发点
     int32_t mEnterGate = -1;
     /// 离开时对应的Gate, -1表示还没离开
-    int32_t mLeftGate = -1;
+    int32_t mLeaveGate = -1;
     /// 时间上的排序序列
     std::size_t nSerial = 0;
     /// 到此Exp创建过的MapTwig数量
@@ -39,7 +39,7 @@ public:
 
     void setSerial(size_t serial);
 
-    void setLeftGate(int32_t leftGate);
+    void setLeftGate(int32_t leaveGate);
 
     const std::vector<MergedExpWePtr>& getMergedExps() const;
 
@@ -52,7 +52,7 @@ public:
 
     int32_t getEnterGate() const;
 
-    int32_t getLeftGate() const;
+    int32_t getLeaveGate() const;
 };
 }
 

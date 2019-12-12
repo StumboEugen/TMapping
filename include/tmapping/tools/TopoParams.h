@@ -64,6 +64,14 @@ class Exp;
 
 using ExpWePtr = std::weak_ptr<Exp>;
 using ExpPtr = std::shared_ptr<Exp>;
+using ExpCPtr = std::shared_ptr<const Exp>;
+
+class MapNode;
+using MapNodePtr = std::shared_ptr<MapNode>;
+using MapNodeWe = std::weak_ptr<MapNode>;
+
+class StructedMapImpl;
+using StructedMap = std::shared_ptr<StructedMapImpl>;
 }
 
 #endif //TMAPPING_TOPOPARAMS_H

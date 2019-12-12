@@ -12,12 +12,12 @@ using namespace tmap;
 
 const std::vector<GateUnPtr>& tmap::ExpData::getGates() const
 {
-    return gates;
+    return mGates;
 }
 
 void ExpData::addGate(GateUnPtr pGate)
 {
-    gates.emplace_back(std::move(pGate));
+    mGates.emplace_back(std::move(pGate));
 }
 
 void ExpData::addLandmark(PLMUnPtr pLandmark)
@@ -27,7 +27,7 @@ void ExpData::addLandmark(PLMUnPtr pLandmark)
 
 size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
 {
-    size_t gateSize = gates.size();
+    size_t gateSize = mGates.size();
     if (gateSize == 0) {
         cerr << FILE_AND_LINE << " Gate size is ZERO ?!" << endl;
         throw;
@@ -35,7 +35,7 @@ size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
     auto lenMax = DBL_MAX;
     size_t res = 0;
     for (size_t i = 0; i < gateSize; ++i) {
-        double currentLen = (gates[i]->getPos() - gatePos).len();
+        double currentLen = (mGates[i]->getPos() - gatePos).len();
         if (currentLen < lenMax) {
             lenMax = currentLen;
             res = i;
@@ -62,5 +62,10 @@ double ExpData::quickMatch(const ExpData& another, double selfWeight) const
     } else {
         return 0.0;
     }
+}
+
+size_t ExpData::nGates() const
+{
+    return mGates.size();
 }
 

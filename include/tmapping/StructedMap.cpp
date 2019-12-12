@@ -3,3 +3,8 @@
 //
 
 #include "StructedMap.h"
+
+void tmap::StructedMapImpl::setNodes(const std::vector<MapNodePtr>& nodes)
+{
+    StructedMapImpl::nodes = nodes;
+}

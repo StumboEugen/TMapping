@@ -180,7 +180,7 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
         return res;
     }
 
-    if (gateID == mRelatedExp->getLeftGate()) {
+    if (gateID == mRelatedExp->getLeaveGate()) {
         res.conflictExp = mRelatedExp.get();
         res.enter = false;
         return res;
@@ -200,7 +200,7 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
             return res;
         }
 
-        if (relatedFatherGate == relatedExp->getLeftGate()) {
+        if (relatedFatherGate == relatedExp->getLeaveGate()) {
             res.conflictExp = father->mRelatedExp.get();
             res.enter = false;
             return res;
@@ -273,4 +273,30 @@ void MergedExp::cleanUpExpiredRelatedTwigs()
         }
     }
     mRelatedMaps.swap(cleanRes);
+}
+
+const ExpPtr& MergedExp::getTheLastExp() const
+{
+    return mRelatedExp;
+}
+
+const MergedExpPtr& MergedExp::getFather() const
+{
+    return mFather;
+}
+
+void MergedExp::mapGates(vector<size_t>& gates2map) const
+{
+    auto mapSize = gates2map.size();
+    vector<size_t> newMap;
+    newMap.reserve(mapSize);
+    for (int i = 0; i < mapSize; ++i) {
+        auto newIndex = mGatesMapping[i];
+        while (newIndex >= newMap.size()) {
+            /// 确保下一个newIndex不会越界
+            newMap.push_back(SIZE_MAX);
+        }
+        newMap[newIndex] = gates2map[i];
+    }
+    gates2map.swap(newMap);
 }

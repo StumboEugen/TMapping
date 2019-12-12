@@ -39,6 +39,8 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     /// 如果 mFather == nullptr, 则该成员为空
     /// @TODO 更改存储类型, 暗示对应gate的占用情况, 从而加速gate的占用情况搜索, 需要修改MergedExp在Exp注册的逻辑
     /// 需要在Exp setleftGate的时候添加信息, 需要修改匹配结果结合上一次的信息, 性价比不高, 暂时不做
+    ///
+    /// @TODO 更改类型, 使得能够展现空映射关系, 并且检查所有调用, 能够体现错误 (BIG)
     std::vector<size_t> mGatesMapping;
 
     /// 这次融合的概率降低系数
@@ -66,28 +68,6 @@ private: // method
 public:
 
     /**
-     * @brief 针对实际数据进行匹配
-     * @see MatchResult_IMPL
-     */
-    MatchResult detailedMatching(const MergedExp& another) const;
-
-    /**
-     * @brief 针对实际数据进行匹配
-     * @see MatchResult_IMPL
-     */
-    MatchResult detailedMatching(const ExpData& expData) const;
-
-    size_t serialOfLastExp() const;
-
-    bool isChildOf(const MergedExp* possibileFather) const;
-
-    /**
-     * @brief 找到使用这个MergedExp的所有MOVE2NEW末端Twig
-     * @return 与此MergedExp可能的闭环的末端MapTwig
-     */
-    std::vector<MapTwigPtr> findTwigsUsingThis();
-
-    /**
      * @brief 生成一个和this MergedExp有关的后代MergedExp, 自动在newExp注册新的MergedExp
      * @param newExp 需要额外融合的新Exp
      * @param matchResult 上次匹配的结果, 包含有融合后的ExpData信息以及gate对应关系
@@ -103,6 +83,31 @@ public:
      * @return
      */
     static MergedExpPtr singleMergedFromExp(ExpPtr fatherExp);
+
+    /**
+     * @brief 针对实际数据进行匹配
+     * @see MatchResult_IMPL
+     */
+    MatchResult detailedMatching(const MergedExp& another) const;
+
+    /**
+     * @brief 针对实际数据进行匹配
+     * @see MatchResult_IMPL
+     */
+    MatchResult detailedMatching(const ExpData& expData) const;
+
+    /**
+     * @return 最后一个相关exp的序列号, 也就是mRelatedExp->serial(), 也表示了从系统开始到现在的exp数量
+     */
+    size_t serialOfLastExp() const;
+
+    bool isChildOf(const MergedExp* possibileFather) const;
+
+    /**
+     * @brief 找到使用这个MergedExp的所有MOVE2NEW末端Twig
+     * @return 与此MergedExp可能的闭环的末端MapTwig
+     */
+    std::vector<MapTwigPtr> findTwigsUsingThis();
 
     void addRelatedMapTwig(const MapTwigPtr& twigPtr);
 
@@ -144,6 +149,20 @@ public:
     int64_t findReverseGateMapping(size_t gateOfFather) const;
 
     size_t gateMapping2Father(size_t gateOfThis);
+
+    const ExpPtr& getTheLastExp() const;
+
+    const MergedExpPtr& getFather() const;
+
+    /**
+     * @brief 将gates2map映射到father的gatesMap
+     *
+     * 转换前: <br>
+     * gates2map[j] = k <br>
+     * 转换后: <br>
+     * gates2map[ mGatesMapping[j] ] = k
+     */
+    void mapGates(std::vector<size_t>& gates2map) const;
 };
 
 }

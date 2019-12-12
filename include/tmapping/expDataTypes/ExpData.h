@@ -37,7 +37,7 @@ using MatchResult = std::unique_ptr<MatchResult_IMPL>;
 /// 代表观测得到的一次地形数据, 比如一个路口, 一个房间的信息
 class ExpData
 {
-    std::vector<GateUnPtr> gates;
+    std::vector<GateUnPtr> mGates;
     std::vector<PLMUnPtr> posLandmarks;
 
 public:
@@ -66,6 +66,8 @@ public:
      * @return 匹配的结果, 只包含一个概率评分
      */
     double quickMatch(const ExpData& another, double selfWeight) const;
+
+    size_t nGates() const;
 };
 
 }

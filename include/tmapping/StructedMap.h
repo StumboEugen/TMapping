@@ -14,22 +14,30 @@
 namespace tmap
 {
 
-class StructedMap
+struct MapNode
 {
-    struct TopoNode
-    {
-        MergedExpPtr relatedExp;
-        std::vector<TopoNode*> connections;
-        ExpDataType expType;
+    struct Link {
+        MapNodeWe to;
+        size_t at;
     };
+    MergedExpPtr relatedMergedExp;
+    std::vector<Link> links;
+};
 
+class StructedMapImpl
+{
     struct AgentPos
     {
         size_t placeNode;
         TopoVec2 pos;
     };
 
-    std::vector<TopoNode> nodes;
+    std::vector<MapNodePtr> nodes;
+
+    MapTwigWePtr relatedTwig;
+
+public:
+    void setNodes(const std::vector<MapNodePtr>& nodes);
 
 };
 

@@ -21,7 +21,7 @@ void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
                 const auto& similarExp = mExperiencesData.at(
                         gatesOccRes.conflictExp->serial() + (gatesOccRes.enter ? -1 : 1));
                 size_t theGoingRelatedGate = gatesOccRes.enter ?
-                                             similarExp->getLeftGate() :
+                                             similarExp->getLeaveGate() :
                                              similarExp->getEnterGate();
                 mergedExp->setRelatedTwigsNextMove2old(similarExp, theGoingRelatedGate);
             } else {
@@ -109,4 +109,9 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
 
     vecSameType.push_back(newExp.get());
     mExperiencesData.push_back(std::move(newExp));
+}
+
+const tmap::ExpPtr& tmap::ExpCollection::getExpAt(size_t serial) const
+{
+    return mExperiencesData[serial];
 }

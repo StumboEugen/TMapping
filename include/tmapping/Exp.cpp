@@ -28,9 +28,9 @@ void Exp::setSerial(size_t serial)
     nSerial = serial;
 }
 
-void Exp::setLeftGate(int32_t leftGate)
+void Exp::setLeftGate(int32_t leaveGate)
 {
-    mLeftGate = leftGate;
+    mLeaveGate = leaveGate;
 }
 
 const std::vector<MergedExpWePtr>& Exp::getMergedExps() const
@@ -67,7 +67,7 @@ int32_t Exp::getEnterGate() const
     return mEnterGate;
 }
 
-int32_t Exp::getLeftGate() const
+int32_t Exp::getLeaveGate() const
 {
-    return mLeftGate;
+    return mLeaveGate;
 }

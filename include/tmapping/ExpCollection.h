@@ -38,6 +38,8 @@ public:
      */
     void addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                      tmap::MapTwigCollection& twigMaster);
+
+    const ExpPtr& getExpAt(size_t serial) const;
 };
 
 }

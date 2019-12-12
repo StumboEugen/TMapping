@@ -11,6 +11,7 @@
 #include <map>
 
 #include "tools/TopoParams.h"
+#include "ExpCollection.h"
 
 namespace tmap
 {
@@ -115,6 +116,8 @@ public:
     void setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t arrivingGate);
 
     void setMove2new();
+
+    StructedMap makeMap(const ExpCollection& exps) const;
 };
 
 }
