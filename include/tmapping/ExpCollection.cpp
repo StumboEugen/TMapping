@@ -6,6 +6,7 @@
 #include "Exp.h"
 #include "MergedExp.h"
 #include "MapTwig.h"
+#include "MapTwigCollection.h"
 
 void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 {

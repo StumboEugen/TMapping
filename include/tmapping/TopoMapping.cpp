@@ -6,6 +6,7 @@
 #include "MapTwig.h"
 #include "tools/TopoParams.h"
 #include "MergedExp.h"
+#include "Exp.h"
 
 #include <iostream>
 #include <unordered_set>

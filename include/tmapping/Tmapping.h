@@ -10,7 +10,12 @@
 #include "expDataTypes/ExpDataTypes.h"
 #include "landmarkTypes/LandmarkTypes.h"
 
+#include "Exp.h"
 #include "ExpCollection.h"
+#include "MapTwig.h"
+#include "MapTwigCollection.h"
+#include "MergedExp.h"
 #include "StructedMap.h"
+#include "TopoMapping.h"
 
 #endif //TMAPPING_TMAPPING_H

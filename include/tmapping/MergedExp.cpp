@@ -196,7 +196,7 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
 
         if (relatedFatherGate == relatedExp->getEnterGate()) {
             res.conflictExp = father->mRelatedExp.get();
-            res.enter = true;
+            res.enter = false;
             return res;
         }
 

@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "expDataTypes/ExpDataTypes.h"
-#include "tools/BitsHash.h"
 #include "tools/TopoParams.h"
 
 namespace tmap

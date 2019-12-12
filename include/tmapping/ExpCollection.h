@@ -7,8 +7,6 @@
 
 #include "expDataTypes/ExpDataTypes.h"
 #include "tools/TopoTools.h"
-#include "Exp.h"
-#include "MapTwigCollection.h"
 
 #include <memory>
 #include <unordered_map>
@@ -18,9 +16,10 @@
 namespace tmap
 {
 
+class MapTwigCollection;
+
 class ExpCollection
 {
-    size_t nSerial;
     std::vector<ExpPtr> mExperiencesData;
     std::map<ExpDataType, std::vector<Exp*>> mClassification;
 
