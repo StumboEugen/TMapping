@@ -137,8 +137,7 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, GateID 
     for (auto iter = chainToFather.rbegin(); iter != chainToFather.rend(); ++iter) {
         for (const auto& mergedExp : (*iter)->mExpUsages) {
             if (mergedExp->isChildOf(theSimilarMergedExp.get())) {
-                /// TODO 这里会平白无故增加工作量, 未来可能考虑匹配结果要存储一张双向的映射表
-                arrivingGate = mergedExp->findReverseGateMapping(arrivingGate);
+                arrivingGate = mergedExp->mapGateFromFather(arrivingGate);
                 theSimilarMergedExp = mergedExp;
             }
         }

@@ -27,6 +27,8 @@ struct MatchResult_IMPL{
     double possibility;
     /// k = gateMapping2this[j], 则 mergedExpData->gates[j] 与this->gates[k]为同一gate
     std::vector<GateID> gateMapping2this;
+    /// k = gateMapping2mergedExpData[j], 则 this->gates[j] 与mergedExpData->gates[k]为同一gate
+    std::vector<GateID> gateMapping2mergedExpData;
     /// 两个ExpData的相对位移, 相对于that而言
     TopoVec2 displacement;
     /// 融合后产生的新ExpData, gate编号与that相吻合

@@ -36,10 +36,12 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
 
     /// 令k = mGatesMapping2Father[j],
     /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate.
-    /// 如果 mFather == nullptr, 则该成员为空
-    /// @TODO 更改存储类型, 暗示对应gate的占用情况, 从而加速gate的占用情况搜索, 需要修改MergedExp在Exp注册的逻辑
-    /// 需要在Exp setleftGate的时候添加信息, 需要修改匹配结果结合上一次的信息, 性价比不高, 暂时不做
+    /// 如果 mFather == nullptr, 则该成员为由 GATEID_NO_MAPPING 组成
     std::vector<GateID> mGatesMapping2Father;
+    /// 令k = mGatesMappingFromFather[j],
+    /// 意味着mergedExpData->gates[k] 和 mFather->mergedExpData->gates[j]对应同一个Gate.
+    /// 如果 mFather == nullptr, 则该成员为由 GATEID_NO_MAPPING 组成
+    std::vector<GateID> mGatesMappingFromFather;
 
     /// 这次融合的概率降低系数
     double mPossDecConf;
@@ -144,7 +146,7 @@ public:
 
     void setRelatedTwigsNextMove2new();
 
-    GateID findReverseGateMapping(GateID gateOfFather) const;
+    GateID mapGateFromFather(GateID gateOfFather) const;
 
     GateID gateMapping2Father(GateID gateOfThis);
 

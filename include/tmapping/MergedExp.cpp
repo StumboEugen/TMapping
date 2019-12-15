@@ -18,6 +18,7 @@ MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult
           mMergedExpData(std::move(matchResult->mergedExpData)),
           mTrans(matchResult->displacement),
           mGatesMapping2Father(std::move(matchResult->gateMapping2this)),
+          mGatesMappingFromFather(std::move(matchResult->gateMapping2mergedExpData)),
           mPossDecConf(matchResult->possibility)
 {}
 
@@ -27,8 +28,9 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           nMergedExps(1),
           mMergedExpData(fatherExp->expData()),
           mTrans(),
-          /// add this for safety
+          /// add GATEID_NO_MAPPING for safety
           mGatesMapping2Father(mMergedExpData->nGates(), GATEID_NO_MAPPING),
+          mGatesMappingFromFather(),
           mPossDecConf(1.0)
 {}
 
@@ -254,18 +256,12 @@ void MergedExp::setRelatedTwigsNextMove2new()
     }
 }
 
-GateID MergedExp::findReverseGateMapping(GateID gateOfFather) const
+GateID MergedExp::mapGateFromFather(GateID gateOfFather) const
 {
-    GateID res = GATEID_NO_MAPPING;
-    auto mapSize = mGatesMapping2Father.size();
-    for (size_t i = 0; i < mapSize; ++i) {
-        if (mGatesMapping2Father[i] == gateOfFather) {
-            res = i;
-            return res;
-        }
+    GateID res = mGatesMappingFromFather[gateOfFather];
+    if (res < 0) {
+        cerr << FILE_AND_LINE << " find reverse gate FAIL, this should not happen!" << endl;
     }
-
-    cerr << FILE_AND_LINE << " find reverse gate FAIL, this should not happen!" << endl;
     return res;
 }
 
