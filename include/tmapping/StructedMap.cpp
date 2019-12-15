@@ -4,7 +4,17 @@
 
 #include "StructedMap.h"
 
-void tmap::StructedMapImpl::setNodes(const std::vector<MapNodePtr>& nodes)
+#include <utility>
+
+tmap::StructedMapImpl::StructedMapImpl(std::vector<MapNodePtr> nodes,
+                                       const MapTwigPtr& twigUsed) :
+        mNodes(std::move(nodes)),
+        mRelatedTwig(twigUsed),
+        mAgentAt(nodes.size() - 1)
 {
-    StructedMapImpl::nodes = nodes;
+}
+
+const tmap::MapTwigWePtr& tmap::StructedMapImpl::relatedTwig() const
+{
+    return mRelatedTwig;
 }

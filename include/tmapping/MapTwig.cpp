@@ -156,7 +156,7 @@ void MapTwig::setMove2new()
     status = MapTwigStatus::MOVE2NEW;
 }
 
-StructedMap MapTwig::makeMap(const ExpCollection& exps) const
+StructedMap MapTwig::makeMap(const ExpCollection& exps)
 {
     if (status == MapTwigStatus::EXPIRED) {
         cerr << FILE_AND_LINE << " You are making a map from an expired twig!" << endl;
@@ -177,8 +177,8 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps) const
     mapNodePtrs.reserve(expSize);
 
     /// 从current MapTwig开始遍历, 直到最初的MapTwig
-    const MapTwig* current = this;
-    while (current != nullptr) {
+    const MapTwig* currentTwig = this;
+    while (currentTwig != nullptr) {
         for (auto iter = mExpUsages.rbegin(); iter != mExpUsages.rend(); ++iter) {
             /// ExpUsages也是从后向前遍历
             auto& mergedExp = *iter;
@@ -193,37 +193,41 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps) const
                 relatedNodePtr->links.assign(nGates, MapNode::Link{});
                 mapNodePtrs.emplace_back(relatedNodePtr);
 
-                vector<GateID> gatesMap(nGates);
+                vector<GateID> gatesMap2EndMergedExp(nGates);
                 for (int i = 0; i < nGates; ++i) {
-                    gatesMap[i] = i;
+                    gatesMap2EndMergedExp[i] = i;
                 }
                 GateID enterGate = currentMergedRelatedExp->getEnterGate();
                 GateID leaveGate = currentMergedRelatedExp->getLeaveGate();
                 if (enterGate != GATEID_BEGINNING_POINT) {
-                    realGates[currentSerial].enterGate = gatesMap[enterGate];
+                    realGates[currentSerial].enterGate = gatesMap2EndMergedExp[enterGate];
                 }
                 if (leaveGate != GATEID_HAVENT_LEFT) {
-                    realGates[currentSerial].leaveGate = gatesMap[leaveGate];
+                    realGates[currentSerial].leaveGate = gatesMap2EndMergedExp[leaveGate];
                 }
-                mergedExp->mapGates(gatesMap);
 
-                /// 让 mergedExp 的所有 father 对应序号的 NodeP 都指向刚刚由 mergedExp 生成的 relatedNodePtr
                 MergedExp* fatherMergedExp = mergedExp->getFather().get();
-                while (fatherMergedExp != nullptr) {
-                    size_t oneFatherSerial = fatherMergedExp->getTheLastExp()->serial();
-                    nodePs[oneFatherSerial] = relatedNodePtr;
+                if (fatherMergedExp != nullptr) {
+                    mergedExp->mapGates(gatesMap2EndMergedExp);
 
-                    /// 记录这个位置的gate真实映射关系
-                    enterGate = fatherMergedExp->getTheLastExp()->getEnterGate();
-                    leaveGate = fatherMergedExp->getTheLastExp()->getLeaveGate();
-                    if (enterGate != GATEID_BEGINNING_POINT) {
-                        realGates[oneFatherSerial].enterGate = gatesMap[enterGate];
+                    /// 让 mergedExp 的所有 father 对应序号的 NodeP 都指向刚刚由 mergedExp 生成的 relatedNodePtr
+                    while (fatherMergedExp != nullptr) {
+                        size_t oneFatherSerial = fatherMergedExp->getTheLastExp()->serial();
+                        nodePs[oneFatherSerial] = relatedNodePtr;
+
+                        /// 记录这个位置的gate真实映射关系
+                        leaveGate = fatherMergedExp->getTheLastExp()->getLeaveGate();
+                        realGates[oneFatherSerial].leaveGate = gatesMap2EndMergedExp[leaveGate];
+
+                        enterGate = fatherMergedExp->getTheLastExp()->getEnterGate();
+                        if (enterGate != GATEID_BEGINNING_POINT) {
+                            realGates[oneFatherSerial].enterGate = gatesMap2EndMergedExp[enterGate];
+                        }
+                        fatherMergedExp->mapGates(gatesMap2EndMergedExp);
+
+                        /// 下一个father
+                        fatherMergedExp = fatherMergedExp->getFather().get();
                     }
-                    realGates[oneFatherSerial].leaveGate = gatesMap[leaveGate];
-                    fatherMergedExp->mapGates(gatesMap);
-
-                    /// 下一个father
-                    fatherMergedExp = fatherMergedExp->getFather().get();
                 }
             } else {
                 /// 对应的Node已经被生成过了, 说明current mergedExp的child在这个Map的MapNode里,
@@ -231,7 +235,7 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps) const
                 continue;
             }
         }
-        current = current->mFather.get();
+        currentTwig = currentTwig->mFather.get();
     }
     
     /// DEBUG TEST: 检查nodePsVec是否都被充满了
@@ -242,6 +246,7 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps) const
         }
     }
 
+    /// 沿着Experience设定每个MapNode的连接关系
     for (int i = 0; i < expSize - 1; ++i) {
         auto leaveGate = realGates[i].leaveGate;
         auto enterGate = realGates[i + 1].enterGate;
@@ -253,8 +258,23 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps) const
         enterLink.at = leaveGate;
     }
 
-    auto structedMap = make_shared<StructedMapImpl>();
-    structedMap->setNodes(mapNodePtrs);
+    auto structedMap = make_shared<StructedMapImpl>(mapNodePtrs, shared_from_this());
 
     return structedMap;
+}
+
+bool MapTwig::isDevelopedFrom(MapTwig* twig2check, size_t nGenerations) const
+{
+    if (nGenerations == 0) {
+        nGenerations = SIZE_MAX;
+    }
+    size_t nGens = 0;
+    const MapTwig* familyMember = this;
+    while (familyMember != nullptr && nGens++ <= nGenerations) {
+        if (twig2check == familyMember) {
+            return true;
+        }
+        familyMember = familyMember->mFather.get();
+    }
+    return false;
 }

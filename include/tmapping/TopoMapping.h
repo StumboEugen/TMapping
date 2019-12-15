@@ -17,6 +17,7 @@ class TopoMapping
 {
     ExpCollection mExperiences;
     MapTwigCollection twigCollection;
+    StructedMap mChampionMap;
 
     size_t mSurviverSetting = 0;
 

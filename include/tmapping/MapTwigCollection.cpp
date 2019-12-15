@@ -64,5 +64,23 @@ size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienc
 
     mAliveMaps.swap(mNextGeneration);
     mNextGeneration.clear();
+
+    mPossScores.clear();
+    mPossScores.reserve(mAliveMaps.size());
+    double sum = 0.0;
+    for (const auto& aliveMap : mAliveMaps) {
+        double poss = aliveMap->calGlobalPoss(logN);
+        sum += poss;
+        mPossScores.push_back(poss);
+    }
+    for (auto& score : mPossScores) {
+        score /= sum;
+    }
+
     return nSurviver;
+}
+
+const vector<double>& MapTwigCollection::getScores() const
+{
+    return mPossScores;
 }

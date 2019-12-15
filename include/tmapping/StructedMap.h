@@ -26,19 +26,22 @@ struct MapNode
 
 class StructedMapImpl
 {
-    struct AgentPos
-    {
-        size_t placeNode;
-        TopoVec2 pos;
-    };
+//    struct AgentPos
+//    {
+//        size_t placeNode;
+//        TopoVec2 pos;
+//    };
 
-    std::vector<MapNodePtr> nodes;
+    std::vector<MapNodePtr> mNodes;
 
-    MapTwigWePtr relatedTwig;
+    MapTwigWePtr mRelatedTwig;
+
+    size_t mAgentAt;
 
 public:
-    void setNodes(const std::vector<MapNodePtr>& nodes);
+    StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed);
 
+    const MapTwigWePtr& relatedTwig() const;
 };
 
 }

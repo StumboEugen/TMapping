@@ -117,7 +117,15 @@ public:
 
     void setMove2new();
 
-    StructedMap makeMap(const ExpCollection& exps) const;
+    StructedMap makeMap(const ExpCollection& exps);
+
+    /**
+     * @brief 检查this是否从twig2check衍生而来
+     * @param twig2check 要被检查是否为直系father的tiwg
+     * @param nGenerations 查询代数, 默认只查询是否为father或者this
+     * @return this是否由twig2check衍生而来
+     */
+    bool isDevelopedFrom(MapTwig* twig2check, size_t nGenerations = 1) const;
 };
 
 }

@@ -7,6 +7,7 @@
 #include "tools/TopoParams.h"
 #include "MergedExp.h"
 #include "Exp.h"
+#include "StructedMap.h"
 
 #include <iostream>
 #include <unordered_set>
@@ -100,5 +101,14 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 
     twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);
 
-    /// TODO 构建可理解拓扑地图的工作
+    auto& currentChampion = twigCollection.getAliveMaps().front();
+    if (mChampionMap) {
+        MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
+        if (relatedTwig) {
+            if (currentChampion->isDevelopedFrom(relatedTwig.get())) {
+                cout << "The champion remains" << endl;
+            }
+        }
+    }
+    mChampionMap = currentChampion->makeMap(this->mExperiences);
 }

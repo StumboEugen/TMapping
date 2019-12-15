@@ -22,6 +22,8 @@ class MapTwigCollection
     std::vector<MapTwigWePtr> mMapTwigs;
     /// 方便高速地处理下一代的问题
     std::vector<MapTwigPtr> mNextGeneration;
+    /// 各个aliveMaps的对应分数
+    std::vector<double> mPossScores;
 
 public:
     std::vector<MapTwigPtr>& getAliveMaps();
@@ -35,6 +37,8 @@ public:
     void add2NextGeneration(MapTwigPtr&& mapTwig);
 
     size_t nextgCompleteAdding(size_t nSurviver, size_t experienceCount);
+
+    const std::vector<double>& getScores() const;
 };
 
 }
