@@ -8,7 +8,7 @@
 #include "MapTwig.h"
 #include "MapTwigCollection.h"
 
-void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
+void tmap::ExpCollection::setLeftGateOfCurrent(GateID leftGate)
 {
     const auto& backExp = mExperiencesData.back();
     /// 遍历尾端Exp的所有mergedExp使用情况, 查找是否发生移动到已通过点的情况
@@ -20,7 +20,7 @@ void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
                 /// 发生gate的冲突, 找到相连的其他Exp以及对应gate, 用于设置mergedExp相关Map的similarNext
                 const auto& similarExp = mExperiencesData.at(
                         gatesOccRes.conflictExp->serial() + (gatesOccRes.enter ? -1 : 1));
-                size_t theGoingRelatedGate = gatesOccRes.enter ?
+                GateID theGoingRelatedGate = gatesOccRes.enter ?
                                              similarExp->getLeaveGate() :
                                              similarExp->getEnterGate();
                 mergedExp->setRelatedTwigsNextMove2old(similarExp, theGoingRelatedGate);
@@ -35,7 +35,7 @@ void tmap::ExpCollection::setLeftGateOfCurrent(size_t leftGate)
 
 void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
 {
-    auto cloestGate = mExperiencesData.back()->expData()->findTheCloestGate(gatePos);
+    GateID cloestGate = mExperiencesData.back()->expData()->findTheCloestGate(gatePos);
     setLeftGateOfCurrent(cloestGate);
 }
 
@@ -69,7 +69,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                             (currentMatchResult->gateMapping2this[newExp->getEnterGate()]);
                     /// 而且这个入口不能和之前的出入口发生冲突, 闭环必须发生在没有走过的gate上
 
-                    if (conflictRes.conflictExp != nullptr)
+                    if (conflictRes.conflictExp == nullptr)
                     {
                         /// 并没有发生gate上的冲突, 于是开始找使用这个MergedExp的末端MapTwig
                         auto closureTwigs = mergedExp->findTwigsUsingThis();

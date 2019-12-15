@@ -17,19 +17,19 @@ class Exp
 {
     /// 对应实际的测量数据
     const ExpDataPtr mData;
-    /// 进入时对应的Gate, -1表示这个为出发点
-    int32_t mEnterGate = -1;
-    /// 离开时对应的Gate, -1表示还没离开
-    int32_t mLeaveGate = -1;
     /// 时间上的排序序列
     std::size_t nSerial = 0;
     /// 到此Exp创建过的MapTwig数量
     std::size_t nBuiltTwig = 0;
     /// 记录着包含这个Exp的所有融合假设(不包括将来的), 第一个为single mergedExp
     std::vector<MergedExpWePtr> mMergedExps;
+    /// 进入时对应的Gate, GATEID_BEGINNING_POINT(-2)表示这个为出发点
+    GateID mEnterGate = GATEID_BEGINNING_POINT;
+    /// 离开时对应的Gate, GATEID_HAVENT_LEFT(-3)表示还没离开
+    GateID mLeaveGate = GATEID_HAVENT_LEFT;
 
 public:
-    Exp(ExpDataPtr  expData, int32_t enterGateID);
+    Exp(ExpDataPtr  expData, GateID enterGateID);
 
     MergedExpWePtr& theSingleMergedExp();
 
@@ -39,7 +39,7 @@ public:
 
     void setSerial(size_t serial);
 
-    void setLeftGate(int32_t leaveGate);
+    void setLeftGate(GateID leaveGate);
 
     const std::vector<MergedExpWePtr>& getMergedExps() const;
 
@@ -50,9 +50,9 @@ public:
 
     void addMergedExpIns(const MergedExpPtr& newMerged);
 
-    int32_t getEnterGate() const;
+    GateID getEnterGate() const;
 
-    int32_t getLeaveGate() const;
+    GateID getLeaveGate() const;
 };
 }
 

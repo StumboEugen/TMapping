@@ -7,7 +7,7 @@
 using namespace tmap;
 using namespace std;
 
-Exp::Exp(ExpDataPtr expData, int32_t enterGateID)
+Exp::Exp(ExpDataPtr expData, GateID enterGateID)
         : mData(std::move(expData)),
           mEnterGate(enterGateID),
           mMergedExps(1)
@@ -28,7 +28,7 @@ void Exp::setSerial(size_t serial)
     nSerial = serial;
 }
 
-void Exp::setLeftGate(int32_t leaveGate)
+void Exp::setLeftGate(GateID leaveGate)
 {
     mLeaveGate = leaveGate;
 }
@@ -62,12 +62,12 @@ MergedExpWePtr& Exp::theSingleMergedExp()
     return mMergedExps.front();
 }
 
-int32_t Exp::getEnterGate() const
+GateID Exp::getEnterGate() const
 {
     return mEnterGate;
 }
 
-int32_t Exp::getLeaveGate() const
+GateID Exp::getLeaveGate() const
 {
     return mLeaveGate;
 }

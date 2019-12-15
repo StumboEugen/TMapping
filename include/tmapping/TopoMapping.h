@@ -23,7 +23,7 @@ class TopoMapping
 public:
     void addNewExp(ExpDataPtr newExpData);
 
-    void setLeftGate(size_t gateID);
+    void setLeftGate(GateID gateID);
     void setLeftGate(TopoVec2 gatePos);
 
     void arriveNewExp(const ExpPtr& newExp);

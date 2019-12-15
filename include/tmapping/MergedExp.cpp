@@ -17,7 +17,7 @@ MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult
           nMergedExps(father->nMergedExps + 1),
           mMergedExpData(std::move(matchResult->mergedExpData)),
           mTrans(matchResult->displacement),
-          mGatesMapping(std::move(matchResult->gateMapping2this)),
+          mGatesMapping2Father(std::move(matchResult->gateMapping2this)),
           mPossDecConf(matchResult->possibility)
 {}
 
@@ -27,7 +27,8 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           nMergedExps(1),
           mMergedExpData(fatherExp->expData()),
           mTrans(),
-          mGatesMapping(),
+          /// add this for safety
+          mGatesMapping2Father(mMergedExpData->nGates(), GATEID_NO_MAPPING),
           mPossDecConf(1.0)
 {}
 
@@ -169,7 +170,7 @@ double MergedExp::getPossDecConf() const
     return mPossDecConf;
 }
 
-MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
+MergedExp::GateConflictResult MergedExp::checkGateConflict(GateID gateID)
 {
     GateConflictResult res{};
 
@@ -187,31 +188,41 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(size_t gateID)
     }
 
     /// 为后续的单向遍历搜索做准备
-    size_t relatedFatherGate = gateID;
     MergedExp* father = mFather.get();
-    while (father != nullptr) {
+    if (father != nullptr) {
         /// father存在, 检查是否在father里面被占用
-        relatedFatherGate = father->mGatesMapping[relatedFatherGate];
-        const auto & relatedExp = father->mRelatedExp;
+        GateID relatedFatherGate = mGatesMapping2Father[gateID];
+        while (true) {
+            if (relatedFatherGate == GATEID_NO_MAPPING) {
+                /// this的gate在father并没有对应的gate映射(是一个father Exp没有被发现的Gate), 那一定没有冲突
+                return res;
+            }
 
-        if (relatedFatherGate == relatedExp->getEnterGate()) {
-            res.conflictExp = father->mRelatedExp.get();
-            res.enter = false;
-            return res;
+            const auto & relatedExp = father->mRelatedExp;
+            if (relatedFatherGate == relatedExp->getEnterGate()) {
+                res.conflictExp = father->mRelatedExp.get();
+                res.enter = true;
+                return res;
+            }
+
+            if (relatedFatherGate == relatedExp->getLeaveGate()) {
+                res.conflictExp = father->mRelatedExp.get();
+                res.enter = false;
+                return res;
+            }
+
+            father = father->mFather.get();
+            if (father == nullptr) {
+                return res;
+            }
+            relatedFatherGate = father->mGatesMapping2Father[relatedFatherGate];
         }
-
-        if (relatedFatherGate == relatedExp->getLeaveGate()) {
-            res.conflictExp = father->mRelatedExp.get();
-            res.enter = false;
-            return res;
-        }
-
-        father = father->mFather.get();
+    } else {
+        return res;
     }
-    return res;
 }
 
-void MergedExp::setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate)
+void MergedExp::setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, GateID atGate)
 {
     size_t nExpired = 0;
 
@@ -243,12 +254,12 @@ void MergedExp::setRelatedTwigsNextMove2new()
     }
 }
 
-int64_t MergedExp::findReverseGateMapping(size_t gateOfFather) const
+GateID MergedExp::findReverseGateMapping(GateID gateOfFather) const
 {
-    int64_t res = -1;
-    auto mapSize = mGatesMapping.size();
+    GateID res = GATEID_NO_MAPPING;
+    auto mapSize = mGatesMapping2Father.size();
     for (size_t i = 0; i < mapSize; ++i) {
-        if (mGatesMapping[i] == gateOfFather) {
+        if (mGatesMapping2Father[i] == gateOfFather) {
             res = i;
             return res;
         }
@@ -258,9 +269,9 @@ int64_t MergedExp::findReverseGateMapping(size_t gateOfFather) const
     return res;
 }
 
-size_t MergedExp::gateMapping2Father(size_t gateOfThis)
+GateID MergedExp::gateMapping2Father(GateID gateOfThis)
 {
-    return mGatesMapping[gateOfThis];
+    return mGatesMapping2Father[gateOfThis];
 }
 
 void MergedExp::cleanUpExpiredRelatedTwigs()
@@ -285,16 +296,20 @@ const MergedExpPtr& MergedExp::getFather() const
     return mFather;
 }
 
-void MergedExp::mapGates(vector<size_t>& gates2map) const
+void MergedExp::mapGates(vector<GateID>& gates2map) const
 {
-    auto mapSize = gates2map.size();
-    vector<size_t> newMap;
-    newMap.reserve(mapSize);
-    for (int i = 0; i < mapSize; ++i) {
-        auto newIndex = mGatesMapping[i];
+    vector<GateID> newMap;
+    newMap.reserve(gates2map.size());
+    auto sizeOfThisMap = mGatesMapping2Father.size();
+
+    for (int i = 0; i < sizeOfThisMap; ++i) {
+        auto newIndex = mGatesMapping2Father[i];
+        if (newIndex < 0) {
+            continue;
+        }
         while (newIndex >= newMap.size()) {
             /// 确保下一个newIndex不会越界
-            newMap.push_back(SIZE_MAX);
+            newMap.push_back(GATEID_NO_MAPPING);
         }
         newMap[newIndex] = gates2map[i];
     }

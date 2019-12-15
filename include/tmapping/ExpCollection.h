@@ -28,7 +28,7 @@ public:
      * @brief 设置所有的mapTwig离开对应的gate, 同时推算每个MapTwig接下来的status
      * @param leftGate 离开的gate序号
      */
-    void setLeftGateOfCurrent(size_t leftGate);
+    void setLeftGateOfCurrent(GateID leftGate);
     void setLeftGateOfCurrent(const TopoVec2& gatePos);
 
     /**

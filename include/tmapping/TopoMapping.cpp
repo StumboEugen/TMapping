@@ -18,7 +18,7 @@ void tmap::TopoMapping::addNewExp(tmap::ExpDataPtr newExpData)
 
 }
 
-void tmap::TopoMapping::setLeftGate(size_t gateID)
+void tmap::TopoMapping::setLeftGate(GateID gateID)
 {
     mExperiences.setLeftGateOfCurrent(gateID);
 }

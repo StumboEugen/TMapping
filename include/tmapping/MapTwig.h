@@ -45,7 +45,7 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录相似的Exp在哪里
     MergedExpPtr mExpOfArrivingSimilar{};
     /// 当 status 为 MapTwigStatus::MOVE2OLD 的时候记录对应相似Exp的gate是哪个
-    size_t mGateOfSimilar;
+    GateID mGateOfSimilar;
     /// 当前MapBranch的状态
     MapTwigStatus status = MapTwigStatus::MOVE2NEW;
     /// 当前Branch的概率
@@ -81,7 +81,7 @@ public:
 
     const MergedExpPtr& getTheArrivingSimiliarMergedExp() const;
 
-    size_t gateOfSimilarMergedExp() const;
+    GateID gateOfSimilarMergedExp() const;
 
     /**
      * @brief 生成进行全局排序的概率分数, 在调用 resetLastGlobalConfidenceResult() 之前实际只计算一次
@@ -113,7 +113,7 @@ public:
      */
     void addMergedExp(MergedExpPtr newMerged);
 
-    void setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, size_t arrivingGate);
+    void setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, GateID arrivingGate);
 
     void setMove2new();
 

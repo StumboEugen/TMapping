@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 
+#include "../tools/TopoTools.h"
 #include "../gateTypes/GateTypes.h"
 #include "../landmarkTypes/LandmarkTypes.h"
 
@@ -25,7 +26,7 @@ struct MatchResult_IMPL{
     /// 可能性系数, 如果为0表示完全不可能
     double possibility;
     /// k = gateMapping2this[j], 则 mergedExpData->gates[j] 与this->gates[k]为同一gate
-    std::vector<std::size_t> gateMapping2this;
+    std::vector<GateID> gateMapping2this;
     /// 两个ExpData的相对位移, 相对于that而言
     TopoVec2 displacement;
     /// 融合后产生的新ExpData, gate编号与that相吻合
@@ -49,7 +50,7 @@ public:
 
     void addLandmark(PLMUnPtr pLandmark);
 
-    size_t findTheCloestGate(const TopoVec2& gatePos);
+    GateID findTheCloestGate(const TopoVec2& gatePos);
 
     /**
      * @brief 计算两个ExpData是否类似

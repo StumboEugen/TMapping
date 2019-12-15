@@ -34,14 +34,12 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     /// mFather->mMergedExpData相对于this->mMergedExpData的位移
     TopoVec2 mTrans;
 
-    /// 令k = mGatesMapping[j],
+    /// 令k = mGatesMapping2Father[j],
     /// 意味着mergedExpData->gates[j] 和 mFather->mergedExpData->gates[k]对应同一个Gate.
     /// 如果 mFather == nullptr, 则该成员为空
     /// @TODO 更改存储类型, 暗示对应gate的占用情况, 从而加速gate的占用情况搜索, 需要修改MergedExp在Exp注册的逻辑
     /// 需要在Exp setleftGate的时候添加信息, 需要修改匹配结果结合上一次的信息, 性价比不高, 暂时不做
-    ///
-    /// @TODO 更改类型, 使得能够展现空映射关系, 并且检查所有调用, 能够体现错误 (BIG)
-    std::vector<size_t> mGatesMapping;
+    std::vector<GateID> mGatesMapping2Father;
 
     /// 这次融合的概率降低系数
     double mPossDecConf;
@@ -135,20 +133,20 @@ public:
      * @param gateID 检查的gateID, 相对于this而言
      * @return true表示被占用, false表示没有被占用
      */
-    GateConflictResult checkGateConflict(size_t gateID);
+    GateConflictResult checkGateConflict(GateID gateID);
 
     /**
      * @brief 这一层封装是为了保持mRelatedTwigs的不暴露
      * @param arrivingSimiliarExp 对应的实际Exp
      * @param atGate 下次匹配对应的gate
      */
-    void setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, size_t atGate);
+    void setRelatedTwigsNextMove2old(const ExpPtr& arrivingSimiliarExp, GateID atGate);
 
     void setRelatedTwigsNextMove2new();
 
-    int64_t findReverseGateMapping(size_t gateOfFather) const;
+    GateID findReverseGateMapping(GateID gateOfFather) const;
 
-    size_t gateMapping2Father(size_t gateOfThis);
+    GateID gateMapping2Father(GateID gateOfThis);
 
     const ExpPtr& getTheLastExp() const;
 
@@ -160,9 +158,9 @@ public:
      * 转换前: <br>
      * gates2map[j] = k <br>
      * 转换后: <br>
-     * gates2map[ mGatesMapping[j] ] = k
+     * gates2map[ mGatesMapping2Father[j] ] = k
      */
-    void mapGates(std::vector<size_t>& gates2map) const;
+    void mapGates(std::vector<GateID>& gates2map) const;
 };
 
 }

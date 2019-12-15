@@ -25,7 +25,7 @@ void ExpData::addLandmark(PLMUnPtr pLandmark)
     posLandmarks.emplace_back(std::move(pLandmark));
 }
 
-size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
+GateID ExpData::findTheCloestGate(const TopoVec2& gatePos)
 {
     size_t gateSize = mGates.size();
     if (gateSize == 0) {
@@ -33,7 +33,7 @@ size_t ExpData::findTheCloestGate(const TopoVec2& gatePos)
         throw;
     }
     auto lenMax = DBL_MAX;
-    size_t res = 0;
+    GateID res = 0;
     for (size_t i = 0; i < gateSize; ++i) {
         double currentLen = (mGates[i]->getPos() - gatePos).len();
         if (currentLen < lenMax) {
