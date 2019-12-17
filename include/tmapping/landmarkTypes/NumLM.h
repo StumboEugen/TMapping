@@ -22,6 +22,8 @@ public:
     void setFeatures(const std::vector<double>& features);
 
     const std::vector<double>& getFeatures() const;
+
+    Json::Value toJS() const override;
 };
 }
 

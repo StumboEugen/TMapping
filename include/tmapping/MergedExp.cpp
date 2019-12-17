@@ -311,3 +311,16 @@ void MergedExp::mapGates(vector<GateID>& gates2map) const
     }
     gates2map.swap(newMap);
 }
+
+Json::Value MergedExp::toJS() const
+{
+    Json::Value res;
+    const MergedExp* current = this;
+    while (current != nullptr) {
+        res["exps"].append(current->serialOfLastExp());
+        current = current->mFather.get();
+    }
+    res["data"] = std::move(mMergedExpData->toJS());
+
+    return res;
+}

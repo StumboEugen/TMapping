@@ -69,3 +69,15 @@ size_t ExpData::nGates() const
     return mGates.size();
 }
 
+Json::Value ExpData::toJS() const
+{
+    Json::Value res;
+    for (const auto& gate : mGates) {
+        res["gates"].append(std::move(gate->toJS()));
+    }
+    for (const auto& landMark : posLandmarks) {
+        res["landMark"].append(std::move(landMark->toJS()));
+    }
+    return res;
+}
+

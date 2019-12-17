@@ -16,6 +16,7 @@ namespace tmap
 
 struct MapNode
 {
+    size_t serial;
     struct Link {
         MapNodeWe to;
         size_t at;
@@ -44,6 +45,8 @@ public:
     StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed, double poss);
 
     const MapTwigWePtr& relatedTwig() const;
+
+    Json::Value toJS() const;
 };
 
 }

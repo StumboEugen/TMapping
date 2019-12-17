@@ -71,6 +71,8 @@ public:
     double quickMatch(const ExpData& another, double selfWeight) const;
 
     size_t nGates() const;
+
+    virtual Json::Value toJS() const;
 };
 
 }

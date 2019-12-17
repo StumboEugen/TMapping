@@ -30,6 +30,8 @@ public:
     double getPossibility() const;
 
     void setPossibility(double possibility);
+
+    virtual Json::Value toJS() const;
 };
 
 }

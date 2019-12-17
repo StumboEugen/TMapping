@@ -3,3 +3,10 @@
 //
 
 #include "Intersection.h"
+
+Json::Value tmap::Intersection::toJS() const
+{
+    Json::Value res(ExpData::toJS());
+    res["type"] = "I";
+    return res;
+}

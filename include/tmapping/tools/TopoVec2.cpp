@@ -99,3 +99,11 @@ ostream& tmap::operator<<(ostream& os, const TopoVec2& pos)
     return os;
 }
 
+Json::Value TopoVec2::toJS() const
+{
+    Json::Value res;
+    res.append(px);
+    res.append(py);
+    return res;
+}
+

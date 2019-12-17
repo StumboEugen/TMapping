@@ -3,3 +3,10 @@
 //
 
 #include "GateWay.h"
+
+Json::Value tmap::GateWay::toJS() const
+{
+    Json::Value res(Gate::toJS());
+    res["type"] = "W";
+    return res;
+}

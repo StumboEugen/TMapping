@@ -11,3 +11,10 @@ const tmap::TopoVec2& tmap::PosLandmark::getPos() const
 {
     return pos;
 }
+
+Json::Value tmap::PosLandmark::toJS() const
+{
+    Json::Value res(Landmark::toJS());
+    res["pos"] = pos.toJS();
+    return res;
+}

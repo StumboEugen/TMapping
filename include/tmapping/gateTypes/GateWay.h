@@ -21,6 +21,8 @@ public:
     {
         return GateType::GateWay;
     }
+
+    Json::Value toJS() const override;
 };
 
 }

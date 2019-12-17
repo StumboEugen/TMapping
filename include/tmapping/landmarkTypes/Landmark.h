@@ -5,6 +5,8 @@
 #ifndef TMAPPING_LANDMARK_H
 #define TMAPPING_LANDMARK_H
 
+#include "../tools/TopoParams.h"
+
 namespace tmap
 {
 
@@ -15,6 +17,8 @@ class Landmark
 
 public:
     virtual LandmarkType type() = 0;
+
+    virtual Json::Value toJS() const;
 
 };
 }

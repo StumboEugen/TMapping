@@ -216,7 +216,6 @@ add_library(jsonCpp ${JsonFILES})
 #add_dependencies(FakeOB ${PROJECT_NAME}_gencpp)
 #add_dependencies(localController ${PROJECT_NAME}_gencpp)
 
-add_executable(main src/main.cpp ${TopoFILES})
+add_executable(main src/main.cpp ${TopoFILES} ${JsonFILES})
 
-#target_link_libraries(main topoLayer)
 #target_link_libraries(main topoLayer)

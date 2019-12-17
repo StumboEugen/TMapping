@@ -19,6 +19,8 @@ public:
 
     ExpDataType type() const override { return ExpDataType::Corridor; }
 
+    Json::Value toJS() const override;
+
 };
 }
 

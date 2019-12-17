@@ -21,6 +21,8 @@ public:
     StrPLM(const TopoVec2& pos, std::string str);
 
     const std::string& getStr() const;
+
+    Json::Value toJS() const override;
 };
 }
 

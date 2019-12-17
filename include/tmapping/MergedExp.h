@@ -163,6 +163,8 @@ public:
      * gates2map[ mGatesMapping2Father[j] ] = k
      */
     void mapGates(std::vector<GateID>& gates2map) const;
+
+    Json::Value toJS() const;
 };
 
 }

@@ -12,11 +12,14 @@
 #include <cmath>
 #include <memory>
 
+#include "json/json.h"
+
 #define FILE_AND_LINE __FILE__ << ':' << __LINE__
 
 
 namespace tmap
 {
+static constexpr double TOPO_VERSION = 1.0;
 
 /// maybe one thousand years later, 128 could run out
 using GateID = int8_t;

@@ -16,6 +16,8 @@ class SmallRoom : public ExpData
 
 public:
     ExpDataType type() const override { return ExpDataType::SmallRoom; }
+
+    Json::Value toJS() const override;
 };
 }
 

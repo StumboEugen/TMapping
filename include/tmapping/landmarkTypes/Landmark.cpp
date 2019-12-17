@@ -3,3 +3,8 @@
 //
 
 #include "Landmark.h"
+
+Json::Value tmap::Landmark::toJS() const
+{
+    return Json::Value();
+}

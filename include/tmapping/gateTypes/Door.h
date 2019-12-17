@@ -13,18 +13,20 @@ namespace tmap
 
 class Door : public Gate
 {
-    bool oepned;
+    bool opened;
     StrLM doorMark;
 
 public:
     Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned);
 
-    bool isOepned() const;
+    bool isOpened() const;
 
     GateType type() override
     {
         return GateType::Door;
     }
+
+    Json::Value toJS() const override;
 };
 }
 

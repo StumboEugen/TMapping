@@ -6,6 +6,7 @@
 #define TMAPPING_TOPOVEC2_H
 
 #include <ostream>
+#include <json/json.h>
 
 namespace tmap
 {
@@ -39,6 +40,8 @@ struct TopoVec2
     double len() const;
 
     TopoVec2 unitVec() const;
+
+    Json::Value toJS() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);

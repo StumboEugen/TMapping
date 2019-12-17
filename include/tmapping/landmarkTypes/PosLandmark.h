@@ -11,7 +11,7 @@
 namespace tmap
 {
 
-class PosLandmark : Landmark
+class PosLandmark : public Landmark
 {
     TopoVec2 pos;
 
@@ -22,6 +22,8 @@ public:
     LandmarkType type() override = 0 ;
 
     const TopoVec2& getPos() const;
+
+    Json::Value toJS() const override;
 };
 }
 

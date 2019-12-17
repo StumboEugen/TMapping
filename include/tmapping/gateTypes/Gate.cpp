@@ -28,3 +28,12 @@ double tmap::Gate::getPossibility() const
 {
     return possibility;
 }
+
+Json::Value tmap::Gate::toJS() const
+{
+    Json::Value res;
+    res["pos"] = std::move(pos.toJS());
+    res["nv"] = std::move(normalVec.toJS());
+    res["psb"] = possibility;
+    return res;
+}

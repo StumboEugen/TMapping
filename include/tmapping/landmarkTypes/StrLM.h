@@ -22,6 +22,8 @@ public:
     explicit StrLM(std::string str = "");
 
     const std::string& getStr() const;
+
+    Json::Value toJS() const override;
 };
 }
 
