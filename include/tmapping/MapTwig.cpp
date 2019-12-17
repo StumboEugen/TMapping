@@ -258,7 +258,8 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
         enterLink.at = leaveGate;
     }
 
-    auto structedMap = make_shared<StructedMapImpl>(mapNodePtrs, shared_from_this());
+    auto structedMap = make_shared<StructedMapImpl>(
+            mapNodePtrs, shared_from_this(), mLastGlobalResult);
 
     return structedMap;
 }

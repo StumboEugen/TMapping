@@ -7,10 +7,12 @@
 #include <utility>
 
 tmap::StructedMapImpl::StructedMapImpl(std::vector<MapNodePtr> nodes,
-                                       const MapTwigPtr& twigUsed) :
+                                       const MapTwigPtr& twigUsed,
+                                       double poss) :
         mNodes(std::move(nodes)),
         mRelatedTwig(twigUsed),
-        mAgentAt(nodes.size() - 1)
+        mAgentAt(nodes.size() - 1),
+        mPossibility(poss)
 {
 }
 

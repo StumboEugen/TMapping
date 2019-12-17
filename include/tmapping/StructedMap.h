@@ -38,8 +38,10 @@ class StructedMapImpl
 
     size_t mAgentAt;
 
+    double mPossibility;
+
 public:
-    StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed);
+    StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed, double poss);
 
     const MapTwigWePtr& relatedTwig() const;
 };
