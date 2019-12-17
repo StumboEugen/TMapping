@@ -14,10 +14,10 @@ namespace tmap
 class Door : public Gate
 {
     bool opened;
-    StrLM doorMark;
+    std::string doorMark;
 
 public:
-    Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned);
+    Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned, std::string doorMark);
 
     bool isOpened() const;
 
