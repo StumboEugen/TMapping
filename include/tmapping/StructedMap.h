@@ -16,11 +16,12 @@ namespace tmap
 
 struct MapNode
 {
-    size_t serial;
     struct Link {
         MapNodeWe to;
-        size_t at;
+        GateID at = GATEID_NO_MAPPING;
     };
+
+    size_t serial;
     MergedExpPtr relatedMergedExp;
     std::vector<Link> links;
 };
@@ -43,6 +44,8 @@ class StructedMapImpl
 
 public:
     StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed, double poss);
+
+    explicit StructedMapImpl(const Json::Value& jmap);
 
     const MapTwigWePtr& relatedTwig() const;
 

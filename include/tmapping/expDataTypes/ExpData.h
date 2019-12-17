@@ -44,6 +44,8 @@ class ExpData
     std::vector<PLMUnPtr> posLandmarks;
 
 public:
+    static ExpDataPtr madeFromJS(const Jsobj& jdata);
+
     virtual ExpDataType type() const = 0;
 
     const std::vector<GateUnPtr>& getGates() const;

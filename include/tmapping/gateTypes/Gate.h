@@ -6,9 +6,16 @@
 #define TMAPPING_GATE_H
 
 #include "tmapping/tools/TopoVec2.h"
+#include <memory>
+#include "../tools/TopoTools.h"
 
 namespace tmap
 {
+class Gate;
+
+using GatePtr = std::shared_ptr<Gate>;
+using GateUnPtr = std::unique_ptr<Gate>;
+using GateWePtr = std::weak_ptr<Gate>;
 
 enum class GateType{GateWay, Door};
 
@@ -20,6 +27,8 @@ class Gate
 
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);
+
+    static GateUnPtr madeFromJS(const Jsobj& jgate);
 
     virtual GateType type() = 0;
 

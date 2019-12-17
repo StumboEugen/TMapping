@@ -11,11 +11,18 @@
 namespace tmap
 {
 
+class PosLandmark;
+
+using PLMPtr = std::shared_ptr<PosLandmark>;
+using PLMUnPtr = std::unique_ptr<PosLandmark>;
+using PLMWePtr = std::weak_ptr<PosLandmark>;
+
 class PosLandmark : public Landmark
 {
     TopoVec2 pos;
 
 public:
+    static PLMUnPtr madeFromJS(const Jsobj& jPLM);
 
     explicit PosLandmark(const TopoVec2& pos);
 

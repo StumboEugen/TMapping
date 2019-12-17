@@ -34,6 +34,19 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           mPossDecConf(1.0)
 {}
 
+MergedExp::MergedExp(const Jsobj& jmergedExp)
+        : mFather(),
+          mRelatedExp(),
+          nMergedExps(jmergedExp["exps"].size()),
+          mMergedExpData(ExpData::madeFromJS(jmergedExp["data"])),
+          mTrans(),
+          mGatesMapping2Father(),
+          mGatesMappingFromFather(),
+          mPossDecConf(1.0)
+{
+
+}
+
 MatchResult tmap::MergedExp::detailedMatching(const tmap::MergedExp& another) const
 {
     double weight = this->nMergedExps;
@@ -323,4 +336,9 @@ Json::Value MergedExp::toJS() const
     res["data"] = std::move(mMergedExpData->toJS());
 
     return res;
+}
+
+MergedExpPtr MergedExp::madeFronJS(const Jsobj& jmergedExp)
+{
+    return tmap::MergedExpPtr(new MergedExp(jmergedExp));
 }

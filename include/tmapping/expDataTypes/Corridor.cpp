@@ -4,8 +4,8 @@
 
 #include "Corridor.h"
 
-tmap::Corridor::Corridor(bool completed) : completed(completed)
-{}
+//tmap::Corridor::Corridor(bool completed) : completed(completed)
+//{}
 
 Json::Value tmap::Corridor::toJS() const
 {

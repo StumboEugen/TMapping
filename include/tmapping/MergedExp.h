@@ -61,11 +61,15 @@ private: // constructor
 
     explicit MergedExp(ExpPtr fatherExp);
 
+    MergedExp(const Jsobj& jmergedExp);
+
 private: // method
 
     void cleanUpExpiredRelatedTwigs();
 
 public:
+
+    static MergedExpPtr madeFronJS(const Jsobj& jmergedExp);
 
     /**
      * @brief 生成一个和this MergedExp有关的后代MergedExp, 自动在newExp注册新的MergedExp

@@ -107,3 +107,8 @@ Json::Value TopoVec2::toJS() const
     return res;
 }
 
+TopoVec2::TopoVec2(const Jsobj& p)
+        : px(p[0].asDouble()),
+          py(p[1].asDouble())
+{}
+

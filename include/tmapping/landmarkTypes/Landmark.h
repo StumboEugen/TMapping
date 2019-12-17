@@ -9,6 +9,11 @@
 
 namespace tmap
 {
+class Landmark;
+
+using LMPtr = std::shared_ptr<Landmark>;
+using LMUnPtr = std::unique_ptr<Landmark>;
+using LMWePtr = std::weak_ptr<Landmark>;
 
 enum class LandmarkType {StrLM, NumLM, StrPLM};
 
@@ -16,6 +21,8 @@ class Landmark
 {
 
 public:
+    static LMUnPtr madeFromJS(const Jsobj& jMark) = delete;
+
     virtual LandmarkType type() = 0;
 
     virtual Json::Value toJS() const;

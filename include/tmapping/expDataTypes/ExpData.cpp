@@ -7,6 +7,10 @@
 #include <iostream>
 #include "../tools/TopoParams.h"
 
+#include "Corridor.h"
+#include "Intersection.h"
+#include "SmallRoom.h"
+
 using namespace std;
 using namespace tmap;
 
@@ -78,6 +82,43 @@ Json::Value ExpData::toJS() const
     for (const auto& landMark : posLandmarks) {
         res["landMark"].append(std::move(landMark->toJS()));
     }
+    return res;
+}
+
+ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
+{
+    ExpDataPtr res;
+    string type = jexp["type"].asString();
+    if (type == "C") {
+        res = make_shared<Corridor>();
+    }
+    else if (type == "I") {
+        res = make_shared<Intersection>();
+    }
+    else if (type == "SR") {
+        res = make_shared<SmallRoom>();
+    }
+    else {
+        cerr << FILE_AND_LINE << " You input an UNKNOWN expData! type=" << type << endl;
+        throw;
+    }
+
+    const auto& jgates = jexp["gates"];
+    auto nGate = jgates.size();
+    auto& gates = res->mGates;
+    gates.reserve(nGate);
+    for (int i = 0; i < nGate; ++i) {
+        gates.emplace_back(Gate::madeFromJS(jgates[i]));
+    }
+
+    const auto& jmarks = jexp["landMark"];
+    auto nMark = jmarks.size();
+    auto& marks = res->posLandmarks;
+    marks.reserve(nMark);
+    for (int i = 0; i < nMark; ++i) {
+        marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
+    }
+
     return res;
 }
 

@@ -19,7 +19,8 @@
 
 namespace tmap
 {
-static constexpr double TOPO_VERSION = 1.0;
+static constexpr uint64_t TOPO_JSON_VERSION = 0;
+using Jsobj = Json::Value;
 
 /// maybe one thousand years later, 128 could run out
 using GateID = int8_t;
