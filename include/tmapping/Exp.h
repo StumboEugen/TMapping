@@ -19,8 +19,6 @@ class Exp
     const ExpDataPtr mData;
     /// 时间上的排序序列
     std::size_t nSerial = 0;
-    /// 到此Exp创建过的MapTwig数量
-    std::size_t nBuiltTwig = 0;
     /// 记录着包含这个Exp的所有融合假设(不包括将来的), 第一个为single mergedExp
     std::vector<MergedExpWePtr> mMergedExps;
     /// 进入时对应的Gate, GATEID_BEGINNING_POINT(-2)表示这个为出发点
@@ -29,7 +27,9 @@ class Exp
     GateID mLeaveGate = GATEID_HAVENT_LEFT;
 
 public:
-    Exp(ExpDataPtr  expData, GateID enterGateID);
+    Exp(ExpDataPtr expData, GateID enterGateID);
+
+    explicit Exp(const Jsobj& jexp);
 
     MergedExpWePtr& theSingleMergedExp();
 
@@ -53,6 +53,8 @@ public:
     GateID getEnterGate() const;
 
     GateID getLeaveGate() const;
+
+    Jsobj toJS() const;
 };
 }
 

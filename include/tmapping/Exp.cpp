@@ -71,3 +71,21 @@ GateID Exp::getLeaveGate() const
 {
     return mLeaveGate;
 }
+
+Jsobj Exp::toJS() const
+{
+    Jsobj res;
+    res["data"] = std::move(mData->toJS());
+    res["serial"] = nSerial;
+    res["enterGate"] = mEnterGate;
+    res["leaveGate"] = mLeaveGate;
+    return res;
+}
+
+Exp::Exp(const Jsobj& jexp)
+        : mData(ExpData::madeFromJS(jexp["data"]))
+{
+    nSerial = jexp["serial"].asUInt64();
+    mEnterGate = jexp["enterGate"].asInt();
+    mLeaveGate = jexp["leaveGate"].asInt();
+}
