@@ -112,3 +112,34 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     }
     mChampionMap = currentChampion->makeMap(this->mExperiences);
 }
+
+tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)
+{
+    Jsobj res;
+
+    if (nTops == 0) {
+        nTops = SIZE_MAX;
+    }
+    size_t nPushed = 0;
+
+    const auto& aliveMaps = twigCollection.getAliveMaps();
+    if (aliveMaps.empty()) {
+        cerr << FILE_AND_LINE << " You ask maps from an empty twigCollection!" << endl;
+        return res;
+    }
+    auto iter = aliveMaps.begin();
+
+    if (mChampionMap) {
+        res.append(mChampionMap->toJS());
+        ++iter;
+        ++nPushed;
+    }
+
+    while (nPushed < nTops && iter != aliveMaps.end()) {
+        res.append(iter->get()->makeMap(this->mExperiences)->toJS());
+        ++iter;
+        ++nPushed;
+    }
+
+    return res;
+}

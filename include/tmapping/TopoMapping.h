@@ -28,6 +28,8 @@ public:
     void setLeftGate(TopoVec2 gatePos);
 
     void arriveNewExp(const ExpPtr& newExp);
+
+    Jsobj getTopMaps(size_t nTops);
 };
 }
 
