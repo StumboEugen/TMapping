@@ -18,6 +18,8 @@ std::string JS2Str(const Jsobj& js, bool shortVersion = true, uint8_t precision 
 
 Jsobj Str2JS(const std::string& str);
 
+int saveStructedMap(const StructedMap& map2save, const std::string& fileName = "");
+
 };
 }
 
