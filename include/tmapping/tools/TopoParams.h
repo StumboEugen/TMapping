@@ -44,14 +44,19 @@ static constexpr double piTwo = 3.1415926 * 2.0;
 static constexpr double DEG2RAD = pi / 180;
 static constexpr double RAD2DEG = 180 / pi;
 
-static constexpr char TOPO_STD_FILE_SAVE_FLODER_NAME[] = "topoMaps/";
-static constexpr char TOPO_STD_TOPIC_NAME_NODEINFO[] = "topo/ArriveAtNewNode";
-static constexpr char TOPO_STD_TOPIC_NAME_GATEMOVE[] = "topo/LeaveFromNode";
-static constexpr char TOPO_STD_TOPIC_NAME_CVINFO[] = "topo/cvInfo";
-static constexpr char TOPO_STD_SERVICE_NAME_SAVEMAP[] = "topoSrv/SaveMap";
-static constexpr char TOPO_STD_SERVICE_NAME_GETMAPS[] = "topoSrv/GetMaps";
-static constexpr char TOPO_STD_SERVICE_NAME_PATHPLANNING[] = "topoSrv/PathPlanning";
-static constexpr char TOPO_STD_SERVICE_NAME_ASKINGNEXTSTEP[] = "topoSrv/NextPathStep";
+static constexpr char TMAP_STD_FILE_SAVE_FLODER_NAME[] = "tmappingMaps/";
+static constexpr char TMAP_STD_SERVICE_NAME_NEW_EXP[] = "tmapping/srv/newExp";
+static constexpr char TMAP_STD_SERVICE_NAME_GATE_MOVE[] = "tmapping/srv/gateMove";
+static constexpr char TMAP_STD_SERVICE_NAME_GET_MAPS[] = "tmapping/srv/getMaps";
+
+
+//static constexpr char TOPO_STD_TOPIC_NAME_NODEINFO[] = "topo/ArriveAtNewNode";
+//static constexpr char TOPO_STD_TOPIC_NAME_GATEMOVE[] = "topo/LeaveFromNode";
+//static constexpr char TOPO_STD_TOPIC_NAME_CVINFO[] = "topo/cvInfo";
+//static constexpr char TOPO_STD_SERVICE_NAME_SAVEMAP[] = "topoSrv/SaveMap";
+//static constexpr char TOPO_STD_SERVICE_NAME_GETMAPS[] = "topoSrv/GetMaps";
+//static constexpr char TOPO_STD_SERVICE_NAME_PATHPLANNING[] = "topoSrv/PathPlanning";
+//static constexpr char TOPO_STD_SERVICE_NAME_ASKINGNEXTSTEP[] = "topoSrv/NextPathStep";
 
 static constexpr double TOLLERANCE_1ST_MATCH_EXP = 0.5;
 static constexpr double TOLLERANCE_2ND_MATCH_MERGEDEXP = 0.75;

@@ -8,5 +8,6 @@
 #include "TopoParams.h"
 #include "TopoVec2.h"
 #include "BitsHash.h"
+#include "JsonHelper.h"
 
 #endif //TMAPPING_TOPOTOOLS_H

@@ -21,8 +21,8 @@ void chDir2TopoFileFloder() {
     uid = getuid();
     pwd = getpwuid(uid);
     chdir(pwd->pw_dir);
-    mkdir(tmap::TOPO_STD_FILE_SAVE_FLODER_NAME, 0b111111111);
-    chdir(tmap::TOPO_STD_FILE_SAVE_FLODER_NAME);
+    mkdir(tmap::TMAP_STD_FILE_SAVE_FLODER_NAME, 0b111111111);
+    chdir(tmap::TMAP_STD_FILE_SAVE_FLODER_NAME);
 }
 
 }

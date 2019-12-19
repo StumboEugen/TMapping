@@ -72,10 +72,9 @@ add_message_files(
 ## Generate services in the 'srv' folder
 add_service_files(
     FILES
-#    SaveMap.srv
-#    GetMaps.srv
-#    PathPlanning.srv
-#    NextStepOfPath.srv
+    NewExp.srv
+    GateMovement.srv
+    GetMaps.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -212,10 +211,13 @@ add_library(jsonCpp ${JsonFILES})
 #add_dependencies(TopoUI topoLayer_UI)
 #
 #add_dependencies(topoLayer ${PROJECT_NAME}_gencpp)
-#add_dependencies(main ${PROJECT_NAME}_gencpp)
 #add_dependencies(FakeOB ${PROJECT_NAME}_gencpp)
 #add_dependencies(localController ${PROJECT_NAME}_gencpp)
 
-add_executable(main src/main.cpp ${TopoFILES} ${JsonFILES})
+add_executable(main src/main.cpp src/TmapRosNode.cpp ${TopoFILES} ${JsonFILES})
+
+add_dependencies(main ${PROJECT_NAME}_gencpp)
+
+target_link_libraries(main ${catkin_LIBRARIES})
 
 #target_link_libraries(main topoLayer)
