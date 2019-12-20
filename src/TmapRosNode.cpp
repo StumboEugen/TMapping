@@ -30,8 +30,8 @@ bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
 bool TmapRosNode::cbSrvGateMovement(tmapping::GateMovementRequest& req,
                                     tmapping::GateMovementResponse& res)
 {
-    auto gate = JsonHelper::Str2JS(req.jGateMove).asInt();
-    mTmappingCore.setLeftGate(gate);
+    auto gateID = JsonHelper::Str2JS(req.jGateMove).asInt();
+    mTmappingCore.setLeftGate(gateID);
     return true;
 }
 

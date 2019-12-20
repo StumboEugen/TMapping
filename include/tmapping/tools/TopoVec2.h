@@ -19,7 +19,7 @@ struct TopoVec2
 
     TopoVec2() = default;
     TopoVec2(double px, double py);
-    TopoVec2(const Jsobj& jvec);
+    explicit TopoVec2(const Jsobj& jvec);
 
     friend std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);
 
