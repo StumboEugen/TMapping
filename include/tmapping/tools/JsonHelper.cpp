@@ -9,8 +9,6 @@
 #include <pwd.h>
 #include <sys/stat.h>
 
-#include "../StructedMap.h"
-
 using namespace std;
 
 namespace {
@@ -49,21 +47,31 @@ tmap::Jsobj tmap::JsonHelper::Str2JS(const std::string& str)
         cerr << FILE_AND_LINE << " read Json Failure! msg:\n" << errs << endl;
     }
     delete readerP;
-    return tmap::Jsobj();
+    return res;
 }
 
-int tmap::JsonHelper::saveStructedMap(const tmap::StructedMap& map2save, const std::string& fileName)
+int tmap::JsonHelper::saveJson(const tmap::Jsobj& js, string fileName, bool addTime)
 {
     chDir2TopoFileFloder();
+    if (fileName.empty() || addTime) {
+        struct tm * timeStructP;
+        time_t timeLong;
+        timeLong = time(nullptr);
+        timeStructP = localtime(&timeLong);
+        char tmp[64];
+        strftime(tmp, sizeof(tmp), "%Y%m%d_%H%M", timeStructP);
+        fileName += tmp;
+    }
     fstream fs(fileName, std::ios::out | std::ios::trunc);
-    fs << JS2Str(map2save->toJS());
+    fs << JS2Str(js);
     return 0;
 }
 
-tmap::StructedMap loadStructedMapFromFile(const std::string& fileName) {
+tmap::Jsobj tmap::JsonHelper::loadJson(const std::string& fileName)
+{
+    Jsobj res;
     chDir2TopoFileFloder();
     fstream fs(fileName, std::ios::in);
-    tmap::Jsobj jsobj;
-    fs >> jsobj;
-    return make_shared<tmap::StructedMapImpl>(jsobj);
+    fs >> res;
+    return res;
 }
