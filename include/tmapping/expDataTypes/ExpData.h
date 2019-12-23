@@ -42,6 +42,7 @@ class ExpData
 {
     std::vector<GateUnPtr> mGates;
     std::vector<PLMUnPtr> posLandmarks;
+    std::string mName;
 
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
@@ -75,6 +76,10 @@ public:
     size_t nGates() const;
 
     virtual Json::Value toJS() const;
+
+    const std::string& getName() const;
+
+    void setName(const std::string& name);
 };
 
 }

@@ -82,6 +82,9 @@ Json::Value ExpData::toJS() const
     for (const auto& landMark : posLandmarks) {
         res["landMark"].append(std::move(landMark->toJS()));
     }
+    if (!mName.empty()) {
+        res["name"] = mName;
+    }
     return res;
 }
 
@@ -103,6 +106,10 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         throw;
     }
 
+    if (jexp.isMember("name")) {
+        res->mName = jexp["name"].asString();
+    }
+
     const auto& jgates = jexp["gates"];
     auto nGate = jgates.size();
     auto& gates = res->mGates;
@@ -120,5 +127,15 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
     }
 
     return res;
+}
+
+const string& ExpData::getName() const
+{
+    return mName;
+}
+
+void ExpData::setName(const string& name)
+{
+    ExpData::mName = name;
 }
 
