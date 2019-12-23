@@ -7,11 +7,15 @@
 #include "MainGView.h"
 #include "ViceGView.h"
 
+#include "ui_dockBuildExp.h"
+
 using namespace std;
 
 tmap::TmapUI::TmapUI(QWidget* parent) :
         QMainWindow(parent),
-        uiMain(new Ui::TmapWindow)
+        uiMain(new Ui::TmapWindow),
+        uiDockExpBuilder(new Ui::BuildExpDockUI),
+        dockExpBuilder(new QDockWidget(this))
 {
     {   /// 添加UI组件
         uiMain->setupUi(this);
@@ -69,9 +73,17 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiMain->mainToolBar->addAction(mode_REALTIME);
         uiMain->mainToolBar->addSeparator();
     }
+
+    {
+        uiDockExpBuilder->setupUi(dockExpBuilder);
+        addDockWidget(Qt::RightDockWidgetArea, dockExpBuilder);
+        dockExpBuilder->setShown(true);
+    }
+
 }
 
 tmap::TmapUI::~TmapUI()
 {
 
 }
+

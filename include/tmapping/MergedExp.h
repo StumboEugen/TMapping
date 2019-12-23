@@ -61,7 +61,7 @@ private: // constructor
 
     explicit MergedExp(ExpPtr fatherExp);
 
-    MergedExp(const Jsobj& jmergedExp);
+    explicit MergedExp(const Jsobj& jmergedExp);
 
 private: // method
 
