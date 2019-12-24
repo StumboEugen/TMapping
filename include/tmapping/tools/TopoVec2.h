@@ -39,11 +39,26 @@ struct TopoVec2
 
     TopoVec2 operator- (const TopoVec2& that) const;
 
+    TopoVec2 operator- () const;
+
     double len() const;
 
-    TopoVec2 unitVec() const;
-
     Json::Value toJS() const;
+
+    /**
+     * @brief 得到单位化长度的Vec, 但是如果原来为(0,0), 会得到(1,0)
+     */
+    TopoVec2 unitize() const;
+
+    const TopoVec2& restrictDir(size_t nSlice = 8);
+
+    /**
+     * @brief 产生一个新的Vec, 但是长度为 l
+     */
+    TopoVec2 changeLen(double l) const;
+
+    /// ENU, 逆时针为正
+    TopoVec2 rotate(int degree) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);

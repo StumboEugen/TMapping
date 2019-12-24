@@ -2,6 +2,8 @@
 // Created by stumbo on 2019/12/20.
 //
 
+#include <iostream>
+
 #include "TmapUI.h"
 #include "ui_tmapUI.h"
 #include "MainGView.h"
@@ -10,6 +12,10 @@
 #include "ui_dockBuildExp.h"
 
 using namespace std;
+
+Q_DECLARE_METATYPE(tmap::ExpDataType);
+Q_DECLARE_METATYPE(tmap::ExpDataPtr);
+Q_DECLARE_METATYPE(tmap::GateType);
 
 tmap::TmapUI::TmapUI(QWidget* parent) :
         QMainWindow(parent),
@@ -22,8 +28,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         setWindowTitle("Tmapping Viewer");
 
         centerLayout = new QHBoxLayout(uiMain->centralWidget);
-        centerLayout->setSpacing(6);
-        centerLayout->setContentsMargins(11, 11, 11, 11);
+        centerLayout->setSpacing(3);
+        centerLayout->setContentsMargins(5, 5, 5, 5);
         centerLayout->setObjectName(QString::fromUtf8("centerLayout"));
 
         gvMain = new MainGView(uiMain->centralWidget);
@@ -36,8 +42,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         centerLayout->addWidget(gvMain);
 
         smallWindowLayout = new QVBoxLayout();
-        smallWindowLayout->setSpacing(11);
-        smallWindowLayout->setContentsMargins(11, 0, 11, 0);
+        smallWindowLayout->setSpacing(3);
+        smallWindowLayout->setContentsMargins(5, 0, 5, 0);
 
         infoView = new QTextBrowser(uiMain->centralWidget);
         infoView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -78,6 +84,25 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiDockExpBuilder->setupUi(dockExpBuilder);
         addDockWidget(Qt::RightDockWidgetArea, dockExpBuilder);
         dockExpBuilder->setShown(true);
+
+        uiDockExpBuilder->cbExpType->setItemData(0,
+                QVariant::fromValue(ExpDataType::Intersection));
+        uiDockExpBuilder->cbExpType->setItemData(1,
+                QVariant::fromValue(ExpDataType::SmallRoom));
+
+        uiDockExpBuilder->cbGateType->setItemData(0,
+                QVariant::fromValue(GateType::GateWay));
+        uiDockExpBuilder->cbGateType->setItemData(1,
+                QVariant::fromValue(GateType::DoorOpened));
+        uiDockExpBuilder->cbGateType->setItemData(2,
+                QVariant::fromValue(GateType::DoorClosed));
+
+        connect(uiDockExpBuilder->btnBuildExp, SIGNAL(toggled(bool)),
+                this, SLOT(slotBuildExp(bool)));
+
+        connect(uiDockExpBuilder->cbGateType, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(slotGateTypeChanged(int)));
+
     }
 
 }
@@ -85,5 +110,38 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 tmap::TmapUI::~TmapUI()
 {
 
+}
+
+void tmap::TmapUI::slotBuildExp(bool begin)
+{
+    if (begin) {
+        uiDockExpBuilder->btnBuildExp->setText("Complete Building");
+        auto& cbET = uiDockExpBuilder->cbExpType;
+        gvVice->beginExpBuilding(cbET->itemData(cbET->currentIndex()).value<ExpDataType>());
+    } else {
+        uiDockExpBuilder->btnBuildExp->setText("Build an Exp");
+        addBuiltExpData(gvVice->completeExpBuilding());
+    }
+}
+
+void tmap::TmapUI::addBuiltExpData(const ExpDataPtr& expData)
+{
+    if (!expData) {
+        cout << FILE_AND_LINE << " an invaild ExpData! (null)" << endl;
+        return;
+    }
+    QString name(expData->getName().data());
+    if (name.isEmpty()) {
+        static size_t indexOfExpData = 0;
+        name = "[" + QString::number(indexOfExpData++) + "] " +
+                QString::number(expData->nGates()) + " gates";
+    }
+    uiDockExpBuilder->cbBuiltExps->addItem(name, QVariant::fromValue(expData));
+}
+
+void tmap::TmapUI::slotGateTypeChanged(int index)
+{
+    gvVice->setNextGateType(
+            uiDockExpBuilder->cbGateType->itemData(index).value<GateType>());
 }
 

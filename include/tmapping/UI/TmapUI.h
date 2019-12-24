@@ -13,6 +13,9 @@
 #include <QGraphicsScene>
 #include <QDockWidget>
 
+#include "tmapping/expDataTypes/ExpData.h"
+#include "tmapping/tools/TopoParams.h"
+
 namespace Ui
 {
 class TmapWindow;
@@ -45,13 +48,18 @@ class TmapUI : public QMainWindow
     Ui::BuildExpDockUI* uiDockExpBuilder;
     QDockWidget * dockExpBuilder;
 
-// methods
+private: // methods
+    void addBuiltExpData(const ExpDataPtr& expData);
 
 public:
 
     explicit TmapUI(QWidget* parent = nullptr);
 
     ~TmapUI() override;
+
+private Q_SLOTS:
+    void slotBuildExp(bool begin);
+    void slotGateTypeChanged(int index);
 
 };
 }

@@ -12,8 +12,8 @@
 using namespace std;
 
 tmap::Gate::Gate(const tmap::TopoVec2& pos, const tmap::TopoVec2& normalVec)
-:pos(pos),
- normalVec(normalVec)
+        : pos(pos),
+          mNormalVec(normalVec.unitize())
 {}
 
 const tmap::TopoVec2& tmap::Gate::getPos() const
@@ -23,7 +23,7 @@ const tmap::TopoVec2& tmap::Gate::getPos() const
 
 const tmap::TopoVec2& tmap::Gate::getNormalVec() const
 {
-    return normalVec;
+    return mNormalVec;
 }
 
 void tmap::Gate::setPossibility(double possibility)
@@ -40,14 +40,14 @@ Json::Value tmap::Gate::toJS() const
 {
     Json::Value res;
     res["pos"] = std::move(pos.toJS());
-    res["nv"] = std::move(normalVec.toJS());
+    res["nv"] = std::move(mNormalVec.toJS());
     res["psb"] = possibility;
     return res;
 }
 
-tmap::GateUnPtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
+tmap::GatePtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
 {
-    tmap::GateUnPtr res;
+    tmap::GatePtr res;
     TopoVec2 p(jgate["pos"]);
     TopoVec2 nv(jgate["nv"]);
     string type = jgate["type"].asString();
@@ -63,4 +63,9 @@ tmap::GateUnPtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
     }
     res->possibility = jgate["psb"].asDouble();
     return res;
+}
+
+void tmap::Gate::changeNormalVec2(const tmap::TopoVec2& to)
+{
+    mNormalVec = to.unitize();
 }

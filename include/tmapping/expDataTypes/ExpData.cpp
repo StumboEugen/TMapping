@@ -14,12 +14,12 @@
 using namespace std;
 using namespace tmap;
 
-const std::vector<GateUnPtr>& tmap::ExpData::getGates() const
+const std::vector<GatePtr>& tmap::ExpData::getGates() const
 {
     return mGates;
 }
 
-void ExpData::addGate(GateUnPtr pGate)
+void ExpData::addGate(GatePtr pGate)
 {
     mGates.emplace_back(std::move(pGate));
 }

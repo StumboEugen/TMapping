@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cmath>
 #include <iostream>
+#include <cfloat>
 #include "TopoVec2.h"
 #include "TopoTools.h"
 
@@ -79,18 +80,6 @@ double TopoVec2::len() const
     return sqrt(px * px + py * py);
 }
 
-TopoVec2 TopoVec2::unitVec() const
-{
-    if (px != 0.0 && py != 0.0) {
-        TopoVec2 topoVec2 = *this;
-        topoVec2 /= topoVec2.len();
-        return topoVec2;
-    } else {
-        cerr << FILE_AND_LINE << " You are trying to get a unit vec from TopoVec2(0,0)!";
-        return {};
-    }
-}
-
 ostream& tmap::operator<<(ostream& os, const TopoVec2& pos)
 {
     auto oldf = os.setf(ios::fixed);
@@ -111,4 +100,65 @@ TopoVec2::TopoVec2(const Jsobj& p)
         : px(p[0].asDouble()),
           py(p[1].asDouble())
 {}
+
+TopoVec2 TopoVec2::unitize() const
+{
+    TopoVec2 res(*this);
+    double l = len();
+    if (l != 0) {
+        res /= l;
+    } else {
+        cerr << FILE_AND_LINE << " You are trying to get a unit vec from TopoVec2(0,0)!";
+        res.px = 1;
+    }
+    return res;
+}
+
+/// for convenient, not fastest
+const TopoVec2& TopoVec2::restrictDir(size_t nSlice)
+{
+    const double dir = atan2(py, px);
+    const double dStep = M_PI * 2.0 / nSlice;
+    double diffMin = 10.0;
+    double D = -M_PI;
+    while (D <= M_PI) {
+        double diffCurrent = abs(D - dir);
+        if (diffCurrent < diffMin) {
+            diffMin = diffCurrent;
+        } else {
+            break;
+        }
+        D += dStep;
+    }
+    D -= dStep;
+    px = cos(D);
+    py = sin(D);
+    return *this;
+}
+
+TopoVec2 TopoVec2::rotate(int degree) const
+{
+    double rotation = M_PI / 180.0 * degree;
+    const double dir = atan2(py, px);
+    double d = dir + rotation;
+    double l = len();
+    TopoVec2 res{};
+    res.px = l * cos(d);
+    res.py = l * sin(d);
+    return res;
+}
+
+TopoVec2 TopoVec2::changeLen(double l) const
+{
+    double le = this->len();
+    if (le == 0.0) {
+        return *this;
+    }
+    return *this * (l / le);
+}
+
+TopoVec2 TopoVec2::operator-() const
+{
+    return this->operator*(-1.0);
+}
 

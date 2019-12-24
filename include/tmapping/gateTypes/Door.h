@@ -17,7 +17,7 @@ class Door : public Gate
     std::string doorMark;
 
 public:
-    Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned, std::string doorMark);
+    Door(const TopoVec2& pos, const TopoVec2& normalVec, bool oepned, std::string doorMark = "");
 
     bool isOpened() const;
 

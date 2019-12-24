@@ -14,21 +14,21 @@ namespace tmap
 class Gate;
 
 using GatePtr = std::shared_ptr<Gate>;
-using GateUnPtr = std::unique_ptr<Gate>;
 using GateWePtr = std::weak_ptr<Gate>;
 
-enum class GateType{GateWay, Door};
+// open close 的设置是为了UI界面的方便
+enum class GateType{GateWay, Door, DoorOpened, DoorClosed};
 
 class Gate
 {
     TopoVec2 pos;
-    TopoVec2 normalVec;
+    TopoVec2 mNormalVec;
     double possibility = 1.0;
 
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);
 
-    static GateUnPtr madeFromJS(const Jsobj& jgate);
+    static GatePtr madeFromJS(const Jsobj& jgate);
 
     virtual GateType type() = 0;
 
@@ -41,6 +41,8 @@ public:
     void setPossibility(double possibility);
 
     virtual Json::Value toJS() const;
+
+    void changeNormalVec2(const TopoVec2& to);
 };
 
 }
