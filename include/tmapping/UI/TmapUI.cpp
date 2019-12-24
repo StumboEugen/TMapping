@@ -100,6 +100,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockExpBuilder->btnBuildExp, SIGNAL(toggled(bool)),
                 this, SLOT(SLOT_BuildExp(bool)));
 
+        connect(uiDockExpBuilder->btnEditJson, SIGNAL(toggled(bool)),
+                this, SLOT(SLOT_EditJson(bool)));
+
         connect(uiDockExpBuilder->cbGateType, SIGNAL(currentIndexChanged(int)),
                 this, SLOT(SLOT_GateTypeChanged(int)));
 
@@ -107,6 +110,12 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 this, SLOT(SLOT_ExpDataSelected(int)));
         connect(uiDockExpBuilder->cbBuiltExps, SIGNAL(highlighted(int)),
                 this, SLOT(SLOT_ExpDataSelected(int)));
+
+        connect(uiDockExpBuilder->btnLoad, SIGNAL(clicked()),
+                this, SLOT(SLOT_LoadExp()));
+
+        connect(uiDockExpBuilder->btnSave, SIGNAL(clicked()),
+                this, SLOT(SLOT_SaveExp()));
 
     }
 
@@ -123,21 +132,15 @@ void tmap::TmapUI::addBuiltExpData(const ExpDataPtr& expData)
         cout << FILE_AND_LINE << " an invaild ExpData! (null)" << endl;
         return;
     }
-    QString name(expData->getName().data());
-    if (name.isEmpty()) {
-        static size_t indexOfExpData = 0;
-        name = "[" + QString::number(indexOfExpData++) + "] " +
-               QString::number(expData->nGates()) + "g " +
-               QString{ExpData::typeStr(expData->type()).data()};
-    }
+
     auto cbBuiltExps = uiDockExpBuilder->cbBuiltExps;
-    cbBuiltExps->addItem(name, QVariant::fromValue(expData));
+    cbBuiltExps->addItem(getExpDataLabel(expData), QVariant::fromValue(expData));
     cbBuiltExps->setCurrentIndex(cbBuiltExps->count() - 1);
 }
 
-void tmap::TmapUI::SLOT_BuildExp(bool begin)
+void tmap::TmapUI::SLOT_BuildExp(bool start)
 {
-    if (begin) {
+    if (start) {
         uiDockExpBuilder->btnBuildExp->setText("Complete Building");
         auto& cbET = uiDockExpBuilder->cbExpType;
         gvVice->beginExpBuilding(cbET->itemData(cbET->currentIndex()).value<ExpDataType>());
@@ -162,5 +165,83 @@ void tmap::TmapUI::SLOT_ExpDataSelected(int index)
 {
     gvVice->displayTheExpData(
             uiDockExpBuilder->cbBuiltExps->itemData(index).value<ExpDataPtr>());
+}
+
+void tmap::TmapUI::SLOT_EditJson(bool start)
+{
+    static int indexOfEditing;
+    auto& exps = uiDockExpBuilder->cbBuiltExps;
+    if (start) {
+        if (exps->count() == 0) {
+            uiDockExpBuilder->btnEditJson->setCheckable(false);
+            uiDockExpBuilder->btnEditJson->setCheckable(true);
+            return;
+        }
+        uiDockExpBuilder->btnEditJson->setText("complete Editting");
+        indexOfEditing = exps->currentIndex();
+        Jsobj jExpData = exps->itemData(indexOfEditing).value<ExpDataPtr>()->toJS();
+        infoView->setText(JsonHelper::JS2Str(jExpData, false).data());
+        infoView->setTextColor(Qt::darkGray);
+        infoView->setReadOnly(false);
+    } else {
+        uiDockExpBuilder->btnEditJson->setText( "Edit Json");
+
+        Jsobj editedJs = JsonHelper::Str2JS(infoView->toPlainText().toStdString());
+        ExpDataPtr madeExp = ExpData::madeFromJS(editedJs);
+        if (madeExp) {
+            exps->setItemData(indexOfEditing, QVariant::fromValue<ExpDataPtr>(madeExp));
+            exps->setItemText(indexOfEditing, getExpDataLabel(madeExp));
+            gvVice->displayTheExpData(madeExp);
+        } else {
+            infoView->append("\n Trans error!");
+        }
+        infoView->setTextColor(Qt::black);
+        infoView->setReadOnly(true);
+    }
+}
+
+QString tmap::TmapUI::getExpDataLabel(const tmap::ExpDataPtr& expData)
+{
+    QString name(expData->getName().data());
+    if (name.isEmpty()) {
+        static size_t indexOfAnoymousExpData = 0;
+        name = "[" + QString::number(indexOfAnoymousExpData++) + "] " +
+               QString::number(expData->nGates()) + "g " +
+               QString{ExpData::typeStr(expData->type()).data()};
+    }
+    return name;
+}
+
+void tmap::TmapUI::SLOT_SaveExp()
+{
+    auto& exps = uiDockExpBuilder->cbBuiltExps;
+    if (exps->count() == 0) {
+        return;
+    }
+    const auto& expData2Save = exps->itemData(exps->currentIndex()).value<ExpDataPtr>();
+    string fileName = uiDockExpBuilder->expName->text().toStdString();
+    if (fileName.empty()) {
+        fileName = expData2Save->getName();
+    } else {
+        expData2Save->setName(fileName);
+    }
+    if (JsonHelper::saveJson(expData2Save->toJS(), fileName) == 0) {
+        cout << "save exp data [name:" + fileName + "] success!" << endl;
+    }
+}
+
+void tmap::TmapUI::SLOT_LoadExp()
+{
+    auto& expNameEdit = uiDockExpBuilder->expName;
+    const auto& name = expNameEdit->text();
+    if (name.isEmpty()) {
+        return;
+    }
+    Jsobj jExpData = JsonHelper::loadJson(name.toStdString());
+    ExpDataPtr expRead = ExpData::madeFromJS(jExpData);
+    if (expRead) {
+        cout << "load exp data [name:" << name.toStdString() << "] success!" << endl;
+        addBuiltExpData(expRead);
+    }
 }
 

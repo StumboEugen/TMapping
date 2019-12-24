@@ -50,6 +50,7 @@ class TmapUI : public QMainWindow
 
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
+    static QString getExpDataLabel(const ExpDataPtr& expData);
 
 public:
 
@@ -58,9 +59,12 @@ public:
     ~TmapUI() override;
 
 private Q_SLOTS:
-    void SLOT_BuildExp(bool begin);
+    void SLOT_BuildExp(bool start);
     void SLOT_GateTypeChanged(int index);
     void SLOT_ExpDataSelected(int index);
+    void SLOT_EditJson(bool start);
+    void SLOT_SaveExp();
+    void SLOT_LoadExp();
 
 };
 }

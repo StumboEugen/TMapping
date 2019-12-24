@@ -153,6 +153,10 @@ void tmap::ViceGView::mouseReleaseEvent(QMouseEvent* event)
 
 void tmap::ViceGView::displayTheExpData(tmap::ExpDataPtr data2show)
 {
+    if (mStatus == DisplayStatus::BUILDING_EXP || mStatus == DisplayStatus::DRAWING_GATE) {
+        cerr << FILE_AND_LINE << " Cant display now" << endl;
+        return;
+    }
     scene()->clear();
     mStatus = DisplayStatus::DISPLAYING_EXP;
     mRelatedExpData = std::move(data2show);
@@ -186,6 +190,7 @@ void tmap::QGate::paint(QPainter* painter, const QStyleOptionGraphicsItem* optio
     if (mData->type() == GateType::GateWay) {
         painter->setPen({Qt::black, 3});
         painter->drawLine({0, 0}, p2);
+        painter->drawEllipse(QRectF{-2, -2, 4, 4});
     }
     if (mData->type() == GateType::Door) {
         painter->drawLine({0, 0}, p2);

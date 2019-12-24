@@ -92,41 +92,45 @@ Json::Value ExpData::toJS() const
 ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
 {
     ExpDataPtr res;
-    string type = jexp["type"].asString();
-    if (type == typeStr(ExpDataType::Corridor)) {
-        res = make_shared<Corridor>();
-    }
-    else if (type == typeStr(ExpDataType::Intersection)) {
-        res = make_shared<Intersection>();
-    }
-    else if (type == typeStr(ExpDataType::SmallRoom)) {
-        res = make_shared<SmallRoom>();
-    }
-    else {
-        cerr << FILE_AND_LINE << " You input an UNKNOWN expData! typeStr=" << type << endl;
-        return res;
-    }
 
-    if (jexp.isMember("name")) {
-        res->mName = jexp["name"].asString();
-    }
+    try {
+        string type = jexp["type"].asString();
+        if (type == typeStr(ExpDataType::Corridor)) {
+            res = make_shared<Corridor>();
+        }
+        else if (type == typeStr(ExpDataType::Intersection)) {
+            res = make_shared<Intersection>();
+        }
+        else if (type == typeStr(ExpDataType::SmallRoom)) {
+            res = make_shared<SmallRoom>();
+        }
+        else {
+            cerr << FILE_AND_LINE << " You input an UNKNOWN expData! typeStr=" << type << endl;
+            return res;
+        }
 
-    const auto& jgates = jexp["gates"];
-    auto nGate = jgates.size();
-    auto& gates = res->mGates;
-    gates.reserve(nGate);
-    for (int i = 0; i < nGate; ++i) {
-        gates.emplace_back(Gate::madeFromJS(jgates[i]));
-    }
+        if (jexp.isMember("name")) {
+            res->mName = jexp["name"].asString();
+        }
 
-    const auto& jmarks = jexp["landMark"];
-    auto nMark = jmarks.size();
-    auto& marks = res->posLandmarks;
-    marks.reserve(nMark);
-    for (int i = 0; i < nMark; ++i) {
-        marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
-    }
+        const auto& jgates = jexp["gates"];
+        auto nGate = jgates.size();
+        auto& gates = res->mGates;
+        gates.reserve(nGate);
+        for (int i = 0; i < nGate; ++i) {
+            gates.emplace_back(Gate::madeFromJS(jgates[i]));
+        }
 
+        const auto& jmarks = jexp["landMark"];
+        auto nMark = jmarks.size();
+        auto& marks = res->posLandmarks;
+        marks.reserve(nMark);
+        for (int i = 0; i < nMark; ++i) {
+            marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
+        }
+    } catch (...) {
+        res = nullptr;
+    }
     return res;
 }
 
