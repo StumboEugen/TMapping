@@ -40,11 +40,12 @@ class ViceGView : public QGraphicsView
 {
     Q_OBJECT
 
-    enum class DisplayStatus{NOTHING, BUILDING_EXP, DRAWING_GATE};
+    enum class DisplayStatus{NOTHING, BUILDING_EXP, DRAWING_GATE, DISPLAYING_EXP};
 
-    DisplayStatus mStatus;
+    DisplayStatus mStatus = DisplayStatus::NOTHING;
     ExpDataPtr mRelatedExpData;
     std::vector<QGate*> mQGates;
+
     QGraphicsScene mScene;
     GateType mNextGateType = GateType::GateWay;
 
@@ -58,6 +59,8 @@ public:
     void setNextGateType(GateType type);
 
     void startDrawingGateFromReferPoint(const ReferPoint& rp);
+
+    void displayTheExpData(ExpDataPtr data2show);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;

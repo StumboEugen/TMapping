@@ -29,7 +29,7 @@ std::string tmap::JsonHelper::JS2Str(const Jsobj& js, bool shortVersion, uint8_t
 {
     Json::StreamWriterBuilder builder;
     builder["precision"] = precision > 8 ? 8 : precision;
-    builder["indentation"] = shortVersion ? "" : "\t";
+    builder["indentation"] = shortVersion ? "" : "   ";
     auto writerP(builder.newStreamWriter());
     stringstream ss;
     writerP->write(js, &ss);

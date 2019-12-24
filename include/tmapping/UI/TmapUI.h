@@ -58,8 +58,9 @@ public:
     ~TmapUI() override;
 
 private Q_SLOTS:
-    void slotBuildExp(bool begin);
-    void slotGateTypeChanged(int index);
+    void SLOT_BuildExp(bool begin);
+    void SLOT_GateTypeChanged(int index);
+    void SLOT_ExpDataSelected(int index);
 
 };
 }

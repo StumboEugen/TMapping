@@ -93,18 +93,18 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
 {
     ExpDataPtr res;
     string type = jexp["type"].asString();
-    if (type == "C") {
+    if (type == typeStr(ExpDataType::Corridor)) {
         res = make_shared<Corridor>();
     }
-    else if (type == "I") {
+    else if (type == typeStr(ExpDataType::Intersection)) {
         res = make_shared<Intersection>();
     }
-    else if (type == "SR") {
+    else if (type == typeStr(ExpDataType::SmallRoom)) {
         res = make_shared<SmallRoom>();
     }
     else {
-        cerr << FILE_AND_LINE << " You input an UNKNOWN expData! type=" << type << endl;
-        throw;
+        cerr << FILE_AND_LINE << " You input an UNKNOWN expData! typeStr=" << type << endl;
+        return res;
     }
 
     if (jexp.isMember("name")) {
@@ -145,19 +145,19 @@ std::string ExpData::typeStr(ExpDataType type)
     string res;
     switch (type) {
         case ExpDataType::Intersection:
-            res = "I";
+            res = "Intersection";
             break;
         case ExpDataType::Corridor:
-            res = "C";
+            res = "Corridor";
             break;
         case ExpDataType::Stair:
-            res = "S";
+            res = "Stair";
             break;
         case ExpDataType::BigRoom:
-            res = "BR";
+            res = "BigRoom";
             break;
         case ExpDataType::SmallRoom:
-            res = "SR";
+            res = "SmallRoom";
             break;
     }
     return res;

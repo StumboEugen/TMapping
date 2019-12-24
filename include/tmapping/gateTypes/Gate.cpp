@@ -52,15 +52,15 @@ tmap::GatePtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
     TopoVec2 p(jgate["pos"]);
     TopoVec2 nv(jgate["nv"]);
     string type = jgate["type"].asString();
-    if (type == "D") {
+    if (type == typeStr(GateType::Door)) {
         res.reset(new Door(p, nv, jgate["opened"].asBool(), jgate["mark"].asString()));
     }
-    else if (type == "W") {
+    else if (type == typeStr(GateType::GateWay)) {
         res.reset(new GateWay(p, nv));
     }
     else {
-        cerr << FILE_AND_LINE << " You input an UNKNOWN gate! type=" << type << endl;
-        throw;
+        cerr << FILE_AND_LINE << " You input an UNKNOWN gate! typeStr=" << type << endl;
+        return res;
     }
     res->possibility = jgate["psb"].asDouble();
     return res;
@@ -76,12 +76,12 @@ std::string tmap::Gate::typeStr(tmap::GateType type)
     string res;
     switch (type) {
         case GateType::GateWay:
-            res = "W";
+            res = "GateWay";
             break;
         case GateType::DoorClosed:
         case GateType::DoorOpened:
         case GateType::Door:
-            res = "D";
+            res = "Door";
             break;
     }
     return res;

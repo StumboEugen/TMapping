@@ -98,10 +98,15 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 QVariant::fromValue(GateType::DoorClosed));
 
         connect(uiDockExpBuilder->btnBuildExp, SIGNAL(toggled(bool)),
-                this, SLOT(slotBuildExp(bool)));
+                this, SLOT(SLOT_BuildExp(bool)));
 
         connect(uiDockExpBuilder->cbGateType, SIGNAL(currentIndexChanged(int)),
-                this, SLOT(slotGateTypeChanged(int)));
+                this, SLOT(SLOT_GateTypeChanged(int)));
+
+        connect(uiDockExpBuilder->cbBuiltExps, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(SLOT_ExpDataSelected(int)));
+        connect(uiDockExpBuilder->cbBuiltExps, SIGNAL(highlighted(int)),
+                this, SLOT(SLOT_ExpDataSelected(int)));
 
     }
 
@@ -110,18 +115,6 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 tmap::TmapUI::~TmapUI()
 {
 
-}
-
-void tmap::TmapUI::slotBuildExp(bool begin)
-{
-    if (begin) {
-        uiDockExpBuilder->btnBuildExp->setText("Complete Building");
-        auto& cbET = uiDockExpBuilder->cbExpType;
-        gvVice->beginExpBuilding(cbET->itemData(cbET->currentIndex()).value<ExpDataType>());
-    } else {
-        uiDockExpBuilder->btnBuildExp->setText("Build an Exp");
-        addBuiltExpData(gvVice->completeExpBuilding());
-    }
 }
 
 void tmap::TmapUI::addBuiltExpData(const ExpDataPtr& expData)
@@ -134,14 +127,40 @@ void tmap::TmapUI::addBuiltExpData(const ExpDataPtr& expData)
     if (name.isEmpty()) {
         static size_t indexOfExpData = 0;
         name = "[" + QString::number(indexOfExpData++) + "] " +
-                QString::number(expData->nGates()) + " gates";
+               QString::number(expData->nGates()) + "g " +
+               QString{ExpData::typeStr(expData->type()).data()};
     }
-    uiDockExpBuilder->cbBuiltExps->addItem(name, QVariant::fromValue(expData));
+    auto cbBuiltExps = uiDockExpBuilder->cbBuiltExps;
+    cbBuiltExps->addItem(name, QVariant::fromValue(expData));
+    cbBuiltExps->setCurrentIndex(cbBuiltExps->count() - 1);
 }
 
-void tmap::TmapUI::slotGateTypeChanged(int index)
+void tmap::TmapUI::SLOT_BuildExp(bool begin)
+{
+    if (begin) {
+        uiDockExpBuilder->btnBuildExp->setText("Complete Building");
+        auto& cbET = uiDockExpBuilder->cbExpType;
+        gvVice->beginExpBuilding(cbET->itemData(cbET->currentIndex()).value<ExpDataType>());
+    } else {
+        uiDockExpBuilder->btnBuildExp->setText("Build an Exp");
+        auto theBuiltExp = gvVice->completeExpBuilding();
+        if (theBuiltExp) {
+            addBuiltExpData(theBuiltExp);
+            infoView->setText("The built Exp's Json:\n");
+            infoView->append(JsonHelper::JS2Str(theBuiltExp->toJS(), false).data());
+        }
+    }
+}
+
+void tmap::TmapUI::SLOT_GateTypeChanged(int index)
 {
     gvVice->setNextGateType(
             uiDockExpBuilder->cbGateType->itemData(index).value<GateType>());
+}
+
+void tmap::TmapUI::SLOT_ExpDataSelected(int index)
+{
+    gvVice->displayTheExpData(
+            uiDockExpBuilder->cbBuiltExps->itemData(index).value<ExpDataPtr>());
 }
 

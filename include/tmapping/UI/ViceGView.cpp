@@ -4,6 +4,7 @@
 
 #include "ViceGView.h"
 #include "UITools.h"
+#include "tmapping/expDataTypes/ExpDataTypes.h"
 
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
@@ -51,6 +52,7 @@ tmap::ViceGView::ViceGView(QWidget* parent) : QGraphicsView(parent)
 void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
 {
     mStatus = DisplayStatus::BUILDING_EXP;
+    mQGates.clear();
 
     scene()->clear();
 
@@ -84,11 +86,16 @@ void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
 
 tmap::ExpDataPtr tmap::ViceGView::completeExpBuilding()
 {
+    mStatus = DisplayStatus::NOTHING;
+
+    if (mQGates.empty()) {
+        return nullptr;
+    }
+
     for (auto& qGate : mQGates) {
         mRelatedExpData->addGate(qGate->getGateData());
     }
     mQGates.clear();
-    scene()->clear();
     return mRelatedExpData;
 }
 
@@ -118,7 +125,7 @@ void tmap::ViceGView::startDrawingGateFromReferPoint(const ReferPoint& rp)
             break;
     }
 
-    auto qGate = new QGate(newGate);
+    auto qGate = new QGate(std::move(newGate));
     scene()->addItem(qGate);
     qGate->setPos(qp);
     mQGates.push_back(qGate);
@@ -144,6 +151,26 @@ void tmap::ViceGView::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
+void tmap::ViceGView::displayTheExpData(tmap::ExpDataPtr data2show)
+{
+    scene()->clear();
+    mStatus = DisplayStatus::DISPLAYING_EXP;
+    mRelatedExpData = std::move(data2show);
+    QRectF rec({-RPR, -RPR}, QPointF{RPR, RPR});
+    if (mRelatedExpData->type() == ExpDataType::Intersection) {
+        scene()->addEllipse(rec, {Qt::gray, 1}, Qt::lightGray);
+    }
+    else if (mRelatedExpData->type() == ExpDataType::SmallRoom) {
+        scene()->addRect(rec, {Qt::gray, 1}, Qt::lightGray);
+    }
+    for (const auto& gate : mRelatedExpData->getGates()) {
+        auto g = new QGate(gate);
+        g->setPos(UIT::TopoVec2QPt(gate->getPos()));
+        scene()->addItem(g);
+        mQGates.emplace_back(g);
+    }
+}
+
 /////////////////////// QGate related
 
 tmap::QGate::QGate(tmap::GatePtr data)
@@ -157,17 +184,15 @@ void tmap::QGate::paint(QPainter* painter, const QStyleOptionGraphicsItem* optio
     auto halfNorVec = mData->getNormalVec() / 2;
     auto p2 = UIT::TopoVec2QPt(halfNorVec);
     if (mData->type() == GateType::GateWay) {
-        auto pen = painter->pen();
-        pen.setWidth(3);
-        painter->setPen(pen);
+        painter->setPen({Qt::black, 3});
         painter->drawLine({0, 0}, p2);
     }
     if (mData->type() == GateType::Door) {
         painter->drawLine({0, 0}, p2);
         auto halfDoor = halfNorVec.rotate(90).changeLen(0.2);
-        auto pen = painter->pen();
-        pen.setWidth(3);
-        painter->setPen(pen);
+        Door* door = dynamic_cast<Door*>(mData.get());
+        painter->setPen(QPen{Qt::black, 2,
+                             door->isOpened() ? Qt::DotLine : Qt::SolidLine });
         painter->drawLine(UIT::TopoVec2QPt(halfDoor), UIT::TopoVec2QPt(-halfDoor));
     }
 }
