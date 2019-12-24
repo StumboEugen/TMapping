@@ -30,7 +30,7 @@ public:
 
     static GatePtr madeFromJS(const Jsobj& jgate);
 
-    virtual GateType type() = 0;
+    virtual GateType type() const = 0 ;
 
     const TopoVec2& getPos() const;
 
@@ -43,6 +43,8 @@ public:
     virtual Json::Value toJS() const;
 
     void changeNormalVec2(const TopoVec2& to);
+
+    static std::string typeStr(GateType type);
 };
 
 }

@@ -17,7 +17,6 @@ tmap::StrLM::StrLM(std::string str) : str(std::move(str))
 Json::Value tmap::StrLM::toJS() const
 {
     Json::Value res(Landmark::toJS());
-    res["type"] = "S";
     res["str"] = str;
     return res;
 }

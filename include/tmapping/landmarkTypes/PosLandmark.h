@@ -26,7 +26,7 @@ public:
 
     explicit PosLandmark(const TopoVec2& pos);
 
-    LandmarkType type() override = 0 ;
+    LandmarkType type() const override = 0 ;
 
     const TopoVec2& getPos() const;
 

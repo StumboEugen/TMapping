@@ -17,7 +17,7 @@ public:
     GateWay(const TopoVec2& pos, const TopoVec2& normalVec) : Gate(pos, normalVec)
     {}
 
-    GateType type() override
+    GateType type() const override
     {
         return GateType::GateWay;
     }

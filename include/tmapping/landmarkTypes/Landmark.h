@@ -23,9 +23,11 @@ class Landmark
 public:
     static LMUnPtr madeFromJS(const Jsobj& jMark) = delete;
 
-    virtual LandmarkType type() = 0;
+    virtual LandmarkType type() const = 0;
 
     virtual Json::Value toJS() const;
+
+    static std::string typeStr(LandmarkType type);
 
 };
 }

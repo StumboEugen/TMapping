@@ -21,7 +21,7 @@ public:
 
     bool isOpened() const;
 
-    GateType type() override
+    GateType type() const override
     {
         return GateType::Door;
     }

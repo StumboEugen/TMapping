@@ -85,6 +85,7 @@ Json::Value ExpData::toJS() const
     if (!mName.empty()) {
         res["name"] = mName;
     }
+    res["type"] = typeStr(type());
     return res;
 }
 
@@ -137,5 +138,28 @@ const string& ExpData::getName() const
 void ExpData::setName(const string& name)
 {
     ExpData::mName = name;
+}
+
+std::string ExpData::typeStr(ExpDataType type)
+{
+    string res;
+    switch (type) {
+        case ExpDataType::Intersection:
+            res = "I";
+            break;
+        case ExpDataType::Corridor:
+            res = "C";
+            break;
+        case ExpDataType::Stair:
+            res = "S";
+            break;
+        case ExpDataType::BigRoom:
+            res = "BR";
+            break;
+        case ExpDataType::SmallRoom:
+            res = "SR";
+            break;
+    }
+    return res;
 }
 

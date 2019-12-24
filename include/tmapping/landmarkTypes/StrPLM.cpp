@@ -19,7 +19,6 @@ const std::string& tmap::StrPLM::getStr() const
 Json::Value tmap::StrPLM::toJS() const
 {
     Json::Value res(PosLandmark::toJS());
-    res["type"] = "PS";
     res["str"] = str;
     return res;
 }

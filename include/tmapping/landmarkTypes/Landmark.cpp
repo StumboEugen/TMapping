@@ -4,7 +4,30 @@
 
 #include "Landmark.h"
 
+#include <string>
+
+using namespace std;
+
 Json::Value tmap::Landmark::toJS() const
 {
-    return Json::Value();
+    Jsobj res;
+    res["type"] = typeStr(type());
+    return res;
+}
+
+std::string tmap::Landmark::typeStr(LandmarkType type)
+{
+    string res;
+    switch (type) {
+        case LandmarkType::StrLM:
+            res = "S";
+            break;
+        case LandmarkType::NumLM:
+            res = "N";
+            break;
+        case LandmarkType::StrPLM:
+            res = "SP";
+            break;
+    }
+    return res;
 }

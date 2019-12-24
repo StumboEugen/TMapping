@@ -16,7 +16,7 @@ class StrPLM : public PosLandmark
     std::string str;
 
 public:
-    LandmarkType type() override { return LandmarkType::StrPLM; }
+    LandmarkType type() const override { return LandmarkType::StrPLM; }
 
     StrPLM(const TopoVec2& pos, std::string str);
 

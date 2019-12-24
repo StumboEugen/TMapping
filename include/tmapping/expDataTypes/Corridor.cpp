@@ -10,6 +10,5 @@
 Json::Value tmap::Corridor::toJS() const
 {
     Json::Value res(ExpData::toJS());
-    res["type"] = "C";
     return res;
 }

@@ -21,6 +21,5 @@ Json::Value tmap::Door::toJS() const
     Json::Value res(Gate::toJS());
     res["opened"] = opened;
     res["mark"] = doorMark;
-    res["type"] = "D";
     return res;
 }

@@ -17,7 +17,7 @@ class NumLM : public Landmark
     std::vector<double> features;
 
 public:
-    LandmarkType type() override { return LandmarkType::NumLM; }
+    LandmarkType type() const override { return LandmarkType::NumLM; }
 
     void setFeatures(const std::vector<double>& features);
 

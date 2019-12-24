@@ -80,6 +80,8 @@ public:
     const std::string& getName() const;
 
     void setName(const std::string& name);
+
+    static std::string typeStr(ExpDataType type);
 };
 
 }

@@ -7,6 +7,5 @@
 Json::Value tmap::SmallRoom::toJS() const
 {
     Json::Value res(ExpData::toJS());
-    res["type"] = "SR";
     return res;
 }

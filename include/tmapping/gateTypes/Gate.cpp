@@ -42,6 +42,7 @@ Json::Value tmap::Gate::toJS() const
     res["pos"] = std::move(pos.toJS());
     res["nv"] = std::move(mNormalVec.toJS());
     res["psb"] = possibility;
+    res["type"] = typeStr(type());
     return res;
 }
 
@@ -68,4 +69,20 @@ tmap::GatePtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
 void tmap::Gate::changeNormalVec2(const tmap::TopoVec2& to)
 {
     mNormalVec = to.unitize();
+}
+
+std::string tmap::Gate::typeStr(tmap::GateType type)
+{
+    string res;
+    switch (type) {
+        case GateType::GateWay:
+            res = "W";
+            break;
+        case GateType::DoorClosed:
+        case GateType::DoorOpened:
+        case GateType::Door:
+            res = "D";
+            break;
+    }
+    return res;
 }

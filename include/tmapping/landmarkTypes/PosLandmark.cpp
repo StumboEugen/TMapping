@@ -30,7 +30,7 @@ tmap::PLMUnPtr tmap::PosLandmark::madeFromJS(const tmap::Jsobj& jPLM)
     TopoVec2 p(jPLM["pos"]);
 
     string type = jPLM["type"].asString();
-    if (type == "PS") {
+    if (type == typeStr(LandmarkType::StrPLM)) {
         res.reset(new StrPLM(p, jPLM["str"].asString()));
     } else {
         cerr << FILE_AND_LINE << " You input an UNKNOWN PosLandmark! type=" << type << endl;
