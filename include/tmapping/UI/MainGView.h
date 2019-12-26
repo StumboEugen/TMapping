@@ -30,6 +30,9 @@ class MainGView : public QGraphicsView
     Q_OBJECT
     QGraphicsScene mScene4FakeMap;
 
+protected:
+    void wheelEvent(QWheelEvent * event) override ;
+
 public:
     explicit MainGView(QWidget *parent = nullptr);
 

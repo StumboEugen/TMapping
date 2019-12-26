@@ -78,6 +78,12 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiMain->mainToolBar->addAction(mode_SIMULATION);
         uiMain->mainToolBar->addAction(mode_REALTIME);
         uiMain->mainToolBar->addSeparator();
+
+        auto * dragMode = new QAction("enable Drag", uiMain->mainToolBar);
+        dragMode->setCheckable(true);
+        uiMain->mainToolBar->addAction(dragMode);
+        uiMain->mainToolBar->addSeparator();
+        connect(dragMode, SIGNAL(toggled(bool)), this, SLOT(SLOT_DragMode(bool)));
     }
 
     {
@@ -242,6 +248,15 @@ void tmap::TmapUI::SLOT_LoadExp()
     if (expRead) {
         cout << "load exp data [name:" << name.toStdString() << "] success!" << endl;
         addBuiltExpData(expRead);
+    }
+}
+
+void tmap::TmapUI::SLOT_DragMode(bool isDrag)
+{
+    if (isDrag) {
+        gvMain->setDragMode(QGraphicsView::ScrollHandDrag);
+    } else {
+        gvMain->setDragMode(QGraphicsView::NoDrag);
     }
 }
 

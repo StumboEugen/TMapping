@@ -65,6 +65,7 @@ private Q_SLOTS:
     void SLOT_EditJson(bool start);
     void SLOT_SaveExp();
     void SLOT_LoadExp();
+    void SLOT_DragMode(bool enableDrag);
 
 };
 }
