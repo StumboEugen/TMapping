@@ -24,6 +24,8 @@ struct MapNode
     size_t serial;
     MergedExpPtr relatedMergedExp;
     std::vector<Link> links;
+
+    virtual ~MapNode() = default;
 };
 
 class StructedMapImpl

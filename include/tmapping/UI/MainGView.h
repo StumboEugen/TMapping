@@ -7,16 +7,31 @@
 
 #include <QGraphicsView>
 #include <QWidget>
+#include <QGraphicsItem>
+
+#include "tmapping/StructedMap.h"
 
 namespace tmap
 {
 
+class QNode : public QGraphicsItem, public MapNode
+{
+public:
+    QRectF boundingRect() const override;
+
+    void
+    paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
+    ~QNode() override;
+};
+
 class MainGView : public QGraphicsView
 {
     Q_OBJECT
+    QGraphicsScene mScene4FakeMap;
 
 public:
-    explicit MainGView(QWidget *parent = nullptr) : QGraphicsView(parent) {}
+    explicit MainGView(QWidget *parent = nullptr);
 
 };
 }
