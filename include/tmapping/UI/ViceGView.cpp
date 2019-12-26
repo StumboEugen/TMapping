@@ -89,6 +89,7 @@ tmap::ExpDataPtr tmap::ViceGView::completeExpBuilding()
     mStatus = DisplayStatus::NOTHING;
 
     if (mQGates.empty()) {
+        scene()->clear();
         return nullptr;
     }
 
