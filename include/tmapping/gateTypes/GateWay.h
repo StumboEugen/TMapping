@@ -23,6 +23,8 @@ public:
     }
 
     Json::Value toJS() const override;
+
+    GatePtr clone() override;
 };
 
 }

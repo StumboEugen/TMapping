@@ -22,3 +22,9 @@ Json::Value tmap::StrPLM::toJS() const
     res["str"] = str;
     return res;
 }
+
+tmap::PLMPtr tmap::StrPLM::clone()
+{
+    auto newsp = new StrPLM(this->getPos(), this->str);
+    return PLMPtr{newsp};
+}

@@ -18,6 +18,8 @@ public:
     ExpDataType type() const override { return ExpDataType::SmallRoom; }
 
     Json::Value toJS() const override;
+
+    ExpDataPtr clone() override;
 };
 }
 

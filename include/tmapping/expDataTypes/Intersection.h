@@ -17,6 +17,8 @@ public:
     ExpDataType type() const override { return ExpDataType::Intersection; }
 
     Json::Value toJS() const override;
+
+    ExpDataPtr clone() override;
 };
 }
 

@@ -23,3 +23,14 @@ Json::Value tmap::Door::toJS() const
     res["mark"] = doorMark;
     return res;
 }
+
+tmap::GatePtr tmap::Door::clone()
+{
+    auto cloned = new Door(
+            this->getPos(),
+            this->getNormalVec(),
+            this->opened,
+            this->doorMark);
+    cloned->setPossibility(this->getPossibility());
+    return GatePtr{cloned};
+}

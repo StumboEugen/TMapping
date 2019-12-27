@@ -14,7 +14,6 @@ namespace tmap
 class PosLandmark;
 
 using PLMPtr = std::shared_ptr<PosLandmark>;
-using PLMUnPtr = std::unique_ptr<PosLandmark>;
 using PLMWePtr = std::weak_ptr<PosLandmark>;
 
 class PosLandmark : public Landmark
@@ -22,7 +21,7 @@ class PosLandmark : public Landmark
     TopoVec2 pos;
 
 public:
-    static PLMUnPtr madeFromJS(const Jsobj& jPLM);
+    static PLMPtr madeFromJS(const Jsobj& jPLM);
 
     explicit PosLandmark(const TopoVec2& pos);
 
@@ -31,6 +30,8 @@ public:
     const TopoVec2& getPos() const;
 
     Json::Value toJS() const override;
+
+    virtual PLMPtr clone() = 0;
 };
 }
 

@@ -23,6 +23,8 @@ public:
     const std::string& getStr() const;
 
     Json::Value toJS() const override;
+
+    PLMPtr clone() override;
 };
 }
 

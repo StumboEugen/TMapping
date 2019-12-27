@@ -24,9 +24,9 @@ Json::Value tmap::PosLandmark::toJS() const
     return res;
 }
 
-tmap::PLMUnPtr tmap::PosLandmark::madeFromJS(const tmap::Jsobj& jPLM)
+tmap::PLMPtr tmap::PosLandmark::madeFromJS(const tmap::Jsobj& jPLM)
 {
-    PLMUnPtr res;
+    PLMPtr res;
     TopoVec2 p(jPLM["pos"]);
 
     string type = jPLM["type"].asString();

@@ -86,3 +86,10 @@ std::string tmap::Gate::typeStr(tmap::GateType type)
     }
     return res;
 }
+
+void tmap::Gate::copy2(tmap::Gate* target)
+{
+    target->mNormalVec = this->mNormalVec;
+    target->pos = this->pos;
+    target->possibility = this->possibility;
+}

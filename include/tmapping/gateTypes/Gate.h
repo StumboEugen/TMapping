@@ -25,6 +25,9 @@ class Gate
     TopoVec2 mNormalVec;
     double possibility = 1.0;
 
+protected:
+    void copy2(Gate* target);
+
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);
 
@@ -45,6 +48,8 @@ public:
     void changeNormalVec2(const TopoVec2& to);
 
     static std::string typeStr(GateType type);
+
+    virtual GatePtr clone() = 0;
 };
 
 }

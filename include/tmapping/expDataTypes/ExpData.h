@@ -41,8 +41,11 @@ using MatchResult = std::unique_ptr<MatchResult_IMPL>;
 class ExpData
 {
     std::vector<GatePtr> mGates;
-    std::vector<PLMUnPtr> posLandmarks;
+    std::vector<PLMPtr> mPosLandmarks;
     std::string mName;
+
+protected:
+    void copy2(ExpData* copy2);
 
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
@@ -53,7 +56,7 @@ public:
 
     void addGate(GatePtr pGate);
 
-    void addLandmark(PLMUnPtr pLandmark);
+    void addLandmark(PLMPtr pLandmark);
 
     GateID findTheCloestGate(const TopoVec2& gatePos);
 
@@ -82,6 +85,15 @@ public:
     void setName(const std::string& name);
 
     static std::string typeStr(ExpDataType type);
+
+    /**
+     * @brief 产生关于gate的外包洛正方形, ENU
+     * @param 额外的扩展长度
+     * @return 上下左右, 东南西北 ENU
+     */
+    std::array<double, 4> getOutBounding(double expandValue = 0.) const;
+
+    virtual ExpDataPtr clone() = 0;
 };
 
 }

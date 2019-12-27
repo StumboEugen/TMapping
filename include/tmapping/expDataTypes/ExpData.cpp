@@ -24,9 +24,9 @@ void ExpData::addGate(GatePtr pGate)
     mGates.emplace_back(std::move(pGate));
 }
 
-void ExpData::addLandmark(PLMUnPtr pLandmark)
+void ExpData::addLandmark(PLMPtr pLandmark)
 {
-    posLandmarks.emplace_back(std::move(pLandmark));
+    mPosLandmarks.emplace_back(std::move(pLandmark));
 }
 
 GateID ExpData::findTheCloestGate(const TopoVec2& gatePos)
@@ -79,7 +79,7 @@ Json::Value ExpData::toJS() const
     for (const auto& gate : mGates) {
         res["gates"].append(std::move(gate->toJS()));
     }
-    for (const auto& landMark : posLandmarks) {
+    for (const auto& landMark : mPosLandmarks) {
         res["landMark"].append(std::move(landMark->toJS()));
     }
     if (!mName.empty()) {
@@ -123,7 +123,7 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
 
         const auto& jmarks = jexp["landMark"];
         auto nMark = jmarks.size();
-        auto& marks = res->posLandmarks;
+        auto& marks = res->mPosLandmarks;
         marks.reserve(nMark);
         for (int i = 0; i < nMark; ++i) {
             marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
@@ -165,5 +165,38 @@ std::string ExpData::typeStr(ExpDataType type)
             break;
     }
     return res;
+}
+
+std::array<double, 4> ExpData::getOutBounding(double expandValue) const
+{
+    std::array<double, 4> res{0., 0., 0., 0.};
+    for (const auto& gate : mGates) {
+        auto& pos = gate->getPos();
+        res[0] = max(res[0], pos.py);
+        res[1] = min(res[1], pos.py);
+        res[2] = min(res[2], pos.px);
+        res[3] = max(res[3], pos.px);
+    }
+    res[0] += expandValue;
+    res[1] -= expandValue;
+    res[2] -= expandValue;
+    res[3] += expandValue;
+
+    return res;
+}
+
+void ExpData::copy2(ExpData* copy2)
+{
+    copy2->mGates.reserve(this->mGates.size());
+    for (auto& gate : this->mGates) {
+        copy2->mGates.emplace_back(gate->clone());
+    }
+
+    copy2->mPosLandmarks.reserve(this->mPosLandmarks.size());
+    for (auto& plm : this->mPosLandmarks) {
+        copy2->mPosLandmarks.emplace_back(plm->clone());
+    }
+
+    copy2->mName = this->mName;
 }
 
