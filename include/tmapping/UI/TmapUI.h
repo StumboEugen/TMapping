@@ -20,6 +20,7 @@ namespace Ui
 {
 class TmapWindow;
 class BuildExpDockUI;
+class BuildMapDockUI;
 }
 
 namespace tmap
@@ -47,6 +48,8 @@ class TmapUI : public QMainWindow
 
     Ui::BuildExpDockUI* uiDockExpBuilder;
     QDockWidget * dockExpBuilder;
+    Ui::BuildMapDockUI* uiDockMapBuilder;
+    QDockWidget * dockMapBuilder;
 
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);

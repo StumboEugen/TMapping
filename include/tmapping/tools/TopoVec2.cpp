@@ -162,3 +162,13 @@ TopoVec2 TopoVec2::operator-() const
     return this->operator*(-1.0);
 }
 
+TopoVec2 TopoVec2::round2(double lidu) const
+{
+    if (lidu == 0.) {
+        lidu = 1.;
+    }
+    double rx = round(px / lidu) * lidu;
+    double ry = round(py / lidu) * lidu;
+    return {rx, ry};
+}
+

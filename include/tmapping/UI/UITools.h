@@ -34,6 +34,11 @@ inline double QMeter(double meter)
     return METER2PIX * meter;
 }
 
+inline double pix2meter(double pix)
+{
+    return pix / METER2PIX;
+}
+
 void drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose = false);
 
 } /// namespace UIT

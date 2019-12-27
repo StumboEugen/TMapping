@@ -38,14 +38,23 @@ class MainGView : public QGraphicsView
     QGraphicsScene mScene4FakeMap;
     std::set<QNodePtr> mNodesInFakeMap;
 
+    bool mEnableFakeNodesMoving = true;
+    bool mEnableNodeRestriction = false;
+
 protected:
     void wheelEvent(QWheelEvent * event) override ;
+    void mouseReleaseEvent(QMouseEvent *event) override ;
 
 public:
     explicit MainGView(QWidget *parent = nullptr);
 
     void addNode2FakeMap(const ExpDataPtr& usedExpData);
 
+    void restrictQNode(QNode* qNode);
+
+public Q_SLOTS:
+    void SLOT_EnableMoving4FakeNodes(bool enableMove);
+    void SLOT_EnableGridRestriction(bool enableRes);
 };
 }
 

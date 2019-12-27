@@ -10,6 +10,7 @@
 #include "ViceGView.h"
 
 #include "ui_dockBuildExp.h"
+#include "ui_dockBuildMap.h"
 
 using namespace std;
 
@@ -21,7 +22,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         QMainWindow(parent),
         uiMain(new Ui::TmapWindow),
         uiDockExpBuilder(new Ui::BuildExpDockUI),
-        dockExpBuilder(new QDockWidget(this))
+        dockExpBuilder(new QDockWidget(this)),
+        uiDockMapBuilder(new Ui::BuildMapDockUI),
+        dockMapBuilder(new QDockWidget(this))
 {
     {   /// 添加UI组件
         uiMain->setupUi(this);
@@ -125,6 +128,18 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockExpBuilder->btnAdd2Map, SIGNAL(clicked()),
                 this, SLOT(SLOT_AddFakeNode()));
+    }
+
+    {
+        uiDockMapBuilder->setupUi(dockMapBuilder);
+        addDockWidget(Qt::LeftDockWidgetArea, dockMapBuilder);
+        dockExpBuilder->setShown(true);
+
+        connect(uiDockMapBuilder->cbEnableNodesMoving, SIGNAL(toggled(bool)),
+                gvMain, SLOT(SLOT_EnableMoving4FakeNodes(bool)));
+
+        connect(uiDockMapBuilder->cbRestrictGrid, SIGNAL(toggled(bool)),
+                gvMain, SLOT(SLOT_EnableGridRestriction(bool)));
     }
 
 }

@@ -107,5 +107,52 @@ void tmap::MainGView::addNode2FakeMap(const tmap::ExpDataPtr& usedExpData)
     auto qNode = make_shared<QNode>(usedExpData->clone());
     mNodesInFakeMap.insert(qNode);
     mScene4FakeMap.addItem(qNode.get());
-    qNode->setFlag(QGraphicsItem::ItemIsMovable);
+    qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
+}
+
+void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
+{
+    mEnableFakeNodesMoving = enableMove;
+    for (auto& item : mScene4FakeMap.items()) {
+        if (auto qNode = dynamic_cast<QNode*>(item)) {
+            if (qNode->relatedMergedExp->getMergedExpData()->type() != ExpDataType::Corridor) {
+                qNode->setFlag(QGraphicsItem::ItemIsMovable, enableMove);
+            }
+        }
+    }
+}
+
+void tmap::MainGView::SLOT_EnableGridRestriction(bool enableRes)
+{
+    mEnableNodeRestriction = enableRes;
+}
+
+void tmap::MainGView::restrictQNode(tmap::QNode* qNode)
+{
+    if (qNode &&
+        qNode->scene() == &mScene4FakeMap &&
+        qNode->relatedMergedExp->getMergedExpData()->type() != ExpDataType::Corridor) {
+        auto pos = qNode->pos();
+        auto roundedP = UIT::QPt2TopoVec(pos).round2();
+        qNode->setPos(UIT::TopoVec2QPt(roundedP));
+    }
+}
+
+void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
+{
+    QGraphicsView::mouseReleaseEvent(event);
+    const auto & clickPosInView = event->pos();
+    const auto & clickPosInScene = mapToScene(clickPosInView);
+    auto item = scene()->itemAt(clickPosInScene);
+
+    if (item) {
+        if (auto qNode = dynamic_cast<QNode*>(item)) {
+            if (qNode->relatedMergedExp->getMergedExpData()->type() != ExpDataType::Corridor) {
+                if (mEnableNodeRestriction) {
+                    restrictQNode(qNode);
+                }
+            }
+        }
+    }
+
 }

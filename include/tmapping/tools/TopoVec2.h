@@ -59,6 +59,11 @@ struct TopoVec2
 
     /// ENU, 逆时针为正
     TopoVec2 rotate(int degree) const;
+
+    /**
+     * @brief 取整到lidu
+     */
+    TopoVec2 round2(double lidu = 1.0) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);
