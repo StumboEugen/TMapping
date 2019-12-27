@@ -66,6 +66,7 @@ private Q_SLOTS:
     void SLOT_SaveExp();
     void SLOT_LoadExp();
     void SLOT_DragMode(bool enableDrag);
+    void SLOT_AddFakeNode();
 
 };
 }

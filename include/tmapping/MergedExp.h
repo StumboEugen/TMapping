@@ -169,6 +169,8 @@ public:
     void mapGates(std::vector<GateID>& gates2map) const;
 
     Json::Value toJS() const;
+
+    ExpDataPtr getMergedExpData() const;
 };
 
 }

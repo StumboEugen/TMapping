@@ -186,21 +186,7 @@ tmap::QGate::QGate(tmap::GatePtr data)
 void tmap::QGate::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                         QWidget* widget)
 {
-    auto halfNorVec = mData->getNormalVec() / 2;
-    auto p2 = UIT::TopoVec2QPt(halfNorVec);
-    if (mData->type() == GateType::GateWay) {
-        painter->setPen({Qt::black, 3});
-        painter->drawLine({0, 0}, p2);
-        painter->drawEllipse(QRectF{-2, -2, 4, 4});
-    }
-    if (mData->type() == GateType::Door) {
-        painter->drawLine({0, 0}, p2);
-        auto halfDoor = halfNorVec.rotate(90).changeLen(0.2);
-        Door* door = dynamic_cast<Door*>(mData.get());
-        painter->setPen(QPen{Qt::black, 2,
-                             door->isOpened() ? Qt::DotLine : Qt::SolidLine });
-        painter->drawLine(UIT::TopoVec2QPt(halfDoor), UIT::TopoVec2QPt(-halfDoor));
-    }
+    UIT::drawGate(painter, mData.get());
 }
 
 void tmap::QGate::changeNormalVec(const QPointF& toPointInScene)

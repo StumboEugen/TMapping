@@ -26,7 +26,7 @@ MergedExp::MergedExp(ExpPtr fatherExp)
         : mFather(nullptr),
           mRelatedExp(std::move(fatherExp)),
           nMergedExps(1),
-          mMergedExpData(fatherExp->expData()),
+          mMergedExpData(mRelatedExp->expData()),
           mTrans(),
           /// add GATEID_NO_MAPPING for safety
           mGatesMapping2Father(mMergedExpData->nGates(), GATEID_NO_MAPPING),
@@ -341,4 +341,9 @@ Json::Value MergedExp::toJS() const
 MergedExpPtr MergedExp::madeFronJS(const Jsobj& jmergedExp)
 {
     return tmap::MergedExpPtr(new MergedExp(jmergedExp));
+}
+
+ExpDataPtr MergedExp::getMergedExpData() const
+{
+    return mMergedExpData;
 }

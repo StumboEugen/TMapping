@@ -9,7 +9,11 @@
 
 #include <QPointF>
 
+class QPainter;
+
 namespace tmap {
+
+class Gate;
 
 static constexpr double METER2PIX = 60.0;
 
@@ -29,6 +33,9 @@ inline double QMeter(double meter)
 {
     return METER2PIX * meter;
 }
+
+void drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose = false);
+
 } /// namespace UIT
 
 }

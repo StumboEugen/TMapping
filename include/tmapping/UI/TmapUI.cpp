@@ -123,6 +123,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockExpBuilder->btnSave, SIGNAL(clicked()),
                 this, SLOT(SLOT_SaveExp()));
 
+        connect(uiDockExpBuilder->btnAdd2Map, SIGNAL(clicked()),
+                this, SLOT(SLOT_AddFakeNode()));
     }
 
 }
@@ -258,5 +260,14 @@ void tmap::TmapUI::SLOT_DragMode(bool isDrag)
     } else {
         gvMain->setDragMode(QGraphicsView::NoDrag);
     }
+}
+
+void tmap::TmapUI::SLOT_AddFakeNode()
+{
+    auto& exps = uiDockExpBuilder->cbBuiltExps;
+    if (exps->count() == 0) {
+        return;
+    }
+    gvMain->addNode2FakeMap(exps->itemData(exps->currentIndex()).value<ExpDataPtr>());
 }
 
