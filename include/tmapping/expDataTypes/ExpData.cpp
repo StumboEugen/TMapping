@@ -97,8 +97,10 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         string type = jexp["type"].asString();
         if (type == typeStr(ExpDataType::Corridor)) {
             auto c = new Corridor;
-            c->setEndPointA(jexp["endP_A"].asInt());
-            c->setEndPointB(jexp["endP_B"].asInt());
+            c->setEndGateA(jexp["endG_A"].asInt());
+            c->setEndGateB(jexp["endG_B"].asInt());
+            c->setEndPointA(TopoVec2{jexp["endP_A"]});
+            c->setEndPointB(TopoVec2{jexp["endP_B"]});
             res.reset(c);
         }
         else if (type == typeStr(ExpDataType::Intersection)) {

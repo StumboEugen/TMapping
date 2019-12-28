@@ -13,8 +13,10 @@ namespace tmap
 class Corridor : public ExpData
 {
 
-    GateID mEndPointA = GATEID_CORRIDOR_NO_ENDPOINT;
-    GateID mEndPointB = GATEID_CORRIDOR_NO_ENDPOINT;
+    GateID mEndGateA = GATEID_CORRIDOR_NO_ENDPOINT;
+    GateID mEndGateB = GATEID_CORRIDOR_NO_ENDPOINT;
+    TopoVec2 mEndPointA{};
+    TopoVec2 mEndPointB{};
 
 public:
 
@@ -24,13 +26,23 @@ public:
 
     ExpDataPtr clone() override;
 
-    GateID getEndPointA() const;
+    GateID getEndGateA() const;
 
-    GateID getEndPointB() const;
+    GateID getEndGateB() const;
 
-    void setEndPointA(GateID endPointA);
+    const TopoVec2& getEndPointA() const;
 
-    void setEndPointB(GateID endPointB);
+    const TopoVec2& getEndPointB() const;
+
+    void setEndGateA(GateID endPointA);
+
+    void setEndGateB(GateID endPointB);
+
+    void setEndPointA(const TopoVec2& endPointA);
+
+    void setEndPointB(const TopoVec2& endPointB);
+
+
 };
 }
 
