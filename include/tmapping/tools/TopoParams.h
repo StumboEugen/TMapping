@@ -27,6 +27,7 @@ using GateID = int8_t;
 static constexpr GateID GATEID_NO_MAPPING = -1;
 static constexpr GateID GATEID_BEGINNING_POINT = -2;
 static constexpr GateID GATEID_HAVENT_LEFT = -3;
+static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 
 static constexpr double convEdgePerMeter = 0.02;
 static constexpr double stdDevEdgePerMeter = 0.1 * M_SQRT2;

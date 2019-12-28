@@ -96,7 +96,10 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
     try {
         string type = jexp["type"].asString();
         if (type == typeStr(ExpDataType::Corridor)) {
-            res = make_shared<Corridor>();
+            auto c = new Corridor;
+            c->setEndPointA(jexp["endP_A"].asInt());
+            c->setEndPointB(jexp["endP_B"].asInt());
+            res.reset(c);
         }
         else if (type == typeStr(ExpDataType::Intersection)) {
             res = make_shared<Intersection>();
