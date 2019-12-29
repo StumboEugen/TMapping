@@ -5,6 +5,7 @@
 #include "Corridor.h"
 
 #include <cmath>
+#include <iostream>
 
 using namespace std;
 
@@ -96,4 +97,21 @@ std::array<double, 4> tmap::Corridor::getOutBounding(double expandValue) const
     res[2] -= expandValue;
     res[3] += expandValue;
     return res;
+}
+
+void tmap::Corridor::moveGatePos(tmap::GateID id, const tmap::TopoVec2& newPos)
+{
+    if (id < 0 || id >= this->nGates()) {
+        cerr << FILE_AND_LINE << " An invalid GateID!!! id:" << id;
+        return;
+    }
+
+    this->getGates()[id]->setPos(newPos);
+
+    if (id == mEndGateA) {
+        mEndPointA = newPos;
+    }
+    else if (id == mEndGateB) {
+        mEndPointB = newPos;
+    }
 }

@@ -22,10 +22,15 @@ class QNode : public QGraphicsItem, public MapNode, public std::enable_shared_fr
 {
     mutable QRectF mBoundingRect;
 
-protected:
+private:
     explicit QNode(const ExpDataPtr& relatedExpData);
 
+protected:
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
 public:
+    void notifyNeighbours2Move() const;
     static QNodePtr makeOne(const ExpDataPtr& relatedExpData);
 
     QRectF boundingRect() const override;
@@ -33,7 +38,7 @@ public:
     void
     paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
-    void changeSize();
+    void notifySizeChange();
 
     ~QNode() override;
 };

@@ -91,7 +91,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     }
 }
 
-void tmap::QNode::changeSize()
+void tmap::QNode::notifySizeChange()
 {
     mBoundingRect.setWidth(0.);
     prepareGeometryChange();
@@ -102,6 +102,75 @@ tmap::QNodePtr tmap::QNode::makeOne(const tmap::ExpDataPtr& relatedExpData)
 {
     return QNodePtr(new QNode(relatedExpData->clone()));
 }
+
+void tmap::QNode::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseMoveEvent(event);
+    if (flags() & ItemIsMovable) {
+        notifyNeighbours2Move();
+    }
+}
+
+void tmap::QNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseReleaseEvent(event);
+    if (flags() & ItemIsMovable) {
+        notifyNeighbours2Move();
+    }
+}
+
+void tmap::QNode::notifyNeighbours2Move() const
+{
+    vector<const QNode*> stack{this};
+    set<const QNode*> searchedNodes;
+    
+    while (!stack.empty()) {
+        auto current = stack.back();
+        stack.pop_back();
+        for (int i = 0; i < links.size(); ++i) {
+            auto& link = links[i];
+            if (!link.to.expired()) {
+                const auto& linkedQNode = dynamic_cast<QNode*>(link.to.lock().get());
+                if (searchedNodes.find(linkedQNode) != searchedNodes.end()) {
+                    /// 要处理的current之前已经处理过了, 不要发生死循环
+                    continue;
+                }
+                GateID linkedGateID = link.at;
+                const auto& linkedExpData = linkedQNode->relatedMergedExp->getMergedExpData();
+                /// 得到在scene中两个点的位置差距
+                auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
+                        (linkedExpData->getGates()[linkedGateID]->getPos()));
+                auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
+                        (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
+                switch (linkedExpData->type()) {
+                    case ExpDataType::Intersection:
+                    case ExpDataType::SmallRoom:
+                        /// Intersection和SmallRoom采用相同的策略, 跟随current移动
+                        searchedNodes.insert(linkedQNode);
+                        linkedQNode->setPos(
+                                linkedQNode->pos() + (currentGatePos - linkedGatePos));
+                        /// 移动后相关的Gate也会受影响, 加入修改队列中
+                        stack.push_back(linkedQNode);
+                        break;
+                    case ExpDataType::Corridor: {
+                        /// 走廊的话直接移动端点 TODO 考虑是否合理?
+                        dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
+                        (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
+                        linkedQNode->notifySizeChange();
+                        searchedNodes.insert(linkedQNode);
+                        break;
+                    }
+                    default:
+                        cerr << FILE_AND_LINE << " Unimplemented type!" <<
+                             (int) linkedExpData->type() << endl;
+                        break;
+                }
+            }
+        }
+    }
+}
+
+//////////////////////////// end of QNode
 
 tmap::MainGView::MainGView(QWidget* parent) : QGraphicsView(parent)
 {
@@ -163,6 +232,7 @@ void tmap::MainGView::restrictQNode(tmap::QNode* qNode)
         auto pos = qNode->pos();
         auto roundedP = UIT::QPt2TopoVec(pos).round2();
         qNode->setPos(UIT::TopoVec2QPt(roundedP));
+        qNode->notifyNeighbours2Move();
     }
 }
 
@@ -240,7 +310,7 @@ void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
         const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
         dynamic_cast<Corridor*>(mTheDrawingCorridor->relatedMergedExp->getMergedExpData().get())
                 ->setEndPointB(UIT::QPt2TopoVec(clickPosInQNode));
-        mTheDrawingCorridor->changeSize();
+        mTheDrawingCorridor->notifySizeChange();
     }
 }
 
@@ -298,7 +368,7 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                             l.at = clickedGateID;
                             mTheDrawingCorridor->links.push_back(std::move(l));
                             /// 完成制作, 确定图形
-                            mTheDrawingCorridor->changeSize();
+                            mTheDrawingCorridor->notifySizeChange();
                             mTheDrawingCorridor.reset();
                             return;
                         }
@@ -307,7 +377,7 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                 const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
                 dynamic_cast<Corridor*>(mTheDrawingCorridor->relatedMergedExp->getMergedExpData().get())
                         ->setEndPointB(UIT::QPt2TopoVec(clickPosInQNode));
-                mTheDrawingCorridor->changeSize();
+                mTheDrawingCorridor->notifySizeChange();
                 mTheDrawingCorridor.reset();
             }
         }
