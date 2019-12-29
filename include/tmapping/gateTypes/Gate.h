@@ -21,7 +21,7 @@ enum class GateType{GateWay, Door, DoorOpened, DoorClosed};
 
 class Gate
 {
-    TopoVec2 pos;
+    TopoVec2 mPos;
     TopoVec2 mNormalVec;
     double possibility = 1.0;
 
@@ -50,6 +50,10 @@ public:
     static std::string typeStr(GateType type);
 
     virtual GatePtr clone() = 0;
+
+    void setPos(const TopoVec2& pos);
+
+    void setNormalVec(const TopoVec2& mNormalVec);
 };
 
 }

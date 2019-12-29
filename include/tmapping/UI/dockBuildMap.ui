@@ -71,6 +71,12 @@
       <property name="text">
        <string>Draw Corridor</string>
       </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
     <item>
@@ -105,6 +111,16 @@
      <widget class="QCheckBox" name="cbEnableNodesMoving">
       <property name="text">
        <string>Enable nodes moving</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbDrawFromGate">
+      <property name="text">
+       <string>Draw edge from gate</string>
       </property>
       <property name="checked">
        <bool>true</bool>

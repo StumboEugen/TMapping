@@ -12,13 +12,13 @@
 using namespace std;
 
 tmap::Gate::Gate(const tmap::TopoVec2& pos, const tmap::TopoVec2& normalVec)
-        : pos(pos),
+        : mPos(pos),
           mNormalVec(normalVec.unitize())
 {}
 
 const tmap::TopoVec2& tmap::Gate::getPos() const
 {
-    return pos;
+    return mPos;
 }
 
 const tmap::TopoVec2& tmap::Gate::getNormalVec() const
@@ -39,7 +39,7 @@ double tmap::Gate::getPossibility() const
 Json::Value tmap::Gate::toJS() const
 {
     Json::Value res;
-    res["pos"] = std::move(pos.toJS());
+    res["pos"] = std::move(mPos.toJS());
     res["nv"] = std::move(mNormalVec.toJS());
     res["psb"] = possibility;
     res["type"] = typeStr(type());
@@ -90,6 +90,16 @@ std::string tmap::Gate::typeStr(tmap::GateType type)
 void tmap::Gate::copy2(tmap::Gate* target)
 {
     target->mNormalVec = this->mNormalVec;
-    target->pos = this->pos;
+    target->mPos = this->mPos;
     target->possibility = this->possibility;
+}
+
+void tmap::Gate::setPos(const tmap::TopoVec2& pos)
+{
+    Gate::mPos = pos;
+}
+
+void tmap::Gate::setNormalVec(const tmap::TopoVec2& mNormalVec)
+{
+    Gate::mNormalVec = mNormalVec;
 }

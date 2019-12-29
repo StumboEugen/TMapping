@@ -140,6 +140,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockMapBuilder->cbRestrictGrid, SIGNAL(toggled(bool)),
                 gvMain, SLOT(SLOT_EnableGridRestriction(bool)));
+
+        connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
+                this, SLOT(SLOT_DrawEdge(bool)));
     }
 
 }
@@ -284,5 +287,18 @@ void tmap::TmapUI::SLOT_AddFakeNode()
         return;
     }
     gvMain->addNode2FakeMap(exps->itemData(exps->currentIndex()).value<ExpDataPtr>());
+}
+
+void tmap::TmapUI::SLOT_DrawEdge(bool startDraw)
+{
+    uiDockMapBuilder->cbEnableNodesMoving->setDisabled(startDraw);
+    uiDockMapBuilder->cbRestrictGrid->setDisabled(startDraw);
+    dockExpBuilder->setDisabled(startDraw);
+
+    if (startDraw) {
+        uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
+    }
+
+    gvMain->SLOT_StartDrawingEdge(startDraw);
 }
 

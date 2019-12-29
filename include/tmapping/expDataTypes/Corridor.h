@@ -34,13 +34,15 @@ public:
 
     const TopoVec2& getEndPointB() const;
 
-    void setEndGateA(GateID endPointA);
+    void setEndGateA(GateID endGateA);
 
-    void setEndGateB(GateID endPointB);
+    void setEndGateB(GateID endGateB);
 
     void setEndPointA(const TopoVec2& endPointA);
 
     void setEndPointB(const TopoVec2& endPointB);
+
+    std::array<double, 4> getOutBounding(double expandValue) const override;
 
 
 };

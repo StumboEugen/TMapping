@@ -70,6 +70,7 @@ private Q_SLOTS:
     void SLOT_LoadExp();
     void SLOT_DragMode(bool enableDrag);
     void SLOT_AddFakeNode();
+    void SLOT_DrawEdge(bool startDraw);
 
 };
 }

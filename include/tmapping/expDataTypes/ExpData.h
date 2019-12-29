@@ -91,9 +91,11 @@ public:
      * @param 额外的扩展长度
      * @return 上下左右, 东南西北 ENU
      */
-    std::array<double, 4> getOutBounding(double expandValue = 0.) const;
+    virtual std::array<double, 4> getOutBounding(double expandValue) const;
 
     virtual ExpDataPtr clone() = 0;
+
+    GateID findGateAtPos(const TopoVec2& pos, double threshold = 0.5) const;
 };
 
 }

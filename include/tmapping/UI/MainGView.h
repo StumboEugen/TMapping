@@ -18,16 +18,22 @@ namespace tmap
 class QNode;
 using QNodePtr = std::shared_ptr<QNode>;
 
-class QNode : public QGraphicsItem, public MapNode
+class QNode : public QGraphicsItem, public MapNode, public std::enable_shared_from_this<QNode>
 {
     mutable QRectF mBoundingRect;
+
+protected:
+    explicit QNode(const ExpDataPtr& relatedExpData);
+
 public:
-    QNode(const ExpDataPtr& relatedExpData);
+    static QNodePtr makeOne(const ExpDataPtr& relatedExpData);
 
     QRectF boundingRect() const override;
 
     void
     paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
+    void changeSize();
 
     ~QNode() override;
 };
@@ -38,11 +44,16 @@ class MainGView : public QGraphicsView
     QGraphicsScene mScene4FakeMap;
     std::set<QNodePtr> mNodesInFakeMap;
 
+    QNodePtr mTheDrawingCorridor;
+
     bool mEnableFakeNodesMoving = true;
     bool mEnableNodeRestriction = false;
+    bool mIsDrawingEdge = false;
 
 protected:
     void wheelEvent(QWheelEvent * event) override ;
+    void mousePressEvent(QMouseEvent * event) override ;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override ;
 
 public:
@@ -52,9 +63,12 @@ public:
 
     void restrictQNode(QNode* qNode);
 
+    virtual ~MainGView();
+
 public Q_SLOTS:
     void SLOT_EnableMoving4FakeNodes(bool enableMove);
     void SLOT_EnableGridRestriction(bool enableRes);
+    void SLOT_StartDrawingEdge(bool enableDrawing);
 };
 }
 

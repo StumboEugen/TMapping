@@ -4,6 +4,9 @@
 
 #include "Corridor.h"
 
+#include <cmath>
+
+using namespace std;
 
 Json::Value tmap::Corridor::toJS() const
 {
@@ -34,19 +37,19 @@ tmap::GateID tmap::Corridor::getEndGateB() const
     return mEndGateB;
 }
 
-void tmap::Corridor::setEndGateA(tmap::GateID endPointA)
+void tmap::Corridor::setEndGateA(tmap::GateID endGateA)
 {
-    mEndGateA = endPointA;
-    if (endPointA > 0) {
-        mEndPointA = getGates()[endPointA]->getPos();
+    mEndGateA = endGateA;
+    if (endGateA >= 0) {
+        mEndPointA = getGates()[endGateA]->getPos();
     }
 }
 
-void tmap::Corridor::setEndGateB(tmap::GateID endPointB)
+void tmap::Corridor::setEndGateB(tmap::GateID endGateB)
 {
-    mEndGateB = endPointB;
-    if (endPointB > 0) {
-        mEndPointA = getGates()[endPointB]->getPos();
+    mEndGateB = endGateB;
+    if (endGateB >= 0) {
+        mEndPointB = getGates()[endGateB]->getPos();
     }
 }
 
@@ -68,4 +71,29 @@ void tmap::Corridor::setEndPointA(const tmap::TopoVec2& endPointA)
 void tmap::Corridor::setEndPointB(const tmap::TopoVec2& endPointB)
 {
     mEndPointB = endPointB;
+}
+
+std::array<double, 4> tmap::Corridor::getOutBounding(double expandValue) const
+{
+    auto res = ExpData::getOutBounding(0.);
+    if (mEndGateA < 0) {
+        auto& pos = mEndPointA;
+        res[0] = max(res[0], pos.py);
+        res[1] = min(res[1], pos.py);
+        res[2] = min(res[2], pos.px);
+        res[3] = max(res[3], pos.px);
+    }
+
+    if (mEndGateB < 0) {
+        auto& pos = mEndPointB;
+        res[0] = max(res[0], pos.py);
+        res[1] = min(res[1], pos.py);
+        res[2] = min(res[2], pos.px);
+        res[3] = max(res[3], pos.px);
+    }
+    res[0] += expandValue;
+    res[1] -= expandValue;
+    res[2] -= expandValue;
+    res[3] += expandValue;
+    return res;
 }

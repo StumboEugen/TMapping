@@ -205,3 +205,13 @@ void ExpData::copy2(ExpData* copy2)
     copy2->mName = this->mName;
 }
 
+GateID ExpData::findGateAtPos(const TopoVec2& pos, double threshold) const
+{
+    for (int i = 0; i < mGates.size(); ++i) {
+        if ((pos - mGates[i]->getPos()).len() < threshold) {
+            return i;
+        }
+    }
+    return GATEID_NOT_FOUND;
+}
+
