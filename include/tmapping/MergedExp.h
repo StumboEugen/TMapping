@@ -171,6 +171,11 @@ public:
     Json::Value toJS() const;
 
     ExpDataPtr getMergedExpData() const;
+
+    /**
+     * @brief 使用一个新的ExpData, 这是为了UI而专属的一个行为
+     */
+    void exchangeMergedExpData(ExpDataPtr newExpData);
 };
 
 }

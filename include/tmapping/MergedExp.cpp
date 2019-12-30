@@ -349,3 +349,13 @@ ExpDataPtr MergedExp::getMergedExpData() const
 {
     return mMergedExpData;
 }
+
+void MergedExp::exchangeMergedExpData(ExpDataPtr newExpData)
+{
+    if (mRelatedExp) {
+        auto newExp = make_shared<Exp>(newExpData, 0);
+        newExp->setSerial(mRelatedExp->serial());
+        mRelatedExp = newExp;
+    }
+    mMergedExpData = std::move(newExpData);
+}

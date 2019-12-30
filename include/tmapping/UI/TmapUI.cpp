@@ -9,6 +9,8 @@
 #include "MainGView.h"
 #include "ViceGView.h"
 
+#include "tmapping/MergedExp.h"
+
 #include "ui_dockBuildExp.h"
 #include "ui_dockBuildMap.h"
 
@@ -110,7 +112,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 this, SLOT(SLOT_BuildExp(bool)));
 
         connect(uiDockExpBuilder->btnEditJson, SIGNAL(toggled(bool)),
-                this, SLOT(SLOT_EditJson(bool)));
+                this, SLOT(SLOT_EditJsonOfBuiltExpData(bool)));
 
         connect(uiDockExpBuilder->cbGateType, SIGNAL(currentIndexChanged(int)),
                 this, SLOT(SLOT_GateTypeChanged(int)));
@@ -156,6 +158,10 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockMapBuilder->btnLoad, SIGNAL(clicked()),
                 this, SLOT(SLOT_LoadMap()));
+
+        connect(uiDockMapBuilder->btnEditJson, SIGNAL(toggled(bool)),
+                this, SLOT(SLOT_EditJsonOfNodeInFakeMap(bool)));
+
     }
 
 }
@@ -206,7 +212,7 @@ void tmap::TmapUI::SLOT_ExpDataSelected(int index)
             uiDockExpBuilder->cbBuiltExps->itemData(index).value<ExpDataPtr>());
 }
 
-void tmap::TmapUI::SLOT_EditJson(bool start)
+void tmap::TmapUI::SLOT_EditJsonOfBuiltExpData(bool start)
 {
     static int indexOfEditing;
     auto& exps = uiDockExpBuilder->cbBuiltExps;
@@ -238,6 +244,45 @@ void tmap::TmapUI::SLOT_EditJson(bool start)
         infoView->setReadOnly(true);
     }
 }
+
+void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
+{
+    const auto& items = gvMain->scene()->selectedItems();
+    if (start) {
+        if (items.empty()) {
+            uiDockMapBuilder->btnEditJson->setCheckable(false);
+            uiDockMapBuilder->btnEditJson->setCheckable(true);
+            return;
+        }
+        auto qNode = dynamic_cast<QNode*>(items.front());
+        if (!qNode) {
+            uiDockMapBuilder->btnEditJson->setCheckable(false);
+            uiDockMapBuilder->btnEditJson->setCheckable(true);
+            return;
+        }
+        Jsobj jExpData = qNode->relatedMergedExp->getMergedExpData()->toJS();
+        infoView->setText(JsonHelper::JS2Str(jExpData, false).data());
+        infoView->setTextColor(Qt::darkGray);
+        uiDockMapBuilder->btnEditJson->setText("Complete Editting");
+    } else {
+        uiDockMapBuilder->btnEditJson->setText("Edit Json of Selected Node");
+        Jsobj editedJs = JsonHelper::Str2JS(infoView->toPlainText().toStdString());
+        ExpDataPtr madeExpData = ExpData::madeFromJS(editedJs);
+        if (madeExpData) {
+            auto qNode = dynamic_cast<QNode*>(items.front());
+            qNode->relatedMergedExp->exchangeMergedExpData(madeExpData);
+            qNode->notifySizeChange();
+            qNode->notifyNeighbours2Move();
+        } else {
+            infoView->append("\n Trans error!");
+        }
+        infoView->setTextColor(Qt::black);
+    }
+    startEdittingNodes(start);
+    gvMain->setDisabled(start);
+    infoView->setReadOnly(!start);
+}
+
 
 QString tmap::TmapUI::getExpDataLabel(const tmap::ExpDataPtr& expData)
 {
@@ -331,4 +376,3 @@ void tmap::TmapUI::startEdittingNodes(bool start)
         uiDockMapBuilder->cbRestrictGrid->setChecked(false);
     }
 }
-

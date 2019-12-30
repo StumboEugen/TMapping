@@ -66,7 +66,7 @@ private Q_SLOTS:
     void SLOT_BuildExp(bool start);
     void SLOT_GateTypeChanged(int index);
     void SLOT_ExpDataSelected(int index);
-    void SLOT_EditJson(bool start);
+    void SLOT_EditJsonOfBuiltExpData(bool start);
     void SLOT_SaveExp();
     void SLOT_LoadExp();
     void SLOT_DragMode(bool enableDrag);
@@ -74,6 +74,7 @@ private Q_SLOTS:
     void SLOT_DrawEdge(bool startDraw);
     void SLOT_SaveMap();
     void SLOT_LoadMap();
+    void SLOT_EditJsonOfNodeInFakeMap(bool start);
 
 };
 }

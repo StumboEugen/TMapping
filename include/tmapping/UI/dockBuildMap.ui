@@ -91,6 +91,9 @@
       <property name="text">
        <string>Edit Json of Selected Node</string>
       </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item>
