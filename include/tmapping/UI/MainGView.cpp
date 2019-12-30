@@ -173,6 +173,38 @@ void tmap::QNode::notifyNeighbours2Move() const
     }
 }
 
+QPainterPath tmap::QNode::shape() const
+{
+    QPainterPath path;
+    switch (relatedMergedExp->getMergedExpData()->type()) {
+
+        case ExpDataType::Intersection:
+        case ExpDataType::Stair:
+        case ExpDataType::BigRoom:
+        case ExpDataType::SmallRoom: {
+            auto bRect = relatedMergedExp->getMergedExpData()->getOutBounding(0.5);
+            QRectF rect;
+            rect.setTopLeft(UIT::TopoVec2QPt({bRect[2], bRect[0]}));
+            rect.setBottomRight(UIT::TopoVec2QPt({bRect[3], bRect[1]}));
+            path.addRect(rect);
+            break;
+        }
+        case ExpDataType::Corridor: {
+            QPainterPath p;
+            auto corr = dynamic_cast<Corridor*>(relatedMergedExp->getMergedExpData().get());
+            auto pA = UIT::TopoVec2QPt(corr->getEndPointA());
+            auto pB = UIT::TopoVec2QPt(corr->getEndPointB());
+            p.moveTo(pA);
+            p.lineTo(pB);
+            QPainterPathStroker stroker;
+            stroker.setWidth(30);
+            path = stroker.createStroke(p);
+            break;
+        }
+    }
+    return path;
+}
+
 //////////////////////////// end of QNode
 
 tmap::MainGView::MainGView(QWidget* parent) : QGraphicsView(parent)

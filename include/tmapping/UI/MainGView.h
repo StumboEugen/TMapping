@@ -43,6 +43,8 @@ public:
 
     void notifySizeChange();
 
+    QPainterPath shape() const override;
+
     ~QNode() override;
 };
 
