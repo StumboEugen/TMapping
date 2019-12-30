@@ -82,14 +82,21 @@
     <item>
      <widget class="QPushButton" name="btnAddGate2Corridor">
       <property name="text">
-       <string>Add gate to Corridor</string>
+       <string>Add Gate to Corridor</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="modifyJson">
+     <widget class="QPushButton" name="btnEditJson">
       <property name="text">
-       <string>Modify Node Json</string>
+       <string>Edit Json of Selected Node</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnDeleteSelectedNodes">
+      <property name="text">
+       <string>Delete Selected Nodes</string>
       </property>
      </widget>
     </item>
@@ -97,23 +104,6 @@
      <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="cbRestrictGrid">
-      <property name="text">
-       <string>Restrict nodes to grid</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="cbEnableNodesMoving">
-      <property name="text">
-       <string>Enable nodes moving</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -128,9 +118,19 @@
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="cbRightClick2Delete">
+     <widget class="QCheckBox" name="cbEnableNodesMoving">
       <property name="text">
-       <string>Right click to delete</string>
+       <string>Enable nodes moving</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbRestrictGrid">
+      <property name="text">
+       <string>Restrict nodes to grid</string>
       </property>
      </widget>
     </item>

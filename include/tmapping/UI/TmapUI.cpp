@@ -141,11 +141,15 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockMapBuilder->cbRestrictGrid, SIGNAL(toggled(bool)),
                 gvMain, SLOT(SLOT_EnableGridRestriction(bool)));
 
-        connect(uiDockMapBuilder->cbRightClick2Delete, SIGNAL(toggled(bool)),
-                gvMain, SLOT(SLOT_EnableRightClick2Delete(bool)));
+        connect(uiDockMapBuilder->btnDeleteSelectedNodes, SIGNAL(clicked()),
+                gvMain, SLOT(SLOT_RemoveSelectedNodes()));
 
         connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
                 this, SLOT(SLOT_DrawEdge(bool)));
+        connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
+                uiDockMapBuilder->btnAddGate2Corridor, SLOT(setDisabled(bool)));
+        connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
+                uiDockMapBuilder->btnEditJson, SLOT(setDisabled(bool)));
 
         connect(uiDockMapBuilder->btnSave, SIGNAL(clicked()),
                 this, SLOT(SLOT_SaveMap()));
@@ -300,15 +304,7 @@ void tmap::TmapUI::SLOT_AddFakeNode()
 
 void tmap::TmapUI::SLOT_DrawEdge(bool startDraw)
 {
-    uiDockMapBuilder->cbEnableNodesMoving->setDisabled(startDraw);
-    uiDockMapBuilder->cbRestrictGrid->setDisabled(startDraw);
-    dockExpBuilder->setDisabled(startDraw);
-
-    if (startDraw) {
-        uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
-        uiDockMapBuilder->cbRestrictGrid->setChecked(false);
-    }
-
+    startEdittingNodes(startDraw);
     gvMain->SLOT_StartDrawingEdge(startDraw);
 }
 
@@ -322,5 +318,17 @@ void tmap::TmapUI::SLOT_LoadMap()
 {
     string fileName = uiDockMapBuilder->mapName->text().toStdString();
     gvMain->loadMap(fileName);
+}
+
+void tmap::TmapUI::startEdittingNodes(bool start)
+{
+    uiDockMapBuilder->cbEnableNodesMoving->setDisabled(start);
+    uiDockMapBuilder->cbRestrictGrid->setDisabled(start);
+    dockExpBuilder->setDisabled(start);
+
+    if (start) {
+        uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
+        uiDockMapBuilder->cbRestrictGrid->setChecked(false);
+    }
 }
 

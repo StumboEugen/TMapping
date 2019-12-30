@@ -39,7 +39,11 @@ inline double pix2meter(double pix)
     return pix / METER2PIX;
 }
 
-void drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose = false);
+void drawGate(
+        QPainter* painter,
+        Gate* gate2draw,
+        bool useGatePose = false,
+        bool drawDetail =true);
 
 } /// namespace UIT
 

@@ -6,6 +6,7 @@
 #include <queue>
 
 #include <QWheelEvent>
+#include <QStyleOptionGraphicsItem>
 
 #include "MainGView.h"
 #include "tmapping/MergedExp.h"
@@ -16,8 +17,10 @@ using namespace std;
 
 tmap::QNode::QNode(MergedExpPtr mergedExp)
 {
+    setZValue(mergedExp->getMergedExpData()->type() == ExpDataType::Corridor ? -1 : 0);
     links.assign(mergedExp->getMergedExpData()->nGates(), Link{});
     relatedMergedExp = std::move(mergedExp);
+    setFlag(ItemIsSelectable);
 }
 
 tmap::QNode::~QNode() {
@@ -43,28 +46,36 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     QPointF halfDia{UIT::QMeter(0.3), UIT::QMeter(0.3)};
     QRectF middleHalfSq{centerPoint + halfDia, centerPoint - halfDia};
 
+    auto oriPen = painter->pen();
+    auto isSelected = option->state & QStyle::State_Selected;
+
     auto relatedExpData = relatedMergedExp->getMergedExpData();
     switch (relatedExpData->type()) {
-
-        case ExpDataType::Intersection:
-            painter->setBrush(Qt::yellow);
+        case ExpDataType::Intersection: {
+            painter->setBrush(isSelected ? Qt::lightGray : Qt::yellow);
             painter->drawEllipse(middleHalfSq);
+            painter->setPen(oriPen);
+
             for (const auto& gate : relatedExpData->getGates()) {
-                UIT::drawGate(painter, gate.get(), true);
-                auto oldPen = painter->pen();
+                UIT::drawGate(painter, gate.get(), true, false);
                 painter->setPen(QPen(Qt::darkGray, 4, Qt::DashDotLine, Qt::FlatCap));
                 painter->drawLine(centerPoint, UIT::TopoVec2QPt(gate->getPos()));
-                painter->setPen(oldPen);
+                painter->setPen(oriPen);
             }
             break;
+        }
         case ExpDataType::Corridor: {
             auto corr = dynamic_cast<Corridor*>(relatedExpData.get());
             auto pA = UIT::TopoVec2QPt(corr->getEndPointA());
             auto pB = UIT::TopoVec2QPt(corr->getEndPointB());
-            QPen pen{Qt::darkGreen, 10};
+            QPen pen{isSelected ? Qt::green : Qt::darkGreen , 10};
             pen.setCapStyle(Qt::RoundCap);
             painter->setPen(pen);
             painter->drawLine(pA, pB);
+            painter->setPen(oriPen);
+//            for (const auto& gate : relatedExpData->getGates()) {
+//                UIT::drawGate(painter, gate.get(), true);
+//            }
             break;
         }
         case ExpDataType::Stair:
@@ -73,18 +84,19 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         case ExpDataType::BigRoom:
             cerr << FILE_AND_LINE << " unimplemented exp type!" << endl;
             break;
-        case ExpDataType::SmallRoom:
+        case ExpDataType::SmallRoom: {
             auto bRect = relatedExpData->getOutBounding(0.);
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
             painter->drawRect(QRectF{tl,br});
-            painter->setBrush(Qt::yellow);
+            painter->setBrush(isSelected ? Qt::lightGray : Qt::yellow);
             painter->drawRect(middleHalfSq);
+            painter->setPen(oriPen);
             for (const auto& gate : relatedExpData->getGates()) {
-                UIT::drawGate(painter, gate.get(), true);
-//                painter->drawLine(centerPoint, UIT::TopoVec2QPt(gate->getPos()));
+                UIT::drawGate(painter, gate.get(), true, false);
             }
             break;
+        }
     }
 }
 
@@ -142,9 +154,9 @@ void tmap::QNode::notifyNeighbours2Move() const
                 const auto& linkedExpData = linkedQNode->relatedMergedExp->getMergedExpData();
                 /// 得到在scene中两个点的位置差距
                 auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
-                        (linkedExpData->getGates()[linkedGateID]->getPos()));
+                                                                     (linkedExpData->getGates()[linkedGateID]->getPos()));
                 auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
-                        (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
+                                                                  (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
                     case ExpDataType::SmallRoom:
@@ -158,7 +170,7 @@ void tmap::QNode::notifyNeighbours2Move() const
                     case ExpDataType::Corridor: {
                         /// 走廊的话直接移动端点 TODO 考虑是否合理?
                         dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
-                        (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
+                                (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
                         linkedQNode->notifySizeChange();
                         searchedNodes.insert(linkedQNode);
                         break;
@@ -283,9 +295,21 @@ void tmap::MainGView::SLOT_StartDrawingEdge(bool enableDrawing)
     }
 }
 
-void tmap::MainGView::SLOT_EnableRightClick2Delete(bool enableDrawing)
+void tmap::MainGView::SLOT_RemoveSelectedNodes()
 {
-    mRightClick2Delete = enableDrawing;
+    for (auto& item : mScene4FakeMap.selectedItems()) {
+        auto qNode = dynamic_cast<QNode*>(item);
+        if (qNode) {
+            for (auto& link : qNode->links) {
+                auto linkedNode = link.to.lock();
+                if (linkedNode) {
+                    linkedNode->links[link.at].to.reset();
+                    linkedNode->links[link.at].at = GATEID_NO_MAPPING;
+                }
+            }
+            mNodesInFakeMap.erase(qNode->shared_from_this());
+        }
+    }
 }
 
 void tmap::MainGView::mousePressEvent(QMouseEvent* event)
@@ -297,16 +321,6 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
 
     if (item) {
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
-            if (mRightClick2Delete && event->button() == Qt::RightButton) {
-                for (auto& link : clickedQNode->links) {
-                    auto linkedNode = link.to.lock();
-                    if (linkedNode) {
-                        linkedNode->links[link.at].to.reset();
-                        linkedNode->links[link.at].at = GATEID_NO_MAPPING;
-                    }
-                }
-                mNodesInFakeMap.erase(clickedQNode->shared_from_this());
-            }
 
             if (mIsDrawingEdge && event->button() == Qt::LeftButton) {
                 /// 被点中的QNode的坐标系中点击的位置
@@ -345,7 +359,6 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                                 UIT::TopoVec2QPt(clickedGate->getPos())));
                         mNodesInFakeMap.insert(newQNode);
                         mTheDrawingCorridor = std::move(newQNode);
-                        mTheDrawingCorridor->setZValue(-1);
                     }
                 }
             }
@@ -459,6 +472,7 @@ void tmap::MainGView::loadMap(const std::string& fileName)
 {
     Jsobj jMap = JsonHelper::loadJson(fileName);
     if (jMap.isNull()) {
+        cerr << FILE_AND_LINE << " load Map json FAIL " << endl;
         return;
     }
     /// 读取Json文件成功

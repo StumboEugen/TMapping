@@ -7,9 +7,9 @@
 
 #include <QPainter>
 
-void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose)
+void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose, bool drawDetail)
 {
-    auto oldPen = painter->pen();
+    auto oriPen = painter->pen();
     auto offset = TopoVec2QPt(gate2draw->getPos());
     if (useGatePose) {
         painter->translate(offset);
@@ -19,11 +19,15 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose)
     auto p2 = UIT::TopoVec2QPt(halfNorVec);
     if (gate2draw->type() == GateType::GateWay) {
         painter->setPen({Qt::black, 3});
-        painter->drawLine({0, 0}, p2);
+        if (drawDetail) {
+            painter->drawLine({0, 0}, p2);
+        }
         painter->drawEllipse(QRectF{-2, -2, 4, 4});
     }
     if (gate2draw->type() == GateType::Door) {
-        painter->drawLine({0, 0}, p2);
+        if (drawDetail) {
+            painter->drawLine({0, 0}, p2);
+        }
         auto halfDoor = halfNorVec.rotate(90).changeLen(0.2);
         Door* door = dynamic_cast<Door*>(gate2draw);
         QPen pen{Qt::black, 2, door->isOpened() ? Qt::DotLine : Qt::SolidLine};
@@ -36,6 +40,6 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose)
     if (useGatePose) {
         painter->translate(-offset);
     }
-    painter->setPen(oldPen);
+    painter->setPen(oriPen);
 }
 

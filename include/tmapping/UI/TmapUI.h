@@ -54,6 +54,7 @@ class TmapUI : public QMainWindow
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
     static QString getExpDataLabel(const ExpDataPtr& expData);
+    void startEdittingNodes(bool start);
 
 public:
 
