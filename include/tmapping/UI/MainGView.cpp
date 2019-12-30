@@ -251,6 +251,11 @@ void tmap::MainGView::SLOT_StartDrawingEdge(bool enableDrawing)
     }
 }
 
+void tmap::MainGView::SLOT_EnableRightClick2Delete(bool enableDrawing)
+{
+    mRightClick2Delete = enableDrawing;
+}
+
 void tmap::MainGView::mousePressEvent(QMouseEvent* event)
 {
     QGraphicsView::mousePressEvent(event);
@@ -260,7 +265,18 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
 
     if (item) {
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
-            if (mIsDrawingEdge) { // TODO 检查外部的Mode是否准确
+            if (mRightClick2Delete && event->button() == Qt::RightButton) {
+                for (auto& link : clickedQNode->links) {
+                    auto linkedNode = link.to.lock();
+                    if (linkedNode) {
+                        linkedNode->links[link.at].to.reset();
+                        linkedNode->links[link.at].at = GATEID_NO_MAPPING;
+                    }
+                }
+                mNodesInFakeMap.erase(clickedQNode->shared_from_this());
+            }
+
+            if (mIsDrawingEdge && event->button() == Qt::LeftButton) {
                 /// 被点中的QNode的坐标系中点击的位置
                 const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
                 /// 被点中的QNode对应的ExpData数据

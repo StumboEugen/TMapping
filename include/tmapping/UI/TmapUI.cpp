@@ -141,6 +141,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockMapBuilder->cbRestrictGrid, SIGNAL(toggled(bool)),
                 gvMain, SLOT(SLOT_EnableGridRestriction(bool)));
 
+        connect(uiDockMapBuilder->cbRightClick2Delete, SIGNAL(toggled(bool)),
+                gvMain, SLOT(SLOT_EnableRightClick2Delete(bool)));
+
         connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
                 this, SLOT(SLOT_DrawEdge(bool)));
 
