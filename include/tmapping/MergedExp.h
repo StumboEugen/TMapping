@@ -19,7 +19,7 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
     MergedExpPtr mFather;
 
     /// 在此mergedExp新加入的Exp
-    const ExpPtr mRelatedExp;
+    ExpPtr mRelatedExp;
 
     /// 使用这个MergedExp的Twig们(可能有的已经被废弃了)
     std::vector<MapTwigWePtr> mRelatedMaps{};

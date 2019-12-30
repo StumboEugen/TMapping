@@ -44,7 +44,9 @@ MergedExp::MergedExp(const Jsobj& jmergedExp)
           mGatesMappingFromFather(),
           mPossDecConf(1.0)
 {
-
+    mRelatedExp = make_shared<Exp>(mMergedExpData, 0);
+    const auto& expSerials = jmergedExp["exps"];
+    mRelatedExp->setSerial(expSerials[expSerials.size() - 1].asUInt64());
 }
 
 MatchResult tmap::MergedExp::detailedMatching(const tmap::MergedExp& another) const
