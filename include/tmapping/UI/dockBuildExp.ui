@@ -35,7 +35,7 @@
       <item>
        <widget class="QLineEdit" name="expName">
         <property name="text">
-         <string>demo</string>
+         <string>1</string>
         </property>
        </widget>
       </item>

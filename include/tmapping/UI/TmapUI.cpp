@@ -143,6 +143,12 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockMapBuilder->btnDrawCorridor, SIGNAL(toggled(bool)),
                 this, SLOT(SLOT_DrawEdge(bool)));
+
+        connect(uiDockMapBuilder->btnSave, SIGNAL(clicked()),
+                this, SLOT(SLOT_SaveMap()));
+
+        connect(uiDockMapBuilder->btnLoad, SIGNAL(clicked()),
+                this, SLOT(SLOT_LoadMap()));
     }
 
 }
@@ -286,7 +292,7 @@ void tmap::TmapUI::SLOT_AddFakeNode()
     if (exps->count() == 0) {
         return;
     }
-    gvMain->addNode2FakeMap(exps->itemData(exps->currentIndex()).value<ExpDataPtr>());
+    gvMain->addNode2FakeMapFromExpData(exps->itemData(exps->currentIndex()).value<ExpDataPtr>());
 }
 
 void tmap::TmapUI::SLOT_DrawEdge(bool startDraw)
@@ -297,8 +303,21 @@ void tmap::TmapUI::SLOT_DrawEdge(bool startDraw)
 
     if (startDraw) {
         uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
+        uiDockMapBuilder->cbRestrictGrid->setChecked(false);
     }
 
     gvMain->SLOT_StartDrawingEdge(startDraw);
+}
+
+void tmap::TmapUI::SLOT_SaveMap()
+{
+    string fileName = uiDockMapBuilder->mapName->text().toStdString();
+    gvMain->saveFakeMap(fileName);
+}
+
+void tmap::TmapUI::SLOT_LoadMap()
+{
+    string fileName = uiDockMapBuilder->mapName->text().toStdString();
+    gvMain->loadMap(fileName);
 }
 

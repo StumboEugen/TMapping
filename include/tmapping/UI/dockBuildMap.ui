@@ -33,9 +33,9 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLineEdit" name="expName">
+       <widget class="QLineEdit" name="mapName">
         <property name="text">
-         <string>demo</string>
+         <string>demoMap</string>
         </property>
        </widget>
       </item>

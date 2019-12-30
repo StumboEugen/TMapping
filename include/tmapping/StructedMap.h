@@ -21,6 +21,7 @@ struct MapNode
         GateID at = GATEID_NO_MAPPING;
     };
 
+    /// 用于方便各种构造的时候知道links[i].to指向的是哪里
     size_t serial;
     MergedExpPtr relatedMergedExp;
     std::vector<Link> links;
@@ -52,6 +53,8 @@ public:
     const MapTwigWePtr& relatedTwig() const;
 
     Json::Value toJS() const;
+
+    const std::vector<MapNodePtr>& getNodes() const;
 };
 
 }

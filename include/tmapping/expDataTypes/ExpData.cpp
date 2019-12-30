@@ -96,12 +96,7 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
     try {
         string type = jexp["type"].asString();
         if (type == typeStr(ExpDataType::Corridor)) {
-            auto c = new Corridor;
-            c->setEndGateA(jexp["endG_A"].asInt());
-            c->setEndGateB(jexp["endG_B"].asInt());
-            c->setEndPointA(TopoVec2{jexp["endP_A"]});
-            c->setEndPointB(TopoVec2{jexp["endP_B"]});
-            res.reset(c);
+            res = make_shared<Corridor>();
         }
         else if (type == typeStr(ExpDataType::Intersection)) {
             res = make_shared<Intersection>();
@@ -132,6 +127,13 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         marks.reserve(nMark);
         for (int i = 0; i < nMark; ++i) {
             marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
+        }
+
+        if (auto c = dynamic_cast<Corridor*>(res.get())) {
+            c->setEndGateA(jexp["endG_A"].asInt());
+            c->setEndGateB(jexp["endG_B"].asInt());
+            c->setEndPointA(TopoVec2{jexp["endP_A"]});
+            c->setEndPointB(TopoVec2{jexp["endP_B"]});
         }
     } catch (...) {
         res = nullptr;

@@ -63,7 +63,7 @@ int tmap::JsonHelper::saveJson(const tmap::Jsobj& js, string fileName, bool addT
         fileName += tmp;
     }
     fstream fs(fileName, std::ios::out | std::ios::trunc);
-    fs << JS2Str(js);
+    fs << JS2Str(js, false);
     return 0;
 }
 
@@ -72,6 +72,11 @@ tmap::Jsobj tmap::JsonHelper::loadJson(const std::string& fileName)
     Jsobj res;
     chDir2TopoFileFloder();
     fstream fs(fileName, std::ios::in);
-    fs >> res;
+    Json::CharReaderBuilder b;
+    string errs;
+    if (!parseFromStream(b, fs, &res, &errs)) {
+        res = Json::nullValue;
+        cerr << FILE_AND_LINE << errs << endl;
+    }
     return res;
 }

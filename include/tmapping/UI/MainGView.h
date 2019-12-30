@@ -23,7 +23,7 @@ class QNode : public QGraphicsItem, public MapNode, public std::enable_shared_fr
     mutable QRectF mBoundingRect;
 
 private:
-    explicit QNode(const ExpDataPtr& relatedExpData);
+    explicit QNode(MergedExpPtr mergedExp);
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -31,7 +31,10 @@ protected:
 
 public:
     void notifyNeighbours2Move() const;
-    static QNodePtr makeOne(const ExpDataPtr& relatedExpData);
+
+    static QNodePtr makeOneFromExpData(const ExpDataPtr& relatedExpData);
+
+    static QNodePtr makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp);
 
     QRectF boundingRect() const override;
 
@@ -64,11 +67,15 @@ protected:
 public:
     explicit MainGView(QWidget *parent = nullptr);
 
-    void addNode2FakeMap(const ExpDataPtr& usedExpData);
+    void addNode2FakeMapFromExpData(const ExpDataPtr& usedExpData);
 
     void restrictQNode(QNode* qNode);
 
-    virtual ~MainGView();
+    void saveFakeMap(const std::string& mapName);
+
+    void loadMap(const std::string& fileName);
+
+    ~MainGView() override;
 
 public Q_SLOTS:
     void SLOT_EnableMoving4FakeNodes(bool enableMove);

@@ -41,7 +41,9 @@ Json::Value tmap::StructedMapImpl::toJS() const
         jnode["serial"] = node->serial;
         for (const auto& link : node->links) {
             Json::Value jlink;
-            jlink["t"] = link.to.lock()->serial;
+            if (!link.to.expired()) {
+                jlink["t"] = link.to.lock()->serial;
+            }
             jlink["@"] = link.at;
             jnode["links"].append(std::move(jlink));
         }
@@ -59,8 +61,9 @@ StructedMapImpl::StructedMapImpl(const Json::Value& jmap)
     /// 先分配nodes的空间, 因为link需要设置到对应的nodePtr上
     const auto& jnodes = jmap["nodes"];
     auto nodeSize = jnodes.size();
-    mNodes.assign(nodeSize, make_shared<MapNode>());
+    mNodes.assign(nodeSize, nullptr);
     for (int i = 0; i < nodeSize; ++i) {
+        mNodes[i] = make_shared<MapNode>();
         mNodes[i]->serial = i;
     }
 
@@ -75,10 +78,17 @@ StructedMapImpl::StructedMapImpl(const Json::Value& jmap)
         for (int j = 0; j < jlinkSize; ++j) {
             const auto& jlink = jlinks[j];
             auto& link = links[j];
-            link.to = mNodes[jlink["t"].asUInt64()];
+            if (!jlink["t"].isNull()) {
+                link.to = mNodes[jlink["t"].asUInt64()];
+            }
             link.at = jlink["@"].asInt();
         }
         /// 调用static工厂函数, 生成核心数据
         mapNode->relatedMergedExp = MergedExp::madeFronJS(jnode["exp"]);
     }
+}
+
+const vector<MapNodePtr>& StructedMapImpl::getNodes() const
+{
+    return mNodes;
 }

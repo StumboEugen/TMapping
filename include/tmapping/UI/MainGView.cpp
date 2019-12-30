@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <queue>
 
 #include <QWheelEvent>
 
@@ -13,14 +14,10 @@
 
 using namespace std;
 
-tmap::QNode::QNode(const ExpDataPtr& relatedExpData)
+tmap::QNode::QNode(MergedExpPtr mergedExp)
 {
-    static std::size_t STATIC_QNodeSerial = 0;
-    serial = STATIC_QNodeSerial;
-    auto exp = make_shared<Exp>(relatedExpData, 0);
-    auto mergedExp = MergedExp::singleMergedFromExp(std::move(exp));
+    links.assign(mergedExp->getMergedExpData()->nGates(), Link{});
     relatedMergedExp = std::move(mergedExp);
-    links.assign(relatedExpData->nGates(), Link{});
 }
 
 tmap::QNode::~QNode() {
@@ -98,9 +95,15 @@ void tmap::QNode::notifySizeChange()
     update();
 }
 
-tmap::QNodePtr tmap::QNode::makeOne(const tmap::ExpDataPtr& relatedExpData)
+tmap::QNodePtr tmap::QNode::makeOneFromExpData(const tmap::ExpDataPtr& relatedExpData)
 {
-    return QNodePtr(new QNode(relatedExpData->clone()));
+    auto exp = make_shared<Exp>(relatedExpData, 0);
+    return QNodePtr(new QNode(MergedExp::singleMergedFromExp(exp)));
+}
+
+tmap::QNodePtr tmap::QNode::makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp)
+{
+    return QNodePtr(new QNode(relatedMergedExp));
 }
 
 void tmap::QNode::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -123,7 +126,7 @@ void tmap::QNode::notifyNeighbours2Move() const
 {
     vector<const QNode*> stack{this};
     set<const QNode*> searchedNodes;
-    
+
     while (!stack.empty()) {
         auto current = stack.back();
         stack.pop_back();
@@ -199,12 +202,13 @@ void tmap::MainGView::wheelEvent(QWheelEvent* event)
     }
 }
 
-void tmap::MainGView::addNode2FakeMap(const tmap::ExpDataPtr& usedExpData)
+void tmap::MainGView::addNode2FakeMapFromExpData(const tmap::ExpDataPtr& usedExpData)
 {
-    auto qNode = QNode::makeOne(usedExpData);
+    auto qNode = QNode::makeOneFromExpData(usedExpData);
     mNodesInFakeMap.insert(qNode);
     mScene4FakeMap.addItem(qNode.get());
     qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
+    qNode->setPos(sceneRect().center());
 }
 
 void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
@@ -280,14 +284,13 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                         newCorridor->addGate(std::move(newGate));
                         newCorridor->setEndGateA(0);
                         /// 制作对应的QNode
-                        auto newQNode = QNode::makeOne(newCorridor);
+                        auto newQNode = QNode::makeOneFromExpData(newCorridor);
                         /// 添加连接关系
                         clickedQNode->links[clickedGateID].to = newQNode;
                         clickedQNode->links[clickedGateID].at = 0;
                         MapNode::Link l;
-                        l.to = clickedQNode->shared_from_this();
-                        l.at = clickedGateID;
-                        newQNode->links.push_back(std::move(l));
+                        newQNode->links[0].to = clickedQNode->shared_from_this();
+                        newQNode->links[0].at = clickedGateID;
                         /// 添加刚刚制作好的QNode
                         mScene4FakeMap.addItem(newQNode.get());
                         newQNode->setPos(clickedQNode->mapToScene(
@@ -328,7 +331,8 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                     restrictQNode(clickedQNode);
                 }
             }
-            else if (mIsDrawingEdge && mTheDrawingCorridor) {
+
+            if (mIsDrawingEdge && mTheDrawingCorridor) {
                 if (clickedQNode != mTheDrawingCorridor.get()) {
                     /// 被点中的QNode的坐标系中点击的位置
                     const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
@@ -385,8 +389,106 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
 
 }
 
+void tmap::MainGView::saveFakeMap(const std::string& mapName)
+{
+    vector<MapNodePtr> nodes{mNodesInFakeMap.begin(), mNodesInFakeMap.end()};
+    int res = JsonHelper::saveJson(
+            StructedMapImpl(nodes, nullptr, 1.0).toJS(), mapName, false);
+    if (res < 0) {
+        cerr << FILE_AND_LINE << "Save Json ERROR!" << endl;
+    } else {
+        cout << "map save success! [name:" << mapName << "]" << endl;
+    }
+}
+
 tmap::MainGView::~MainGView()
 {
     /// QNode是智能指针管理的, 不要交给scene校徽
     mNodesInFakeMap.clear();
+}
+
+void tmap::MainGView::loadMap(const std::string& fileName)
+{
+    Jsobj jMap = JsonHelper::loadJson(fileName);
+    if (jMap.isNull()) {
+        return;
+    }
+    /// 读取Json文件成功
+
+    /// 为了维护正确的依赖关系, 构造出只含有MapNode的Map, 再从这些MapNode生成QNode
+    /// 由于底层大量数据是复用的, 主要是指针的传送
+    StructedMapImpl map(jMap);
+    const auto& nodes = map.getNodes();
+    vector<QNodePtr> qNodes(nodes.size());
+    for (int i = 0; i < nodes.size(); ++i) {
+        qNodes[i] = QNode::makeOneFromMergedExp(nodes[i]->relatedMergedExp);
+    }
+    /// links的内容需要被更新, 连接对象的指针需要被更改
+    for (int i = 0; i < nodes.size(); ++i) {
+        auto& newLinks = qNodes[i]->links;
+        const auto& oldLinks = nodes[i]->links;
+        newLinks = oldLinks;
+        for (int j = 0; j < newLinks.size(); ++j) {
+            const auto& toNode = oldLinks[j].to.lock();
+            if (toNode) {
+                newLinks[j].to = qNodes[toNode->serial];
+            }
+        }
+    }
+
+    /// 开始BFS构造地图
+    mNodesInFakeMap.clear();
+    bool once = false;
+    for (auto& qNode : qNodes) {
+        /// 为了处理拓扑不相连的情况, 对qNodes中所有成员进行BFS, 理论上其实下面这个if只发生一次
+        if (mNodesInFakeMap.find(qNode) == mNodesInFakeMap.end()) {
+            if (once) {
+                /// 发生了两次, 说明存在不相连的情况
+                cout << FILE_AND_LINE << " this map doesnt fully connected!" << endl;
+            } else {
+                once = true;
+            }
+            /// BFS使用的队列
+            queue<QNode*> lookupQueue;
+            lookupQueue.push(qNode.get());
+            /// BFS中的元素是已经添加过的QNode
+            qNode->setPos(0., 0.);
+            mNodesInFakeMap.insert(qNode);
+
+            while (!lookupQueue.empty()) {
+                auto& currentQnode = lookupQueue.front();
+                lookupQueue.pop();
+                auto& currentLinks = currentQnode->links;
+                /// 查找所有的连接
+                for (int i = 0; i < currentLinks.size(); ++i) {
+                    auto& currentLink = currentLinks[i];
+                    auto link2 = currentLink.to.lock();
+                    /// 是否与实际的QNode相连?
+                    if (link2) {
+                        auto linkedQNode = dynamic_pointer_cast<QNode>(link2);
+                        /// 是否已经被遍历过?
+                        if (mNodesInFakeMap.find(linkedQNode)
+                            == mNodesInFakeMap.end()) {
+                            /// 计算QNode应该放置的位置
+                            auto currentLinkGatePos = currentQnode->mapToScene(UIT::TopoVec2QPt(
+                                    currentQnode->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
+                            auto anotherGatePosInNode = UIT::TopoVec2QPt(
+                                    linkedQNode->relatedMergedExp->getMergedExpData()
+                                    ->getGates()[currentLink.at]->getPos());
+                            linkedQNode->setPos(currentLinkGatePos - anotherGatePosInNode);
+                            mNodesInFakeMap.insert(linkedQNode);
+                            lookupQueue.push(linkedQNode.get());
+                        }
+                    }
+                }
+            }
+            mNodesInFakeMap.insert(std::move(qNode));
+        }
+    }
+    for (const auto& qNode : mNodesInFakeMap) {
+        if (qNode->relatedMergedExp->getMergedExpData()->type() != ExpDataType::Corridor) {
+            qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
+        }
+        mScene4FakeMap.addItem(qNode.get());
+    }
 }
