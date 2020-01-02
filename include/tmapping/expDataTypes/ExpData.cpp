@@ -176,7 +176,11 @@ std::string ExpData::typeStr(ExpDataType type)
 
 std::array<double, 4> ExpData::getOutBounding(double expandValue) const
 {
-    std::array<double, 4> res{0., 0., 0., 0.};
+    if (mGates.empty()) {
+        cerr << FILE_AND_LINE << "You try to get the outbounding of a 0 gates ExpData!" << endl;
+        return {0., 0., 0., 0.};
+    }
+    std::array<double, 4> res{DBL_MIN, DBL_MAX, DBL_MAX, DBL_MIN};
     for (const auto& gate : mGates) {
         auto& pos = gate->getPos();
         res[0] = max(res[0], pos.py);
