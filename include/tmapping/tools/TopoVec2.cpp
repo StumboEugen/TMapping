@@ -70,8 +70,8 @@ TopoVec2& TopoVec2::operator-=(const TopoVec2& that)
 
 TopoVec2 TopoVec2::operator-(const TopoVec2& that) const
 {
-    TopoVec2 vec2 = that;
-    vec2 -= *this;
+    TopoVec2 vec2 = *this;
+    vec2 -= that;
     return vec2;
 }
 

@@ -221,3 +221,12 @@ GateID ExpData::findGateAtPos(const TopoVec2& pos, double threshold) const
     return GATEID_NOT_FOUND;
 }
 
+TopoVec2 ExpData::normalizeSelf()
+{
+    TopoVec2 offset = mGates.front()->getPos();
+    for (auto& gate : mGates) {
+        gate->setPos(gate->getPos() - offset);
+    }
+    return offset;
+}
+

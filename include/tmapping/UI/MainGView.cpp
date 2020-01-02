@@ -249,6 +249,9 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
 void tmap::MainGView::saveFakeMap(const std::string& mapName)
 {
     vector<MapNodePtr> nodes{mNodesInFakeMap.begin(), mNodesInFakeMap.end()};
+    for (auto& node : mNodesInFakeMap) {
+        node->normalizePos();
+    }
     int res = JsonHelper::saveJson(
             StructedMapImpl(nodes, nullptr, 1.0).toJS(), mapName, false);
     if (res < 0) {

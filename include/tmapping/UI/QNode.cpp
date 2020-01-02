@@ -218,3 +218,10 @@ QPainterPath tmap::QNode::shape() const
     }
     return path;
 }
+
+void tmap::QNode::normalizePos()
+{
+    auto offset = relatedMergedExp->getMergedExpData()->normalizeSelf();
+    setPos(pos() + UIT::TopoVec2QPt(offset));
+    notifySizeChange();
+}

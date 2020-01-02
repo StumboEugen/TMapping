@@ -45,6 +45,8 @@ public:
     std::array<double, 4> getOutBounding(double expandValue) const override;
 
     void moveGatePos(GateID id, const TopoVec2& newPos);
+
+    TopoVec2 normalizeSelf() override;
 };
 }
 

@@ -96,6 +96,8 @@ public:
     virtual ExpDataPtr clone() = 0;
 
     GateID findGateAtPos(const TopoVec2& pos, double threshold = 0.5) const;
+
+    virtual TopoVec2 normalizeSelf();
 };
 
 }

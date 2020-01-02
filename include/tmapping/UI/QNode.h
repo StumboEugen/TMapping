@@ -42,6 +42,8 @@ public:
 
     QPainterPath shape() const override;
 
+    void normalizePos();
+
     ~QNode() override;
 };
 }

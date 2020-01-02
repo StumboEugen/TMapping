@@ -115,3 +115,11 @@ void tmap::Corridor::moveGatePos(tmap::GateID id, const tmap::TopoVec2& newPos)
         mEndPointB = newPos;
     }
 }
+
+tmap::TopoVec2 tmap::Corridor::normalizeSelf()
+{
+    auto offset = ExpData::normalizeSelf();
+    mEndPointB -= offset;
+    mEndPointA -= offset;
+    return offset;
+}
