@@ -16,13 +16,27 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose, b
     }
 
     auto halfNorVec = gate2draw->getNormalVec() / 2;
-    auto p2 = UIT::TopoVec2QPt(halfNorVec);
     if (gate2draw->type() == GateType::GateWay) {
-        painter->setPen({Qt::black, 3});
-        if (drawDetail) {
-            painter->drawLine({0, 0}, p2);
-        }
-        painter->drawEllipse(QRectF{-2, -2, 4, 4});
+        auto halfGatePos = UIT::TopoVec2QPt(
+                halfNorVec.rotate(90).changeLen(DOOR_RAD / 2));
+
+        /// 把路口下的边框用白色覆盖
+        QPen whiteBasePen{Qt::white, 5};
+        whiteBasePen.setCapStyle(Qt::RoundCap);
+        painter->setPen(whiteBasePen);
+        painter->drawLine(halfGatePos, -halfGatePos);
+        painter->setPen(oriPen);
+
+        /// 画出路口的虚线
+        QPen dotPen{Qt::black, 3};
+        dotPen.setStyle(Qt::DotLine);
+        dotPen.setDashOffset(2);
+        painter->setPen(dotPen);
+        painter->drawLine(halfGatePos, -halfGatePos);
+        painter->setPen(oriPen);
+
+//        painter->setPen({Qt::black, 3});
+//        painter->drawEllipse(QRectF{-2, -2, 4, 4});
     }
     if (gate2draw->type() == GateType::Door) {
         auto doorChainPos = UIT::TopoVec2QPt(
