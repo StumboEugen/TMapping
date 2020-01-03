@@ -45,7 +45,7 @@ void
 tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     const auto& centerPoint = boundingRect().center();
-    QPointF halfDia{UIT::QMeter(0.3), UIT::QMeter(0.3)};
+    QPointF halfDia{UIT::QMeter(0.2), UIT::QMeter(0.2)};
     QRectF middleHalfSq{centerPoint + halfDia, centerPoint - halfDia};
 
     auto oriPen = painter->pen();
@@ -60,7 +60,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
             for (const auto& gate : relatedExpData->getGates()) {
                 UIT::drawGate(painter, gate.get(), true, false);
-                painter->setPen(QPen(Qt::darkGray, 4, Qt::DashDotLine, Qt::FlatCap));
+                painter->setPen(QPen(Qt::darkGray, 2, Qt::DashDotLine, Qt::FlatCap));
                 painter->drawLine(centerPoint, UIT::TopoVec2QPt(gate->getPos()));
                 painter->setPen(oriPen);
             }
@@ -68,13 +68,41 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         }
         case ExpDataType::Corridor: {
             auto corr = dynamic_cast<Corridor*>(relatedExpData.get());
-            auto pA = UIT::TopoVec2QPt(corr->getEndPointA());
-            auto pB = UIT::TopoVec2QPt(corr->getEndPointB());
-            QPen pen{isSelected ? Qt::green : Qt::darkGreen , 10};
-            pen.setCapStyle(Qt::RoundCap);
-            painter->setPen(pen);
-            painter->drawLine(pA, pB);
+            auto pA = corr->getEndPointA();
+            auto pB = corr->getEndPointB();
+            auto AB = pA - pB;
+            TopoVec2 halfVecPA{}, halfVecPB{};
+            GateID GA = corr->getEndGateA();
+            GateID GB = corr->getEndGateB();
+            halfVecPA = AB.rotate(90).changeLen(corr->halfWidth());
+            halfVecPB = AB.rotate(-90).changeLen(corr->halfWidth());
+            if (GA >= 0) {
+                auto norm = corr->getGates()[GA]->getNormalVec();
+                halfVecPA = norm.rotate(-90).changeLen(
+                        corr->halfWidth() / AB.unitize().dotProduct(-norm));
+            }
+            if (GB >= 0) {
+                auto norm = corr->getGates()[GB]->getNormalVec();
+                halfVecPB = norm.rotate(90).changeLen(
+                        corr->halfWidth() / AB.unitize().dotProduct(norm));
+            }
+            painter->drawLine(UIT::TopoVec2QPt(pA + halfVecPA),
+                              UIT::TopoVec2QPt(pB + halfVecPB));
+            painter->drawLine(UIT::TopoVec2QPt(pA - halfVecPA),
+                              UIT::TopoVec2QPt(pB - halfVecPB));
             painter->setPen(oriPen);
+
+            if (isSelected) {
+                QPainterPath pp;
+                pp.moveTo(UIT::TopoVec2QPt(pA + halfVecPA));
+                pp.lineTo(UIT::TopoVec2QPt(pB + halfVecPB));
+                pp.lineTo(UIT::TopoVec2QPt(pB - halfVecPB));
+                pp.lineTo(UIT::TopoVec2QPt(pA - halfVecPA));
+                pp.lineTo(UIT::TopoVec2QPt(pA + halfVecPA));
+                painter->setPen({Qt::green, 5});
+                painter->drawPath(pp);
+            }
+
             ///绘制除了两端之外的其他Gate
             const auto& gates = relatedExpData->getGates();
             for (int i = 0; i < gates.size(); ++i) {
