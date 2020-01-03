@@ -74,8 +74,8 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             TopoVec2 halfVecPA{}, halfVecPB{};
             GateID GA = corr->getEndGateA();
             GateID GB = corr->getEndGateB();
-            halfVecPA = AB.rotate(90).changeLen(corr->halfWidth());
-            halfVecPB = AB.rotate(-90).changeLen(corr->halfWidth());
+            halfVecPA = AB.rotate(-90).changeLen(corr->halfWidth());
+            halfVecPB = AB.rotate(90).changeLen(corr->halfWidth());
             if (GA >= 0) {
                 auto norm = corr->getGates()[GA]->getNormalVec();
                 halfVecPA = norm.rotate(-90).changeLen(
