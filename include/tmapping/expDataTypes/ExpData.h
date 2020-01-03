@@ -40,11 +40,12 @@ using MatchResult = std::unique_ptr<MatchResult_IMPL>;
 /// 代表观测得到的一次地形数据, 比如一个路口, 一个房间的信息
 class ExpData
 {
-    std::vector<GatePtr> mGates;
-    std::vector<PLMPtr> mPosLandmarks;
     std::string mName;
 
 protected:
+    std::vector<GatePtr> mGates;
+    std::vector<PLMPtr> mPosLandmarks;
+
     void copy2(ExpData* copy2);
 
 public:

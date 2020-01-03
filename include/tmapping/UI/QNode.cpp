@@ -160,9 +160,9 @@ void tmap::QNode::notifyNeighbours2Move() const
                 const auto& linkedExpData = linkedQNode->relatedMergedExp->getMergedExpData();
                 /// 得到在scene中两个点的位置差距
                 auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
-                                                                     (linkedExpData->getGates()[linkedGateID]->getPos()));
+                        (linkedExpData->getGates()[linkedGateID]->getPos()));
                 auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
-                                                                  (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
+                        (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
                     case ExpDataType::SmallRoom:
@@ -178,7 +178,7 @@ void tmap::QNode::notifyNeighbours2Move() const
                         dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
                                 (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
                         linkedQNode->notifySizeChange();
-                        searchedNodes.insert(linkedQNode);
+//                        searchedNodes.insert(linkedQNode);
                         break;
                     }
                     default:

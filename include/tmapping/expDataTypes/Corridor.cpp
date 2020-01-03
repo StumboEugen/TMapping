@@ -107,13 +107,46 @@ void tmap::Corridor::moveGatePos(tmap::GateID id, const tmap::TopoVec2& newPos)
         return;
     }
 
-    this->getGates()[id]->setPos(newPos);
+    if (id == mEndGateA || id == mEndGateB) {
+        auto AB = mEndPointB - mEndPointA;
+        auto nAB = AB.unitize();
+        double lenAB = AB.len();
 
-    if (id == mEndGateA) {
-        mEndPointA = newPos;
-    }
-    else if (id == mEndGateB) {
-        mEndPointB = newPos;
+        auto gSize = mGates.size();
+        vector<double> lenRatio(gSize, 0.0);
+
+        for (int i = 0; i < gSize; ++i) {
+            if (i == mEndGateB || i == mEndGateA) {
+                lenRatio[i] = 0.0;
+                continue;
+            }
+            auto AC = mGates[i]->getPos() - mEndPointA;
+            lenRatio[i] = AC.dotProduct(nAB) / lenAB;
+            if (AB.crossProduct(AC) < 0.) {
+                lenRatio[i] *= -1;
+            }
+        }
+
+        if (id == mEndGateA) {
+            mEndPointA = newPos;
+            this->getGates()[id]->setPos(newPos);
+        } else {
+            mEndPointB = newPos;
+            this->getGates()[id]->setPos(newPos);
+        }
+
+        AB = mEndPointB - mEndPointA;
+        lenAB = AB.len();
+        for (int i = 0; i < gSize; ++i) {
+            if (lenRatio[i] == 0.0) {
+                continue;
+            }
+            auto AD = AB.changeLen(abs(lenRatio[i]) * lenAB);
+            auto nv = AD.unitize().rotate(lenRatio[i] > 0. ? 90 : -90);
+            auto C = mEndPointA + AD + nv * halfWidth();
+            mGates[i]->setPos(C);
+            mGates[i]->setNormalVec(nv);
+        }
     }
 }
 

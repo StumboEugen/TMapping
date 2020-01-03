@@ -44,6 +44,11 @@ public:
 
     std::array<double, 4> getOutBounding(double expandValue) const override;
 
+    /**
+     * @brief 移动某个Gate的Pos, 只有移动两端时起作用, 同时会移动其他Gate的相对位置, 沿轴线分布
+     * @param id
+     * @param newPos
+     */
     void moveGatePos(GateID id, const TopoVec2& newPos);
 
     TopoVec2 normalizeSelf() override;
