@@ -230,3 +230,14 @@ TopoVec2 ExpData::normalizeSelf()
     return offset;
 }
 
+GatePtr ExpData::popBackGate()
+{
+    if (mGates.empty()) {
+        return nullptr;
+    }
+    GatePtr res;
+    res = std::move(mGates.back());
+    mGates.pop_back();
+    return res;
+}
+

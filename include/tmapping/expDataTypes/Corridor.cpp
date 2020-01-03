@@ -8,6 +8,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace tmap;
 
 Json::Value tmap::Corridor::toJS() const
 {
@@ -122,4 +123,21 @@ tmap::TopoVec2 tmap::Corridor::normalizeSelf()
     mEndPointB -= offset;
     mEndPointA -= offset;
     return offset;
+}
+
+pair<TopoVec2, TopoVec2> tmap::Corridor::calPosAmdNvFromPointC(const tmap::TopoVec2& C)
+{
+    auto AB = this->getEndPointB() - this->getEndPointA();
+    auto AC = C - this->getEndPointA();
+    auto nAB = AB.unitize();
+    auto projectP = nAB * nAB.dotProduct(AC) + this->getEndPointA();
+    bool isLeftSide = AB.crossProduct(AC) > 0.;
+    auto nv = nAB.rotate(isLeftSide ? 90 : -90);
+    projectP += nv * halfWidth();
+    return make_pair(projectP, nv);
+}
+
+double Corridor::halfWidth() const
+{
+    return 0.35;
 }

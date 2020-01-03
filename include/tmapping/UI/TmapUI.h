@@ -75,6 +75,7 @@ private Q_SLOTS:
     void SLOT_SaveMap();
     void SLOT_LoadMap();
     void SLOT_EditJsonOfNodeInFakeMap(bool start);
+    void SLOT_AddGate2Corridor(bool start);
 
 };
 }

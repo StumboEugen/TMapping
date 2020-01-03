@@ -41,6 +41,10 @@ struct TopoVec2
 
     TopoVec2 operator- () const;
 
+    bool operator==(const TopoVec2& that) const;
+
+    bool operator!=(const TopoVec2& that) const;
+
     double len() const;
 
     Json::Value toJS() const;
@@ -64,6 +68,10 @@ struct TopoVec2
      * @brief 取整到lidu
      */
     TopoVec2 round2(double lidu = 1.0) const;
+
+    double crossProduct(const TopoVec2& that);
+
+    double dotProduct(const TopoVec2& that);
 };
 
 std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);

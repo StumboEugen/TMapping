@@ -75,9 +75,13 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setPen(pen);
             painter->drawLine(pA, pB);
             painter->setPen(oriPen);
-//            for (const auto& gate : relatedExpData->getGates()) {
-//                UIT::drawGate(painter, gate.get(), true);
-//            }
+            ///绘制除了两端之外的其他Gate
+            const auto& gates = relatedExpData->getGates();
+            for (int i = 0; i < gates.size(); ++i) {
+                if (corr->getEndGateA() != i && corr->getEndGateB() != i) {
+                    UIT::drawGate(painter, gates[i].get(), true);
+                }
+            }
             break;
         }
         case ExpDataType::Stair:

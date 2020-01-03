@@ -27,6 +27,7 @@ class MainGView : public QGraphicsView
     bool mEnableFakeNodesMoving = true;
     bool mEnableNodeRestriction = false;
     bool mIsDrawingEdge = false;
+    bool mAcceptAddingGate2Corridor = false;
 
 protected:
     void wheelEvent(QWheelEvent * event) override ;
@@ -51,6 +52,7 @@ public Q_SLOTS:
     void SLOT_EnableMoving4FakeNodes(bool enableMove);
     void SLOT_EnableGridRestriction(bool enableRes);
     void SLOT_StartDrawingEdge(bool enableDrawing);
+    void SLOT_AcceptAddingGates2Corridor(bool acceptAdding);
     void SLOT_RemoveSelectedNodes();
 };
 }

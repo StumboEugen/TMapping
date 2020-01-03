@@ -172,3 +172,23 @@ TopoVec2 TopoVec2::round2(double lidu) const
     return {rx, ry};
 }
 
+double TopoVec2::crossProduct(const TopoVec2& that)
+{
+    return this->px * that.py - this->py * that.px;
+}
+
+double TopoVec2::dotProduct(const TopoVec2& that)
+{
+    return this->px * that.px + this->py * that.py;
+}
+
+bool TopoVec2::operator==(const TopoVec2& that) const
+{
+    return that.px == this->px && that.py == this->py;
+}
+
+bool TopoVec2::operator!=(const TopoVec2& that) const
+{
+    return !this->operator==(that);
+}
+

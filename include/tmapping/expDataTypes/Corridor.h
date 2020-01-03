@@ -47,6 +47,18 @@ public:
     void moveGatePos(GateID id, const TopoVec2& newPos);
 
     TopoVec2 normalizeSelf() override;
+
+    /**
+     * @brief 一个帮助计算点击位置投影以及法向量的工具函数
+     * @param C 点击的位置
+     * @return first为C在AB上的投影位置, second为投影指向C的法向量
+     */
+    std::pair<TopoVec2, TopoVec2> calPosAmdNvFromPointC(const TopoVec2& C);
+
+    /**
+     * @brief 获取当前走廊的宽度的一半
+     */
+    double halfWidth() const;
 };
 }
 

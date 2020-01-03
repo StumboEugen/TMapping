@@ -118,14 +118,18 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
     if (item) {
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
 
+            /// 被点中的QNode的坐标系中点击的位置
+            const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
+            /// 被点中的QNode对应的ExpData数据
+            const auto& clickedExpData = clickedQNode->relatedMergedExp->getMergedExpData();
+
             if (mIsDrawingEdge && event->button() == Qt::LeftButton) {
-                /// 被点中的QNode的坐标系中点击的位置
-                const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
-                /// 被点中的QNode对应的ExpData数据
-                const auto& clickedExpData = clickedQNode->relatedMergedExp->getMergedExpData();
+                /// 画边模式
+
                 /// 查找被点中的GateID
                 int clickedGateID = clickedExpData->
                         findGateAtPos(UIT::QPt2TopoVec(clickPosInItem),UIT::pix2meter(15));
+
                 if (clickedGateID >= 0) {
                     auto& toNewQNode = clickedQNode->links[clickedGateID].to;
                     if (toNewQNode.expired()) {
@@ -158,6 +162,21 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                     }
                 }
             }
+            else if (clickedQNode->relatedMergedExp->getMergedExpData()->type()
+            == ExpDataType::Corridor
+            && mAcceptAddingGate2Corridor
+            && event->button() == Qt::LeftButton) {
+                /// 在Corridor上画Gate的模式
+
+                auto clickedCorridor = dynamic_cast<Corridor*>(clickedExpData.get());
+                /// 通过点击位置计算得到对应的Gate位置参数
+                auto res = clickedCorridor->calPosAmdNvFromPointC(
+                        UIT::QPt2TopoVec(clickPosInItem));
+                clickedExpData->addGate(GatePtr{
+                    new Door(res.first, res.second, true)});
+                mTheDrawingCorridor = clickedQNode->shared_from_this();
+                mTheDrawingCorridor->notifySizeChange();
+            }
         }
     }
 }
@@ -172,6 +191,22 @@ void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
                 ->setEndPointB(UIT::QPt2TopoVec(clickPosInQNode));
         mTheDrawingCorridor->notifySizeChange();
     }
+    else if (mAcceptAddingGate2Corridor && mTheDrawingCorridor) {
+        const auto& clickPosInScene = mapToScene(event->pos());
+        const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
+        auto clickedCorridor = dynamic_cast<Corridor*>(mTheDrawingCorridor->relatedMergedExp
+                ->getMergedExpData().get());
+        auto res = clickedCorridor->calPosAmdNvFromPointC(UIT::QPt2TopoVec(clickPosInQNode));
+        auto theDrawingGate = mTheDrawingCorridor->relatedMergedExp->getMergedExpData()
+                ->getGates().back();
+        if (theDrawingGate->getNormalVec() != res.second) {
+            /// gate的方向改变了, 调整法向量并根据width调整位置
+            theDrawingGate->setNormalVec(res.second);
+            theDrawingGate->setPos(
+                    theDrawingGate->getPos() + res.second * 2 *clickedCorridor->halfWidth());
+            mTheDrawingCorridor->notifySizeChange();
+        }
+    }
 }
 
 void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
@@ -184,12 +219,13 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
     if (item) {
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
             if (mEnableNodeRestriction) {
+                /// 位置限定模式
                 if (clickedQNode->relatedMergedExp->getMergedExpData()->type() != ExpDataType::Corridor) {
                     restrictQNode(clickedQNode);
                 }
             }
-
-            if (mIsDrawingEdge && mTheDrawingCorridor) {
+            else if (mIsDrawingEdge && mTheDrawingCorridor) {
+                /// Corridor链接模式
                 if (clickedQNode != mTheDrawingCorridor.get()) {
                     /// 被点中的QNode的坐标系中点击的位置
                     const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
@@ -242,6 +278,32 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                 mTheDrawingCorridor.reset();
             }
         }
+    }
+    else if (mAcceptAddingGate2Corridor && mTheDrawingCorridor) {
+        /// Corridor上画Gate的模式
+        const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
+        auto clickedCorridor = dynamic_cast<Corridor*>(mTheDrawingCorridor->relatedMergedExp
+                ->getMergedExpData().get());
+        auto res = clickedCorridor->calPosAmdNvFromPointC(UIT::QPt2TopoVec(clickPosInQNode));
+        auto theDrawingGate = mTheDrawingCorridor->relatedMergedExp->getMergedExpData()
+                ->getGates().back();
+        if (theDrawingGate->getNormalVec() != res.second) {
+            theDrawingGate->setNormalVec(res.second);
+            theDrawingGate->setPos(
+                    theDrawingGate->getPos() + res.second * 2 *clickedCorridor->halfWidth());
+        }
+
+        auto theAddedGate = clickedCorridor->popBackGate();
+        /// 检查添加的位置是否有太近的Gate
+        int clickedGateID = clickedCorridor->findGateAtPos(theAddedGate->getPos(), 0.5);
+        if (clickedGateID >= 0) {
+            cout << FILE_AND_LINE << " The clicked Pos is too close to an exist "
+                                     "Gate" << endl;
+        } else {
+            clickedCorridor->addGate(std::move(theAddedGate));
+        }
+        mTheDrawingCorridor->notifySizeChange();
+        mTheDrawingCorridor.reset();
     }
 
 }
@@ -351,5 +413,15 @@ void tmap::MainGView::loadMap(const std::string& fileName)
             qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
         }
         mScene4FakeMap.addItem(qNode.get());
+    }
+}
+
+void tmap::MainGView::SLOT_AcceptAddingGates2Corridor(bool acceptAdding)
+{
+    mAcceptAddingGate2Corridor = acceptAdding;
+    if (acceptAdding) {
+        setCursor(Qt::CrossCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
     }
 }

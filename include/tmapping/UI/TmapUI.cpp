@@ -162,6 +162,12 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockMapBuilder->btnEditJson, SIGNAL(toggled(bool)),
                 this, SLOT(SLOT_EditJsonOfNodeInFakeMap(bool)));
 
+        connect(uiDockMapBuilder->btnAddGate2Corridor, SIGNAL(toggled(bool)),
+                this, SLOT(SLOT_AddGate2Corridor(bool)));
+        connect(uiDockMapBuilder->btnAddGate2Corridor, SIGNAL(toggled(bool)),
+                uiDockMapBuilder->btnDrawCorridor, SLOT(setDisabled(bool)));
+        connect(uiDockMapBuilder->btnAddGate2Corridor, SIGNAL(toggled(bool)),
+                uiDockMapBuilder->btnEditJson, SLOT(setDisabled(bool)));
     }
 
 }
@@ -278,6 +284,8 @@ void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
         }
         infoView->setTextColor(Qt::black);
     }
+    uiDockMapBuilder->btnAddGate2Corridor->setDisabled(start);
+    uiDockMapBuilder->btnDrawCorridor->setDisabled(start);
     startEdittingNodes(start);
     gvMain->setDisabled(start);
     infoView->setReadOnly(!start);
@@ -375,4 +383,12 @@ void tmap::TmapUI::startEdittingNodes(bool start)
         uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
         uiDockMapBuilder->cbRestrictGrid->setChecked(false);
     }
+}
+
+void tmap::TmapUI::SLOT_AddGate2Corridor(bool start)
+{
+    uiDockMapBuilder->btnEditJson->setDisabled(start);
+    uiDockMapBuilder->btnDrawCorridor->setDisabled(start);
+    gvMain->SLOT_AcceptAddingGates2Corridor(start);
+    startEdittingNodes(start);
 }
