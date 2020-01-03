@@ -72,6 +72,8 @@ struct TopoVec2
     double crossProduct(const TopoVec2& that);
 
     double dotProduct(const TopoVec2& that);
+
+    double tan() const;
 };
 
 std::ostream& operator<<(std::ostream& os, const TopoVec2& pos);

@@ -25,16 +25,39 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose, b
         painter->drawEllipse(QRectF{-2, -2, 4, 4});
     }
     if (gate2draw->type() == GateType::Door) {
-        if (drawDetail) {
-            painter->drawLine({0, 0}, p2);
-        }
-        auto halfDoor = halfNorVec.rotate(90).changeLen(0.2);
+        auto doorChainPos = UIT::TopoVec2QPt(
+                halfNorVec.rotate(90).changeLen(DOOR_RAD / 2));
+
         Door* door = dynamic_cast<Door*>(gate2draw);
-        QPen pen{Qt::black, 2, door->isOpened() ? Qt::DotLine : Qt::SolidLine};
-        pen.setDashOffset(2);
-        painter->setPen(pen);
-        painter->drawLine(UIT::TopoVec2QPt(halfDoor), UIT::TopoVec2QPt(-halfDoor));
-        painter->drawEllipse(QRectF{-2, -2, 4, 4});
+
+        /// 把门下的边框用白色覆盖
+        QPen whiteBasePen{Qt::white, 5};
+        whiteBasePen.setCapStyle(Qt::RoundCap);
+        painter->setPen(whiteBasePen);
+        painter->drawLine(doorChainPos, -doorChainPos);
+        painter->setPen(oriPen);
+
+        /// 绘制圆弧与虚线
+        QPointF dia(UIT::QMeter(DOOR_RAD),UIT::QMeter(DOOR_RAD));
+        QRectF rec{doorChainPos + dia, doorChainPos - dia};
+        painter->setPen(QPen{Qt::black, 1, Qt::DotLine});
+        painter->drawArc(rec,static_cast<int>(halfNorVec.tan() - 90) * 16,-16 * 90);
+        painter->drawLine(doorChainPos,
+                doorChainPos + UIT::TopoVec2QPt(-halfNorVec.changeLen(DOOR_RAD)));
+        painter->drawLine(doorChainPos, -doorChainPos);
+        painter->setPen(oriPen);
+
+        /// 绘制门的主体
+        QPen doorPen{Qt::black, 5};
+        doorPen.setCapStyle(Qt::RoundCap);
+        painter->setPen(doorPen);
+        if (door->isOpened()) {
+            painter->drawLine(doorChainPos,
+                    doorChainPos + UIT::TopoVec2QPt(-halfNorVec.changeLen(DOOR_RAD)));
+        } else {
+            painter->drawLine(doorChainPos, -doorChainPos);
+        }
+        painter->setPen(oriPen);
     }
 
     if (useGatePose) {

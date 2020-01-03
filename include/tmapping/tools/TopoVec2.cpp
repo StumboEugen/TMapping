@@ -192,3 +192,8 @@ bool TopoVec2::operator!=(const TopoVec2& that) const
     return !this->operator==(that);
 }
 
+double TopoVec2::tan() const
+{
+    return atan2(py, px) * 180 / M_PI;
+}
+

@@ -16,6 +16,7 @@ namespace tmap {
 class Gate;
 
 static constexpr double METER2PIX = 60.0;
+static constexpr double DOOR_RAD = 0.4;
 
 /// UI TOOLS
 namespace UIT {
