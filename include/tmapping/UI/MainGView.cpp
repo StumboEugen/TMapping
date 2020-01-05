@@ -438,3 +438,15 @@ void tmap::MainGView::SLOT_AcceptAddingGates2Corridor(bool acceptAdding)
         setCursor(Qt::ArrowCursor);
     }
 }
+
+void tmap::MainGView::keyPressEvent(QKeyEvent* event)
+{
+    QGraphicsView::keyReleaseEvent(event);
+    switch (event->key()) {
+        case Qt::Key_Delete:
+            SLOT_RemoveSelectedNodes();
+            break;
+        default:
+            break;
+    }
+}
