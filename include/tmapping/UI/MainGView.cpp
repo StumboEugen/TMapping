@@ -147,6 +147,8 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                         newCorridor->setEndGateA(0);
                         /// 制作对应的QNode
                         auto newQNode = QNode::makeOneFromExpData(newCorridor);
+                        /// 确保能够链接到正确的QNode上(其他的表层QNode)
+                        newQNode->setZValue(-2);
                         /// 添加连接关系
                         clickedQNode->links[clickedGateID].to = newQNode;
                         clickedQNode->links[clickedGateID].at = 0;
@@ -266,15 +268,25 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                             mTheDrawingCorridor->links.push_back(std::move(l));
                             /// 完成制作, 确定图形
                             mTheDrawingCorridor->notifySizeChange();
+                            mTheDrawingCorridor->setZValue(0);
                             mTheDrawingCorridor.reset();
                             return;
                         }
                     }
+                    /// 松开的位置不在clickedNode的Gate上
                 }
+                /// 没有松在Qnode上
                 const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
-                dynamic_cast<Corridor*>(mTheDrawingCorridor->relatedMergedExp->getMergedExpData().get())
-                        ->setEndPointB(UIT::QPt2TopoVec(clickPosInQNode));
+                const auto& clickTopoPos = UIT::QPt2TopoVec(clickPosInQNode);
+                Corridor* corr = dynamic_cast<Corridor*>(
+                        mTheDrawingCorridor->relatedMergedExp->getMergedExpData().get());
+                auto newDoor = make_shared<Door>(
+                        clickTopoPos, clickTopoPos - corr->getEndPointA(), false);
+                corr->addGate(std::move(newDoor));
+                corr->setEndGateB(corr->nGates() - 1);
+                mTheDrawingCorridor->links.emplace_back();
                 mTheDrawingCorridor->notifySizeChange();
+                mTheDrawingCorridor->setZValue(0);
                 mTheDrawingCorridor.reset();
             }
         }
@@ -301,6 +313,7 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                                      "Gate" << endl;
         } else {
             clickedCorridor->addGate(std::move(theAddedGate));
+            mTheDrawingCorridor->links.emplace_back();
         }
         mTheDrawingCorridor->notifySizeChange();
         mTheDrawingCorridor.reset();

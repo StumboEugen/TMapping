@@ -108,7 +108,8 @@ TopoVec2 TopoVec2::unitize() const
     if (l != 0) {
         res /= l;
     } else {
-        cerr << FILE_AND_LINE << " You are trying to get a unit vec from TopoVec2(0,0)!";
+        cerr << FILE_AND_LINE << " You are trying to get a unit vec from TopoVec2(0,0)!" <<
+        endl;
         res.px = 1;
     }
     return res;

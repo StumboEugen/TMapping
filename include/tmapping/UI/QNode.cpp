@@ -19,7 +19,7 @@ using namespace std;
 
 tmap::QNode::QNode(MergedExpPtr mergedExp)
 {
-    setZValue(mergedExp->getMergedExpData()->type() == ExpDataType::Corridor ? -1 : 0);
+//    setZValue(mergedExp->getMergedExpData()->type() == ExpDataType::Corridor ? -1 : 0);
     links.assign(mergedExp->getMergedExpData()->nGates(), Link{});
     relatedMergedExp = std::move(mergedExp);
     setFlag(ItemIsSelectable);
@@ -68,6 +68,8 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         }
         case ExpDataType::Corridor: {
             auto corr = dynamic_cast<Corridor*>(relatedExpData.get());
+
+            /// 绘制走廊的斜线
             auto pA = corr->getEndPointA();
             auto pB = corr->getEndPointB();
             auto AB = pA - pB;
@@ -243,7 +245,7 @@ QPainterPath tmap::QNode::shape() const
             p.moveTo(pA);
             p.lineTo(pB);
             QPainterPathStroker stroker;
-            stroker.setWidth(30);
+            stroker.setWidth(UIT::QMeter(corr->halfWidth() * 2));
             path = stroker.createStroke(p);
             break;
         }
