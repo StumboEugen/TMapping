@@ -6,6 +6,7 @@
 #include "MergedExp.h"
 
 #include <utility>
+#include <iostream>
 
 using namespace tmap;
 using namespace std;
@@ -19,7 +20,7 @@ tmap::StructedMapImpl::StructedMapImpl(std::vector<MapNodePtr> nodes,
         mPossibility(poss)
 {
     for (size_t i = 0; i < mNodes.size(); ++i) {
-        mNodes[i]->serial = i;
+        mNodes[i]->setSerial(i);
     }
 }
 
@@ -37,12 +38,13 @@ Json::Value tmap::StructedMapImpl::toJS() const
 
     for (const auto& node : mNodes) {
         Json::Value jnode;
-        jnode["exp"] = node->relatedMergedExp->toJS();
-        jnode["serial"] = node->serial;
-        for (const auto& link : node->links) {
+        jnode["exp"] = node->getRelatedMergedExp()->toJS();
+        jnode["serial"] = node->getSerial();
+        for (int i = 0; i < node->nLinks(); ++i) {
+            auto& link = node->linkAt(i);
             Json::Value jlink;
             if (!link.to.expired()) {
-                jlink["t"] = link.to.lock()->serial;
+                jlink["t"] = link.to.lock()->getSerial();
             }
             jlink["@"] = link.at;
             jnode["links"].append(std::move(jlink));
@@ -58,13 +60,15 @@ StructedMapImpl::StructedMapImpl(const Json::Value& jmap)
     mPossibility = jmap["poss"].asDouble();
     mAgentAt = jmap["agentAt"].asUInt64();
 
-    /// 先分配nodes的空间, 因为link需要设置到对应的nodePtr上
+    /// 先生成MapNode的空间, 因为link需要设置到对应的nodePtr上
     const auto& jnodes = jmap["nodes"];
     auto nodeSize = jnodes.size();
     mNodes.assign(nodeSize, nullptr);
     for (int i = 0; i < nodeSize; ++i) {
-        mNodes[i] = make_shared<MapNode>();
-        mNodes[i]->serial = i;
+        const auto& jnode = jnodes[i];
+        auto serial = jnode["serial"].asUInt64();
+        mNodes[serial] = MapNode::makeOneFromMergedExp
+                (MergedExp::madeFronJS(jnode["exp"]), serial);
     }
 
     for (int i = 0; i < nodeSize; ++i) {
@@ -72,19 +76,15 @@ StructedMapImpl::StructedMapImpl(const Json::Value& jmap)
         const auto& jlinks = jnode["links"];
         auto jlinkSize = jlinks.size();
         auto& mapNode = mNodes[jnode["serial"].asUInt64()];
-        auto& links = mapNode->links;
-        links.assign(jlinkSize, {});
         /// 设置所有link
         for (int j = 0; j < jlinkSize; ++j) {
             const auto& jlink = jlinks[j];
-            auto& link = links[j];
+            auto& link = mapNode->linkAt(j);
             if (!jlink["t"].isNull()) {
                 link.to = mNodes[jlink["t"].asUInt64()];
             }
             link.at = jlink["@"].asInt();
         }
-        /// 调用static工厂函数, 生成核心数据
-        mapNode->relatedMergedExp = MergedExp::madeFronJS(jnode["exp"]);
     }
 }
 
@@ -92,3 +92,85 @@ const vector<MapNodePtr>& StructedMapImpl::getNodes() const
 {
     return mNodes;
 }
+
+///////////////////////// NEXT IS ABOUT MAPNODE //////////////////////////
+
+size_t MapNode::getSerial() const
+{
+    return mSerial;
+}
+
+void MapNode::setSerial(size_t serial)
+{
+    MapNode::mSerial = serial;
+}
+
+void MapNode::addNewLink(const MapNodePtr& to, GateID at)
+{
+    mLinks.emplace_back(Link{to, at});
+    setLinkAtIndex(mLinks.size() - 1, to, at);
+}
+
+void MapNode::addNewDanglingLink()
+{
+    addNewLink(nullptr, GATEID_NO_MAPPING);
+}
+
+void MapNode::setLinkAtIndex(size_t index, const MapNodePtr& to, GateID at)
+{
+    auto& link = linkAt(index);
+    link.at = at;
+    link.to = to;
+    if (to) {
+        auto& thatLink = to->linkAt(at);
+        thatLink.to = shared_from_this();
+        thatLink.at = index;
+    }
+}
+
+MapNode::Link& MapNode::linkAt(size_t index)
+{
+    if (mLinks.size() <= index) {
+        cout << FILE_AND_LINE <<
+             " Warning! you are accessing a link that out of range!" << endl;
+        while (mLinks.size() <= index) {
+            mLinks.emplace_back();
+        }
+    }
+    return mLinks[index];
+}
+
+size_t MapNode::nLinks() const
+{
+    return mLinks.size();
+}
+
+MapNodePtr MapNode::makeOneFromMergedExp(MergedExpPtr relatedExp, size_t serial)
+{
+    return tmap::MapNodePtr(new MapNode(std::move(relatedExp), serial));
+}
+
+MapNode::MapNode(MergedExpPtr relatedExp, size_t serial)
+        : mRelatedMergedExp(std::move(relatedExp)),
+          mSerial(serial)
+{
+    mLinks.assign(expData()->nGates(), {});
+}
+
+ExpDataPtr MapNode::expData() const
+{
+    if (mRelatedMergedExp) {
+        return mRelatedMergedExp->getMergedExpData();
+    } else {
+        cerr << FILE_AND_LINE << " you require a expData from a MapNode that doesn't have a "
+                                 "valid relatedMergedExp! " << endl;
+        return nullptr;
+    }
+}
+
+const MergedExpPtr& MapNode::getRelatedMergedExp() const
+{
+    return mRelatedMergedExp;
+}
+
+MapNode::~MapNode() = default;

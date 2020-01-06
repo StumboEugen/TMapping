@@ -17,11 +17,8 @@
 using namespace std;
 
 
-tmap::QNode::QNode(MergedExpPtr mergedExp)
+tmap::QNode::QNode(MergedExpPtr mergedExp) : MapNode(std::move(mergedExp), 0)
 {
-//    setZValue(mergedExp->getMergedExpData()->type() == ExpDataType::Corridor ? -1 : 0);
-    links.assign(mergedExp->getMergedExpData()->nGates(), Link{});
-    relatedMergedExp = std::move(mergedExp);
     setFlag(ItemIsSelectable);
 }
 
@@ -34,7 +31,7 @@ tmap::QNode::~QNode() {
 QRectF tmap::QNode::boundingRect() const
 {
     if (mBoundingRect.isEmpty()) {
-        auto bRect = relatedMergedExp->getMergedExpData()->getOutBounding(0.5);
+        auto bRect = expData()->getOutBounding(0.5);
         mBoundingRect.setTopLeft(UIT::TopoVec2QPt({bRect[2], bRect[0]}));
         mBoundingRect.setBottomRight(UIT::TopoVec2QPt({bRect[3], bRect[1]}));
     }
@@ -51,7 +48,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     auto oriPen = painter->pen();
     auto isSelected = option->state & QStyle::State_Selected;
 
-    auto relatedExpData = relatedMergedExp->getMergedExpData();
+    auto relatedExpData = expData();
     switch (relatedExpData->type()) {
         case ExpDataType::Intersection: {
             painter->setBrush(isSelected ? Qt::lightGray : Qt::yellow);
@@ -170,7 +167,7 @@ void tmap::QNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void tmap::QNode::notifyNeighbours2Move() const
+void tmap::QNode::notifyNeighbours2Move()
 {
     vector<const QNode*> stack{this};
     set<const QNode*> searchedNodes;
@@ -178,8 +175,8 @@ void tmap::QNode::notifyNeighbours2Move() const
     while (!stack.empty()) {
         auto current = stack.back();
         stack.pop_back();
-        for (int i = 0; i < links.size(); ++i) {
-            auto& link = links[i];
+        for (int i = 0; i < nLinks(); ++i) {
+            auto& link = linkAt(i);
             if (!link.to.expired()) {
                 const auto& linkedQNode = dynamic_cast<QNode*>(link.to.lock().get());
                 if (searchedNodes.find(linkedQNode) != searchedNodes.end()) {
@@ -187,12 +184,12 @@ void tmap::QNode::notifyNeighbours2Move() const
                     continue;
                 }
                 GateID linkedGateID = link.at;
-                const auto& linkedExpData = linkedQNode->relatedMergedExp->getMergedExpData();
+                const auto& linkedExpData = linkedQNode->expData();
                 /// 得到在scene中两个点的位置差距
                 auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
                         (linkedExpData->getGates()[linkedGateID]->getPos()));
                 auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
-                        (current->relatedMergedExp->getMergedExpData()->getGates()[i]->getPos()));
+                        (current->expData()->getGates()[i]->getPos()));
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
                     case ExpDataType::SmallRoom:
@@ -224,13 +221,13 @@ void tmap::QNode::notifyNeighbours2Move() const
 QPainterPath tmap::QNode::shape() const
 {
     QPainterPath path;
-    switch (relatedMergedExp->getMergedExpData()->type()) {
+    switch (expData()->type()) {
 
         case ExpDataType::Intersection:
         case ExpDataType::Stair:
         case ExpDataType::BigRoom:
         case ExpDataType::SmallRoom: {
-            auto bRect = relatedMergedExp->getMergedExpData()->getOutBounding(0.5);
+            auto bRect = expData()->getOutBounding(0.5);
             QRectF rect;
             rect.setTopLeft(UIT::TopoVec2QPt({bRect[2], bRect[0]}));
             rect.setBottomRight(UIT::TopoVec2QPt({bRect[3], bRect[1]}));
@@ -239,7 +236,7 @@ QPainterPath tmap::QNode::shape() const
         }
         case ExpDataType::Corridor: {
             QPainterPath p;
-            auto corr = dynamic_cast<Corridor*>(relatedMergedExp->getMergedExpData().get());
+            auto corr = dynamic_cast<Corridor*>(expData().get());
             auto pA = UIT::TopoVec2QPt(corr->getEndPointA());
             auto pB = UIT::TopoVec2QPt(corr->getEndPointB());
             p.moveTo(pA);
@@ -255,7 +252,30 @@ QPainterPath tmap::QNode::shape() const
 
 void tmap::QNode::normalizePos()
 {
-    auto offset = relatedMergedExp->getMergedExpData()->normalizeSelf();
+    auto offset = expData()->normalizeSelf();
     setPos(pos() + UIT::TopoVec2QPt(offset));
     notifySizeChange();
+}
+
+tmap::QNodePtr tmap::QNode::thisQnodePtr()
+{
+    return dynamic_pointer_cast<QNode>(shared_from_this());
+}
+
+void tmap::QNode::breakLinks()
+{
+    for (int i = 0; i < nLinks(); ++i) {
+        auto& link = linkAt(i);
+        auto linkedNode = link.to.lock();
+        if (linkedNode) {
+            linkedNode->linkAt(link.at).to.reset();
+            linkedNode->linkAt(link.at).at = GATEID_NO_MAPPING;
+        }
+    }
+}
+
+tmap::QNodePtr tmap::QNode::qNodeAt(size_t index)
+{
+    MapNodePtr toNode = linkAt(index).to.lock();
+    return dynamic_pointer_cast<QNode>(toNode);
 }

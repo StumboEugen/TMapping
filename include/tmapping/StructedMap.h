@@ -5,6 +5,7 @@
 #ifndef TMAPPING_STRUCTEDMAP_H
 #define TMAPPING_STRUCTEDMAP_H
 
+#include <utility>
 #include <vector>
 
 #include "tools/TopoParams.h"
@@ -14,19 +15,51 @@
 namespace tmap
 {
 
-struct MapNode
+struct MapNode : std::enable_shared_from_this<MapNode>
 {
+
+public:
     struct Link {
+        Link() : to(), at(GATEID_NO_MAPPING) {}
+
+        Link(const MapNodePtr& to, GateID at) : to(to), at(at) {}
+
         MapNodeWe to;
         GateID at = GATEID_NO_MAPPING;
     };
 
+private:
     /// 用于方便各种构造的时候知道links[i].to指向的是哪里
-    size_t serial;
-    MergedExpPtr relatedMergedExp;
-    std::vector<Link> links;
+    size_t mSerial = 0;
 
-    virtual ~MapNode() = default;
+    MergedExpPtr mRelatedMergedExp;
+
+    std::vector<Link> mLinks;
+
+protected:
+    explicit MapNode(MergedExpPtr relatedExp, size_t serial);
+
+public:
+    static MapNodePtr makeOneFromMergedExp(MergedExpPtr relatedExp, size_t serial = 0);
+
+    void addNewLink(const MapNodePtr& to, GateID at);
+    void addNewDanglingLink();
+
+    void setLinkAtIndex(size_t index, const MapNodePtr& to, GateID at);
+
+    Link& linkAt(size_t index);
+
+    size_t nLinks() const;
+
+    size_t getSerial() const;
+
+    ExpDataPtr expData() const;
+
+    void setSerial(size_t serial);
+
+    const MergedExpPtr& getRelatedMergedExp() const;
+
+    virtual ~MapNode();
 };
 
 class StructedMapImpl

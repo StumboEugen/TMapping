@@ -186,13 +186,11 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
             auto& relatedNodePtr = nodePs[currentSerial];
             if (relatedNodePtr == nullptr) {
                 /// 如果对应的MapNode不存在,说明这个mergedExp是第一次被加入,也对应MapNode的实际related Exp
-                relatedNodePtr = make_shared<MapNode>();
-                relatedNodePtr->relatedMergedExp = mergedExp;
+                relatedNodePtr = MapNode::makeOneFromMergedExp(mergedExp);
                 const auto& currentMergedRelatedExp = mergedExp->getTheLastExp();
-                size_t nGates = currentMergedRelatedExp->expData()->nGates();
-                relatedNodePtr->links.assign(nGates, MapNode::Link{});
                 mapNodePtrs.emplace_back(relatedNodePtr);
 
+                size_t nGates = currentMergedRelatedExp->expData()->nGates();
                 vector<GateID> gatesMap2EndMergedExp(nGates);
                 for (int i = 0; i < nGates; ++i) {
                     gatesMap2EndMergedExp[i] = i;
@@ -250,8 +248,8 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
     for (int i = 0; i < expSize - 1; ++i) {
         auto leaveGate = realGates[i].leaveGate;
         auto enterGate = realGates[i + 1].enterGate;
-        auto& leaveLink = nodePs[i]->links[leaveGate];
-        auto& enterLink = nodePs[i + 1]->links[enterGate];
+        auto& leaveLink = nodePs[i]->linkAt(leaveGate);
+        auto& enterLink = nodePs[i + 1]->linkAt(enterGate);
         leaveLink.to = nodePs[i + 1];
         enterLink.to = nodePs[i];
         leaveLink.at = enterGate;

@@ -14,7 +14,7 @@ namespace tmap
 class QNode;
 using QNodePtr = std::shared_ptr<QNode>;
 
-class QNode : public QGraphicsItem, public MapNode, public std::enable_shared_from_this<QNode>
+class QNode : public QGraphicsItem, public MapNode
 {
     mutable QRectF mBoundingRect;
 
@@ -25,9 +25,10 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
-
 public:
-    void notifyNeighbours2Move() const;
+    void breakLinks();
+
+    void notifyNeighbours2Move();
 
     static QNodePtr makeOneFromExpData(const ExpDataPtr& relatedExpData);
 
@@ -45,6 +46,10 @@ public:
     void normalizePos();
 
     ~QNode() override;
+
+    QNodePtr thisQnodePtr();
+
+    QNodePtr qNodeAt(size_t index);
 };
 }
 

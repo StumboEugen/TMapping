@@ -266,7 +266,7 @@ void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
             uiDockMapBuilder->btnEditJson->setCheckable(true);
             return;
         }
-        Jsobj jExpData = qNode->relatedMergedExp->getMergedExpData()->toJS();
+        Jsobj jExpData = qNode->expData()->toJS();
         infoView->setText(JsonHelper::JS2Str(jExpData, false).data());
         infoView->setTextColor(Qt::darkGray);
         uiDockMapBuilder->btnEditJson->setText("Complete Editting");
@@ -276,7 +276,7 @@ void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
         ExpDataPtr madeExpData = ExpData::madeFromJS(editedJs);
         if (madeExpData) {
             auto qNode = dynamic_cast<QNode*>(items.front());
-            qNode->relatedMergedExp->exchangeMergedExpData(madeExpData);
+            qNode->getRelatedMergedExp()->exchangeMergedExpData(madeExpData);
             qNode->notifySizeChange();
             qNode->notifyNeighbours2Move();
         } else {
