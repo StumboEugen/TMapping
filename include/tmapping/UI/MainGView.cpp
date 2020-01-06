@@ -159,7 +159,9 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
             else if (clickedQNode->expData()->type() == ExpDataType::Corridor
                      && mAcceptAddingGate2Corridor
                      && event->button() == Qt::LeftButton) {
-                /// 在Corridor上画Gate的模式
+                /**
+                 * @brief 在Corridor上画Gate的模式
+                 */
 
                 auto clickedCorridor = dynamic_cast<Corridor*>(clickedExpData.get());
                 /// 通过点击位置计算得到对应的Gate位置参数
@@ -170,6 +172,20 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                 mTheDrawingCorridor = clickedQNode->thisQnodePtr();
                 mTheDrawingCorridor->notifySizeChange();
             }
+            else if (mIsDrawingDirectLink && event->button() == Qt::LeftButton) {
+                /// 查找被点中的GateID
+                int clickedGateID = clickedExpData->
+                        findGateAtPos(UIT::QPt2TopoVec(clickPosInItem),UIT::pix2meter(15));
+
+                if (clickedGateID >= 0) {
+                    if (!clickedQNode->qNodeAt(clickedGateID)) {
+                        auto fakeLine = make_shared<FakeLine_IMPL>
+                                (clickPosInScene, clickPosInScene, clickedQNode, clickedGateID);
+                        mScene4FakeMap.addItem(fakeLine.get());
+                        mTheDrawingFakeLine = std::move(fakeLine);
+                    }
+                }
+            }
         }
     }
 }
@@ -177,15 +193,14 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
 void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseMoveEvent(event);
+    const auto& clickPosInScene = mapToScene(event->pos());
     if (mIsDrawingEdge && mTheDrawingCorridor) {
-        const auto& clickPosInScene = mapToScene(event->pos());
         const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
         dynamic_cast<Corridor*>(mTheDrawingCorridor->expData().get())
                 ->setEndPointB(UIT::QPt2TopoVec(clickPosInQNode));
         mTheDrawingCorridor->notifySizeChange();
     }
     else if (mAcceptAddingGate2Corridor && mTheDrawingCorridor) {
-        const auto& clickPosInScene = mapToScene(event->pos());
         const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
         auto clickedCorridor = dynamic_cast<Corridor*>(mTheDrawingCorridor->expData().get());
         auto res = clickedCorridor->calPosAmdNvFromPointC(UIT::QPt2TopoVec(clickPosInQNode));
@@ -197,6 +212,9 @@ void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
                     theDrawingGate->getPos() + res.second * 2 *clickedCorridor->halfWidth());
             mTheDrawingCorridor->notifySizeChange();
         }
+    }
+    else if (mIsDrawingDirectLink && mTheDrawingFakeLine) {
+        mTheDrawingFakeLine->setPoint(nullptr, clickPosInScene);
     }
 }
 
@@ -272,6 +290,27 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
                 mTheDrawingCorridor->notifySizeChange();
                 mTheDrawingCorridor->setZValue(0);
                 mTheDrawingCorridor.reset();
+            }
+            else if (mIsDrawingDirectLink && mTheDrawingFakeLine) {
+                if (clickedQNode != mTheDrawingCorridor.get()) {
+                    /// 被点中的QNode的坐标系中点击的位置
+                    const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
+                    /// 被点中的QNode对应的ExpData数据
+                    const auto& clickedExpData = clickedQNode->expData();
+                    /// 查找被点中的GateID
+                    int clickedGateID = clickedExpData->findGateAtPos(
+                            UIT::QPt2TopoVec(clickPosInItem),UIT::pix2meter(15));
+                    if (clickedGateID >= 0 && !clickedQNode->qNodeAt(clickedGateID)) {
+                        auto theOriQNode = mTheDrawingFakeLine->oriNode();
+                        clickedQNode->setLinkAtIndex(clickedGateID,
+                                theOriQNode->shared_from_this(),
+                                mTheDrawingFakeLine->fromGate());
+                        clickedQNode->fakeLineAt(clickedGateID) = mTheDrawingFakeLine;
+                        theOriQNode->fakeLineAt(mTheDrawingFakeLine->fromGate()) =
+                                std::move(mTheDrawingFakeLine);
+                    }
+                }
+                mTheDrawingFakeLine.reset();
             }
         }
     }
@@ -426,5 +465,15 @@ void tmap::MainGView::keyPressEvent(QKeyEvent* event)
             break;
         default:
             break;
+    }
+}
+
+void tmap::MainGView::SLOT_StartDirectLinking(bool startLink)
+{
+    mIsDrawingDirectLink = startLink;
+    if (startLink) {
+        setCursor(Qt::CrossCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
     }
 }

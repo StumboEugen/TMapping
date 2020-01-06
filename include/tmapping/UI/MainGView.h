@@ -23,14 +23,17 @@ class MainGView : public QGraphicsView
     std::set<QNodePtr> mNodesInFakeMap;
 
     QNodePtr mTheDrawingCorridor;
+    FakeLine mTheDrawingFakeLine;
 
     bool mEnableFakeNodesMoving = true;
     bool mEnableNodeRestriction = false;
     bool mIsDrawingEdge = false;
     bool mAcceptAddingGate2Corridor = false;
+    bool mIsDrawingDirectLink = false;
 
 protected:
     void wheelEvent(QWheelEvent * event) override ;
+
     void mousePressEvent(QMouseEvent * event) override ;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override ;
@@ -56,6 +59,7 @@ public Q_SLOTS:
     void SLOT_StartDrawingEdge(bool enableDrawing);
     void SLOT_AcceptAddingGates2Corridor(bool acceptAdding);
     void SLOT_RemoveSelectedNodes();
+    void SLOT_StartDirectLinking(bool startLink);
 };
 }
 

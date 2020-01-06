@@ -28,7 +28,7 @@ public:
         GateID at = GATEID_NO_MAPPING;
     };
 
-private:
+protected:
     /// 用于方便各种构造的时候知道links[i].to指向的是哪里
     size_t mSerial = 0;
 
@@ -36,7 +36,6 @@ private:
 
     std::vector<Link> mLinks;
 
-protected:
     explicit MapNode(MergedExpPtr relatedExp, size_t serial);
 
 public:

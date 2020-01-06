@@ -67,19 +67,6 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="btnDrawCorridor">
-      <property name="text">
-       <string>Draw Corridor</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QPushButton" name="btnAddGate2Corridor">
       <property name="text">
        <string>Add Gate to Corridor</string>
@@ -103,6 +90,29 @@
      <widget class="QPushButton" name="btnDeleteSelectedNodes">
       <property name="text">
        <string>Delete Selected Nodes</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnConnectGates">
+      <property name="text">
+       <string>Connect Gates</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="cbDrawCorridor">
+      <property name="text">
+       <string>Using Corridor to Connect</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </item>

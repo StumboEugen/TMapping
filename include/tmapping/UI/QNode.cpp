@@ -20,6 +20,7 @@ using namespace std;
 tmap::QNode::QNode(MergedExpPtr mergedExp) : MapNode(std::move(mergedExp), 0)
 {
     setFlag(ItemIsSelectable);
+    mFakeLines.assign(mRelatedMergedExp->getMergedExpData()->nGates(), nullptr);
 }
 
 tmap::QNode::~QNode() {
@@ -46,12 +47,11 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     QRectF middleHalfSq{centerPoint + halfDia, centerPoint - halfDia};
 
     auto oriPen = painter->pen();
-    auto isSelected = option->state & QStyle::State_Selected;
 
     auto relatedExpData = expData();
     switch (relatedExpData->type()) {
         case ExpDataType::Intersection: {
-            painter->setBrush(isSelected ? Qt::lightGray : Qt::yellow);
+            painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
             painter->drawEllipse(middleHalfSq);
             painter->setPen(oriPen);
 
@@ -91,7 +91,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
                               UIT::TopoVec2QPt(pB - halfVecPB));
             painter->setPen(oriPen);
 
-            if (isSelected) {
+            if (isSelected()) {
                 QPainterPath pp;
                 pp.moveTo(UIT::TopoVec2QPt(pA + halfVecPA));
                 pp.lineTo(UIT::TopoVec2QPt(pB + halfVecPB));
@@ -122,7 +122,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
             painter->drawRect(QRectF{tl,br});
-            painter->setBrush(isSelected ? Qt::lightGray : Qt::yellow);
+            painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
             painter->drawRect(middleHalfSq);
             painter->setPen(oriPen);
             for (const auto& gate : relatedExpData->getGates()) {
@@ -169,36 +169,41 @@ void tmap::QNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void tmap::QNode::notifyNeighbours2Move()
 {
-    vector<const QNode*> stack{this};
-    set<const QNode*> searchedNodes;
+    vector<QNode*> stack{this};
+    set<QNode*> searchedNodes;
 
     while (!stack.empty()) {
         auto current = stack.back();
         stack.pop_back();
+        /// 检查每一个link, 通知其需要随我运动
         for (int i = 0; i < nLinks(); ++i) {
-            auto& link = linkAt(i);
-            if (!link.to.expired()) {
-                const auto& linkedQNode = dynamic_cast<QNode*>(link.to.lock().get());
-                if (searchedNodes.find(linkedQNode) != searchedNodes.end()) {
+            if (auto linkedQNode = qNodeAt(i)) {
+                auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
+                        (current->expData()->getGates()[i]->getPos()));
+
+                if (auto fakeLine = fakeLineAt(i)) {
+                    /// 检查是否为Fake连接, 如果是的话, 只要改动Fake连接即可
+                    fakeLine->setPoint(this, currentGatePos);
+                    continue;
+                }
+                if (searchedNodes.find(linkedQNode.get()) != searchedNodes.end()) {
                     /// 要处理的current之前已经处理过了, 不要发生死循环
                     continue;
                 }
-                GateID linkedGateID = link.at;
+                GateID linkedGateID = linkAt(i).at;
                 const auto& linkedExpData = linkedQNode->expData();
                 /// 得到在scene中两个点的位置差距
                 auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
                         (linkedExpData->getGates()[linkedGateID]->getPos()));
-                auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
-                        (current->expData()->getGates()[i]->getPos()));
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
                     case ExpDataType::SmallRoom:
                         /// Intersection和SmallRoom采用相同的策略, 跟随current移动
-                        searchedNodes.insert(linkedQNode);
+                        searchedNodes.insert(linkedQNode.get());
                         linkedQNode->setPos(
                                 linkedQNode->pos() + (currentGatePos - linkedGatePos));
                         /// 移动后相关的Gate也会受影响, 加入修改队列中
-                        stack.push_back(linkedQNode);
+                        stack.push_back(linkedQNode.get());
                         break;
                     case ExpDataType::Corridor: {
                         /// 走廊的话直接移动端点 TODO 考虑是否合理?
@@ -278,4 +283,64 @@ tmap::QNodePtr tmap::QNode::qNodeAt(size_t index)
 {
     MapNodePtr toNode = linkAt(index).to.lock();
     return dynamic_pointer_cast<QNode>(toNode);
+}
+
+tmap::FakeLine& tmap::QNode::fakeLineAt(size_t index)
+{
+    while (mFakeLines.size() <= index) {
+        mFakeLines.emplace_back();
+    }
+    return mFakeLines[index];
+}
+
+////////////////// NEXT TO FAKE LINE
+
+tmap::FakeLine_IMPL::~FakeLine_IMPL()
+{
+    if (scene()) {
+        scene()->removeItem(this);
+    }
+}
+
+tmap::FakeLine_IMPL::FakeLine_IMPL(const QPointF& p1, const QPointF& p2, QNode* node1,
+                                   GateID fromGate) :
+        mPoints{p1, p2}, mOriNode(node1), mFrom(fromGate)
+{
+    setFlag(ItemIsSelectable, true);
+    setLine({p1, p2});
+    setZValue(-3);
+    QPen pen{Qt::black, 2, Qt::DashLine, Qt::FlatCap};
+    setPen(pen);
+}
+
+void tmap::FakeLine_IMPL::setPoint(tmap::QNode* who, const QPointF& newP)
+{
+    if (who == mOriNode) {
+        mPoints[0] = newP;
+    } else {
+        mPoints[1] = newP;
+    }
+    setLine({mPoints[0], mPoints[1]});
+}
+
+void tmap::FakeLine_IMPL::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
+                                QWidget* widget)
+{
+    auto pen = painter->pen();
+    if (isSelected()) {
+        pen.setWidth(4);
+    } else {
+        pen.setWidth(2);
+    }
+    QGraphicsLineItem::paint(painter, option, widget);
+}
+
+tmap::QNode* tmap::FakeLine_IMPL::oriNode() const
+{
+    return mOriNode;
+}
+
+tmap::GateID tmap::FakeLine_IMPL::fromGate() const
+{
+    return mFrom;
 }
