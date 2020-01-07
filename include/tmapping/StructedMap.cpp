@@ -173,4 +173,9 @@ const MergedExpPtr& MapNode::getRelatedMergedExp() const
     return mRelatedMergedExp;
 }
 
+GateID MapNode::linkedGIDAt(size_t index)
+{
+    return linkAt(index).at;
+}
+
 MapNode::~MapNode() = default;

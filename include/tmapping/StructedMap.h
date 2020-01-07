@@ -48,6 +48,8 @@ public:
 
     Link& linkAt(size_t index);
 
+    GateID linkedGIDAt(size_t index);
+
     size_t nLinks() const;
 
     size_t getSerial() const;

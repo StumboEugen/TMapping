@@ -75,6 +75,8 @@ public:
     QNodePtr qNodeAt(size_t index);
 
     FakeLine& fakeLineAt(size_t index);
+
+    QPointF gateQPos(size_t index, bool atScene = true) const;
 };
 }
 

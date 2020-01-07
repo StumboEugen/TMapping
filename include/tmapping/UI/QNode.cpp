@@ -135,6 +135,24 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
 void tmap::QNode::notifySizeChange()
 {
+    /// 遍历更新FakeLine的状态
+    for (int i = 0; i < expData()->nGates(); ++i) {
+        if (const auto& linkedQNode = qNodeAt(i)) {
+            const auto& linkedGatePos = linkedQNode->gateQPos(linkedGIDAt(i));
+            const auto& currentGatePos = gateQPos(i);
+            if (linkedGatePos != currentGatePos) {
+                if (auto& fakeLine = fakeLineAt(i)) {
+                    fakeLine->setPoint(this, currentGatePos);
+                } else {
+                    fakeLine = make_shared<FakeLine_IMPL>(currentGatePos, linkedGatePos,
+                            this, i);
+                    linkedQNode->fakeLineAt(linkedGIDAt(i)) = fakeLine;
+                    scene()->addItem(fakeLine.get());
+                }
+            }
+        }
+    }
+
     mBoundingRect.setWidth(0.);
     prepareGeometryChange();
     update();
@@ -271,10 +289,11 @@ void tmap::QNode::breakLinks()
 {
     for (int i = 0; i < nLinks(); ++i) {
         auto& link = linkAt(i);
-        auto linkedNode = link.to.lock();
-        if (linkedNode) {
-            linkedNode->linkAt(link.at).to.reset();
-            linkedNode->linkAt(link.at).at = GATEID_NO_MAPPING;
+        auto linkedQNode = qNodeAt(i);
+        if (linkedQNode) {
+            linkedQNode->linkAt(link.at).to.reset();
+            linkedQNode->linkAt(link.at).at = GATEID_NO_MAPPING;
+            linkedQNode->fakeLineAt(i).reset();
         }
     }
 }
@@ -291,6 +310,20 @@ tmap::FakeLine& tmap::QNode::fakeLineAt(size_t index)
         mFakeLines.emplace_back();
     }
     return mFakeLines[index];
+}
+
+QPointF tmap::QNode::gateQPos(size_t index, bool atScene) const
+{
+    QPointF res{0,0};
+    if (expData()->nGates() <= index) {
+        cerr << FILE_AND_LINE << " you are getting an invalid gate pos!" << endl;
+        return res;
+    }
+    res = UIT::TopoVec2QPt(expData()->getGates()[index]->getPos());
+    if (atScene) {
+        res = mapToScene(res);
+    }
+    return res;
 }
 
 ////////////////// NEXT TO FAKE LINE
