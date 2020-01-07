@@ -10,8 +10,9 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <set>
+#include <QGraphicsSceneHoverEvent>
 
+#include <set>
 #include <iostream>
 
 using namespace std;
@@ -20,6 +21,7 @@ using namespace std;
 tmap::QNode::QNode(MergedExpPtr mergedExp) : MapNode(std::move(mergedExp), 0)
 {
     setFlag(ItemIsSelectable);
+    setAcceptHoverEvents(true);
     mFakeLines.assign(mRelatedMergedExp->getMergedExpData()->nGates(), nullptr);
 }
 
@@ -130,6 +132,14 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             }
             break;
         }
+    }
+
+    if (mHighLightGate >= 0) {
+        painter->setPen(Qt::red);
+        painter->setBrush(Qt::NoBrush);
+        QPointF diag{7.5, 7.5};
+        auto center = gateQPos(mHighLightGate, false);
+        painter->drawEllipse({center - diag, center + diag});
     }
 }
 
@@ -324,6 +334,25 @@ QPointF tmap::QNode::gateQPos(size_t index, bool atScene) const
         res = mapToScene(res);
     }
     return res;
+}
+
+void tmap::QNode::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsItem::hoverMoveEvent(event);
+    mouseHoverAt(mapFromScene(event->scenePos()));
+}
+
+void tmap::QNode::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    QGraphicsItem::hoverLeaveEvent(event);
+    mHighLightGate = GATEID_NO_MAPPING;
+    update();
+}
+
+void tmap::QNode::mouseHoverAt(const QPointF& at)
+{
+    mHighLightGate = expData()->findGateAtPos(UIT::QPt2TopoVec(at), UIT::pix2meter(15));
+    update();
 }
 
 ////////////////// NEXT TO FAKE LINE

@@ -40,6 +40,7 @@ class QNode : public QGraphicsItem, public MapNode
 {
     mutable QRectF mBoundingRect;
     std::vector<FakeLine> mFakeLines;
+    GateID mHighLightGate = -1;
 
 private:
     explicit QNode(MergedExpPtr mergedExp);
@@ -47,6 +48,8 @@ private:
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
 public:
     void breakLinks();
@@ -77,6 +80,8 @@ public:
     FakeLine& fakeLineAt(size_t index);
 
     QPointF gateQPos(size_t index, bool atScene = true) const;
+
+    void mouseHoverAt(const QPointF& at);
 };
 }
 

@@ -219,6 +219,9 @@ void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
     else if (mIsDrawingDirectLink && mTheDrawingFakeLine) {
         mTheDrawingFakeLine->setPoint(nullptr, clickPosInScene);
     }
+    if (auto qNode = dynamic_cast<QNode*>(scene()->itemAt(clickPosInScene))) {
+        qNode->mouseHoverAt(qNode->mapFromScene(clickPosInScene));
+    }
 }
 
 void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
@@ -416,6 +419,7 @@ void tmap::MainGView::loadMap(const std::string& fileName)
             /// BFS使用的队列
             queue<QNode*> lookupQueue;
             /// BFS中的元素是已经添加过的QNode
+            lookupQueue.push(qNode.get());
             qNode->setPos(0., 0.);
             if (qNode->expData()->type() != ExpDataType::Corridor) {
                 /// TODO, 将来Corridor在某些模式下可移动
@@ -423,7 +427,6 @@ void tmap::MainGView::loadMap(const std::string& fileName)
             }
             mScene4FakeMap.addItem(qNode.get());
             mNodesInFakeMap.insert(std::move(qNode));
-            lookupQueue.push(qNode.get());
 
             while (!lookupQueue.empty()) {
                 auto& currentQnode = lookupQueue.front();
