@@ -23,6 +23,8 @@ public:
     void
     paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
+    QPainterPath shape() const override;
+
     void setPoint(QNode* who, const QPointF& newP);
 
     QNode* oriNode() const;

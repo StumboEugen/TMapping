@@ -94,8 +94,7 @@ void tmap::MainGView::SLOT_StartDrawingEdge(bool enableDrawing)
 void tmap::MainGView::SLOT_RemoveSelectedNodes()
 {
     for (auto& item : mScene4FakeMap.selectedItems()) {
-        auto qNode = dynamic_cast<QNode*>(item);
-        if (qNode) {
+        if (auto qNode = dynamic_cast<QNode*>(item)) {
             qNode->breakLinks();
             mNodesInFakeMap.erase(qNode->thisQnodePtr());
         }
@@ -488,6 +487,23 @@ void tmap::MainGView::keyPressEvent(QKeyEvent* event)
 {
     QGraphicsView::keyReleaseEvent(event);
     switch (event->key()) {
+        case Qt::Key_D:
+            if (auto fakeLine = dynamic_cast<FakeLine_IMPL*>(scene()->selectedItems().first())){
+                auto socket = fakeLine->oriNode();
+                auto socketGID = fakeLine->fromGate();
+                auto plug = socket->qNodeAt(socketGID).get();
+                auto plugGID = socket->linkedGIDAt(socketGID);
+                if (event->modifiers() & Qt::CTRL) {
+                    std::swap(socket, plug);
+                    std::swap(socketGID, plugGID);
+                }
+                auto socketPos = socket->gateQPos(socketGID);
+                auto plugPos = plug->gateQPos(socket->linkedGIDAt(socketGID), false);
+                plug->setPos(socketPos - plugPos);
+                plug->notifyNeighbours2Move();
+                socket->fakeLineAt(socketGID).reset();
+                plug->fakeLineAt(plugGID).reset();
+            }
         case Qt::Key_Delete:
             SLOT_RemoveSelectedNodes();
             break;

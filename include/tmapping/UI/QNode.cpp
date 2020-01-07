@@ -150,15 +150,17 @@ void tmap::QNode::notifySizeChange()
         if (const auto& linkedQNode = qNodeAt(i)) {
             const auto& linkedGatePos = linkedQNode->gateQPos(linkedGIDAt(i));
             const auto& currentGatePos = gateQPos(i);
-            if (linkedGatePos != currentGatePos) {
-                if (auto& fakeLine = fakeLineAt(i)) {
-                    fakeLine->setPoint(this, currentGatePos);
-                } else {
-                    fakeLine = make_shared<FakeLine_IMPL>(currentGatePos, linkedGatePos,
-                            this, i);
-                    linkedQNode->fakeLineAt(linkedGIDAt(i)) = fakeLine;
-                    scene()->addItem(fakeLine.get());
-                }
+            auto& fakeLine = fakeLineAt(i);
+            if (fakeLine) {
+                /// 如果fakeLine存在的话直接重新设置位置点
+                fakeLine->setPoint(this, currentGatePos);
+            }
+            else if (linkedGatePos != currentGatePos) {
+                /// 判断一下位置是否有问题, 有的话制造一个位置点出来
+                fakeLine = make_shared<FakeLine_IMPL>(currentGatePos, linkedGatePos,
+                        this, i);
+                linkedQNode->fakeLineAt(linkedGIDAt(i)) = fakeLine;
+                scene()->addItem(fakeLine.get());
             }
         }
     }
@@ -199,13 +201,15 @@ void tmap::QNode::notifyNeighbours2Move()
 {
     vector<QNode*> stack{this};
     set<QNode*> searchedNodes;
+    searchedNodes.insert(this);
+    vector<QNode*> touchedNodes{this};
 
     while (!stack.empty()) {
         auto current = stack.back();
         stack.pop_back();
         /// 检查每一个link, 通知其需要随我运动
-        for (int i = 0; i < nLinks(); ++i) {
-            if (auto linkedQNode = qNodeAt(i)) {
+        for (int i = 0; i < current->nLinks(); ++i) {
+            if (auto linkedQNode = current->qNodeAt(i)) {
                 auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
                         (current->expData()->getGates()[i]->getPos()));
 
@@ -218,7 +222,9 @@ void tmap::QNode::notifyNeighbours2Move()
                     /// 要处理的current之前已经处理过了, 不要发生死循环
                     continue;
                 }
-                GateID linkedGateID = linkAt(i).at;
+                touchedNodes.push_back(linkedQNode.get());
+
+                GateID linkedGateID = current->linkedGIDAt(i);
                 const auto& linkedExpData = linkedQNode->expData();
                 /// 得到在scene中两个点的位置差距
                 auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
@@ -237,7 +243,6 @@ void tmap::QNode::notifyNeighbours2Move()
                         /// 走廊的话直接移动端点 TODO 考虑是否合理?
                         dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
                                 (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
-                        linkedQNode->notifySizeChange();
 //                        searchedNodes.insert(linkedQNode);
                         break;
                     }
@@ -248,6 +253,10 @@ void tmap::QNode::notifyNeighbours2Move()
                 }
             }
         }
+    }
+
+    for (const auto& node : touchedNodes) {
+        node->notifySizeChange();
     }
 }
 
@@ -260,7 +269,7 @@ QPainterPath tmap::QNode::shape() const
         case ExpDataType::Stair:
         case ExpDataType::BigRoom:
         case ExpDataType::SmallRoom: {
-            auto bRect = expData()->getOutBounding(0.5);
+            auto bRect = expData()->getOutBounding(0.1);
             QRectF rect;
             rect.setTopLeft(UIT::TopoVec2QPt({bRect[2], bRect[0]}));
             rect.setBottomRight(UIT::TopoVec2QPt({bRect[3], bRect[1]}));
@@ -395,6 +404,12 @@ void tmap::FakeLine_IMPL::paint(QPainter* painter, const QStyleOptionGraphicsIte
         pen.setWidth(2);
     }
     QGraphicsLineItem::paint(painter, option, widget);
+    if (isSelected()) {
+        QLineF line2Draw{mapFromScene(mPoints[0]), mapFromScene(mPoints[1])};
+        line2Draw.setLength(line2Draw.length() / 4);
+        painter->setPen({Qt::red, 4});
+        painter->drawLine(line2Draw);
+    }
 }
 
 tmap::QNode* tmap::FakeLine_IMPL::oriNode() const
@@ -405,4 +420,14 @@ tmap::QNode* tmap::FakeLine_IMPL::oriNode() const
 tmap::GateID tmap::FakeLine_IMPL::fromGate() const
 {
     return mFrom;
+}
+
+QPainterPath tmap::FakeLine_IMPL::shape() const
+{
+    QPainterPath path;
+    path.moveTo(line().p1());
+    path.lineTo(line().p2());
+    QPainterPathStroker stroker;
+    stroker.setWidth(5);
+    return stroker.createStroke(path);
 }
