@@ -200,8 +200,8 @@ void tmap::QNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void tmap::QNode::notifyNeighbours2Move()
 {
     vector<QNode*> stack{this};
-    set<QNode*> searchedNodes;
-    searchedNodes.insert(this);
+    set<QNode*> movedNodes;
+    movedNodes.insert(this);
     vector<QNode*> touchedNodes{this};
 
     while (!stack.empty()) {
@@ -210,45 +210,48 @@ void tmap::QNode::notifyNeighbours2Move()
         /// 检查每一个link, 通知其需要随我运动
         for (int i = 0; i < current->nLinks(); ++i) {
             if (auto linkedQNode = current->qNodeAt(i)) {
-                auto currentGatePos = current->mapToScene(UIT::TopoVec2QPt
-                        (current->expData()->getGates()[i]->getPos()));
 
-                if (auto fakeLine = fakeLineAt(i)) {
+                if (movedNodes.find(linkedQNode.get()) != movedNodes.end()) {
+                    /// 要处理的linkedQNode之前已经处理过了(移动过了, 所以对于Corridor可能会多次遇到)
+                    /// 跳过, 不要发生死循环
+                    continue;
+                }
+
+                /// 当前Gate的全局Pos(在Scene中)
+                auto currentGatePos = current->gateQPos(i);
+
+                if (auto fakeLine = current->fakeLineAt(i)) {
                     /// 检查是否为Fake连接, 如果是的话, 只要改动Fake连接即可
-                    fakeLine->setPoint(this, currentGatePos);
+                    fakeLine->setPoint(current, currentGatePos);
                     continue;
                 }
-                if (searchedNodes.find(linkedQNode.get()) != searchedNodes.end()) {
-                    /// 要处理的current之前已经处理过了, 不要发生死循环
-                    continue;
-                }
+                /// 除了moved ones, 接触到的都可能有尺寸改变
                 touchedNodes.push_back(linkedQNode.get());
 
-                GateID linkedGateID = current->linkedGIDAt(i);
+                GateID linkedGID = current->linkedGIDAt(i);
+                /// linkedGate相对于linkedQNode的原点的位置
+                auto linkedGatePos = linkedQNode->gateQPos(linkedGID, false);
+
                 const auto& linkedExpData = linkedQNode->expData();
-                /// 得到在scene中两个点的位置差距
-                auto linkedGatePos = linkedQNode->mapToScene(UIT::TopoVec2QPt
-                        (linkedExpData->getGates()[linkedGateID]->getPos()));
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
                     case ExpDataType::SmallRoom:
                         /// Intersection和SmallRoom采用相同的策略, 跟随current移动
-                        searchedNodes.insert(linkedQNode.get());
-                        linkedQNode->setPos(
-                                linkedQNode->pos() + (currentGatePos - linkedGatePos));
+                        movedNodes.insert(linkedQNode.get());
+                        linkedQNode->setPos(currentGatePos - linkedGatePos);
                         /// 移动后相关的Gate也会受影响, 加入修改队列中
                         stack.push_back(linkedQNode.get());
                         break;
                     case ExpDataType::Corridor: {
-                        /// 走廊的话直接移动端点 TODO 考虑是否合理?
+                        /// 走廊的话直接移动端点
                         dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
-                                (linkedGateID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
+                                (linkedGID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
 //                        searchedNodes.insert(linkedQNode);
                         break;
                     }
                     default:
-                        cerr << FILE_AND_LINE << " Unimplemented type!" <<
-                             (int) linkedExpData->type() << endl;
+                        cerr << FILE_AND_LINE << " Unimplemented type! " <<
+                             linkedExpData->typeStr() << endl;
                         break;
                 }
             }
@@ -312,7 +315,8 @@ void tmap::QNode::breakLinks()
         if (linkedQNode) {
             linkedQNode->linkAt(link.at).to.reset();
             linkedQNode->linkAt(link.at).at = GATEID_NO_MAPPING;
-            linkedQNode->fakeLineAt(i).reset();
+            linkedQNode->fakeLineAt(link.at).reset();
+            this->fakeLineAt(i).reset();
         }
     }
 }

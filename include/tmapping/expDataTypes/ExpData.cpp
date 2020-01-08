@@ -241,3 +241,8 @@ GatePtr ExpData::popBackGate()
     return res;
 }
 
+std::string ExpData::typeStr()
+{
+    return typeStr(type());
+}
+

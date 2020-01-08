@@ -85,6 +85,8 @@ public:
 
     void setName(const std::string& name);
 
+    std::string typeStr();
+
     static std::string typeStr(ExpDataType type);
 
     /**

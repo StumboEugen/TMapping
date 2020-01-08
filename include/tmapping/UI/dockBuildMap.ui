@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>226</width>
-    <height>361</height>
+    <height>386</height>
    </size>
   </property>
   <property name="features">
@@ -148,6 +148,25 @@
       <property name="text">
        <string>Restrict nodes to grid</string>
       </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="comboMoveStrategy">
+      <item>
+       <property name="text">
+        <string>Every Node Follows</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Only Fixed Rooms Follow</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>No Nodes Follow</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
