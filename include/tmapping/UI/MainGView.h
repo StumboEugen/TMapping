@@ -31,6 +31,8 @@ class MainGView : public QGraphicsView
     bool mAcceptAddingGate2Corridor = false;
     bool mIsDrawingDirectLink = false;
 
+    MoveStragety mMoveStragety = MoveStragety::EVERY_NODE;
+
 protected:
     void wheelEvent(QWheelEvent * event) override ;
 
@@ -60,6 +62,7 @@ public Q_SLOTS:
     void SLOT_AcceptAddingGates2Corridor(bool acceptAdding);
     void SLOT_RemoveSelectedNodes();
     void SLOT_StartDirectLinking(bool startLink);
+    void SLOT_SetMoveStrategy(int strategy);
 };
 }
 

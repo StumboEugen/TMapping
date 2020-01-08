@@ -38,12 +38,21 @@ public:
 
 using FakeLine = std::shared_ptr<FakeLine_IMPL>;
 
+
+enum class MoveStragety
+{
+    EVERY_NODE = 0,
+    ONLY_FIXED_TYPE = 1,
+    NO_NODE_FOLLOW = 2
+};
+
 class QNode : public QGraphicsItem, public MapNode
 {
     mutable QRectF mBoundingRect;
     std::vector<FakeLine> mFakeLines;
     std::vector<bool> mDrawGate;
     GateID mHighLightGate = -1;
+    MoveStragety mMoveStragety;
 
 private:
     explicit QNode(MergedExpPtr mergedExp);
@@ -60,9 +69,9 @@ public:
 
     void notifyNeighbours2Move();
 
-    static QNodePtr makeOneFromExpData(const ExpDataPtr& relatedExpData);
+    static QNodePtr makeOneFromExpData(const ExpDataPtr& relatedExpData, MoveStragety ms);
 
-    static QNodePtr makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp);
+    static QNodePtr makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp, MoveStragety ms);
 
     QRectF boundingRect() const override;
 
@@ -86,6 +95,8 @@ public:
     QPointF gateQPos(size_t index, bool atScene = true) const;
 
     void mouseHoverAt(const QPointF& at);
+
+    void setMoveStragety(MoveStragety moveStragety);
 };
 }
 

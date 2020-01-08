@@ -169,15 +169,19 @@ void tmap::QNode::notifySizeChange()
     update();
 }
 
-tmap::QNodePtr tmap::QNode::makeOneFromExpData(const tmap::ExpDataPtr& relatedExpData)
+tmap::QNodePtr tmap::QNode::makeOneFromExpData(const tmap::ExpDataPtr& relatedExpData, MoveStragety ms)
 {
     auto exp = make_shared<Exp>(relatedExpData, 0);
-    return QNodePtr(new QNode(MergedExp::singleMergedFromExp(exp)));
+    auto pNode = new QNode(MergedExp::singleMergedFromExp(exp));
+    pNode->setMoveStragety(ms);
+    return QNodePtr(pNode);
 }
 
-tmap::QNodePtr tmap::QNode::makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp)
+tmap::QNodePtr tmap::QNode::makeOneFromMergedExp(const MergedExpPtr& relatedMergedExp, MoveStragety ms)
 {
-    return QNodePtr(new QNode(relatedMergedExp));
+    auto pNode = new QNode(relatedMergedExp);
+    pNode->setMoveStragety(ms);
+    return QNodePtr(pNode);
 }
 
 void tmap::QNode::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -198,6 +202,11 @@ void tmap::QNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void tmap::QNode::notifyNeighbours2Move()
 {
+    if (mMoveStragety == MoveStragety::NO_NODE_FOLLOW) {
+        this->notifySizeChange();
+        return;
+    }
+
     vector<QNode*> stack{this};
     set<QNode*> movedNodes;
     movedNodes.insert(this);
@@ -242,10 +251,12 @@ void tmap::QNode::notifyNeighbours2Move()
                         stack.push_back(linkedQNode.get());
                         break;
                     case ExpDataType::Corridor: {
-                        /// 走廊的话直接移动端点
-                        dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
-                                (linkedGID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
+                        if (mMoveStragety != MoveStragety::ONLY_FIXED_TYPE) {
+                            /// 走廊的话直接移动端点
+                            dynamic_cast<Corridor*>(linkedExpData.get())->moveGatePos
+                                    (linkedGID, UIT::QPt2TopoVec(linkedQNode->mapFromScene(currentGatePos)));
 //                        searchedNodes.insert(linkedQNode);
+                        }
                         break;
                     }
                     default:
@@ -386,6 +397,14 @@ void tmap::QNode::refreshGateDrawing()
         }
         mDrawGate[gid] = true;
     }
+}
+
+void tmap::QNode::setMoveStragety(tmap::MoveStragety moveStragety)
+{
+    if (expData()->type() == ExpDataType::Corridor) {
+        setFlag(ItemIsMovable, moveStragety == MoveStragety::NO_NODE_FOLLOW);
+    }
+    QNode::mMoveStragety = moveStragety;
 }
 
 ////////////////// NEXT TO FAKE LINE

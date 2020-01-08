@@ -44,7 +44,7 @@ void tmap::MainGView::wheelEvent(QWheelEvent* event)
 
 void tmap::MainGView::addNode2FakeMapFromExpData(const tmap::ExpDataPtr& usedExpData)
 {
-    auto qNode = QNode::makeOneFromExpData(usedExpData);
+    auto qNode = QNode::makeOneFromExpData(usedExpData, mMoveStragety);
     mNodesInFakeMap.insert(qNode);
     mScene4FakeMap.addItem(qNode.get());
     qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
@@ -140,7 +140,7 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                         newCorridor->addGate(std::move(newGate));
                         newCorridor->setEndGateA(0);
                         /// 制作对应的QNode
-                        auto newQNode = QNode::makeOneFromExpData(newCorridor);
+                        auto newQNode = QNode::makeOneFromExpData(newCorridor, mMoveStragety);
                         /// 确保能够链接到正确的QNode上(其他的表层QNode)
                         newQNode->setZValue(-2);
                         /// 添加连接关系
@@ -390,7 +390,7 @@ void tmap::MainGView::loadMap(const std::string& fileName)
     const auto& nodes = map.getNodes();
     vector<QNodePtr> qNodes(nodes.size());
     for (int i = 0; i < nodes.size(); ++i) {
-        qNodes[i] = QNode::makeOneFromMergedExp(nodes[i]->getRelatedMergedExp());
+        qNodes[i] = QNode::makeOneFromMergedExp(nodes[i]->getRelatedMergedExp(), mMoveStragety);
     }
     /// links的内容需要被更新, 连接对象的指针需要被更改
     for (int i = 0; i < nodes.size(); ++i) {
@@ -519,5 +519,15 @@ void tmap::MainGView::SLOT_StartDirectLinking(bool startLink)
         setCursor(Qt::CrossCursor);
     } else {
         setCursor(Qt::ArrowCursor);
+    }
+}
+
+void tmap::MainGView::SLOT_SetMoveStrategy(int strategy)
+{
+    auto moveStragety = static_cast<MoveStragety>(strategy);
+    for (auto& item : this->items()) {
+        if (auto qnode = dynamic_cast<QNode*>(item)) {
+            qnode->setMoveStragety(moveStragety);
+        }
     }
 }

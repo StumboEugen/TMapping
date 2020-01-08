@@ -168,6 +168,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 uiDockMapBuilder->btnConnectGates, SLOT(setDisabled(bool)));
         connect(uiDockMapBuilder->btnAddGate2Corridor, SIGNAL(toggled(bool)),
                 uiDockMapBuilder->btnEditJson, SLOT(setDisabled(bool)));
+
+        connect(uiDockMapBuilder->comboMoveStrategy, SIGNAL(activated(int)),
+                gvMain, SLOT(SLOT_SetMoveStrategy(int)));
     }
 
 }
