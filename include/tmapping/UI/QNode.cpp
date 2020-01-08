@@ -22,7 +22,7 @@ tmap::QNode::QNode(MergedExpPtr mergedExp) : MapNode(std::move(mergedExp), 0)
 {
     setFlag(ItemIsSelectable);
     setAcceptHoverEvents(true);
-    mFakeLines.assign(mRelatedMergedExp->getMergedExpData()->nGates(), nullptr);
+    mFakeLines.assign(expData()->nGates(), nullptr);
 }
 
 tmap::QNode::~QNode() {
@@ -407,6 +407,33 @@ void tmap::QNode::setMoveStragety(tmap::MoveStragety moveStragety)
     QNode::mMoveStragety = moveStragety;
 }
 
+void tmap::QNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mousePressEvent(event);
+    if (event->modifiers() & Qt::CTRL && event->button() == Qt::RightButton) {
+        auto gid = expData()->findGateAtPos(UIT::QPt2TopoVec(event->pos()), UIT::pix2meter(15));
+        if (gid >= 0) {
+            removeConnection(gid);
+        }
+    }
+}
+
+void tmap::QNode::removeConnection(size_t gid)
+{
+    auto& linkThis = linkAt(gid);
+    if (auto thatNode = linkThis.to.lock()) {
+        if (auto fakeLine = fakeLineAt(gid)) {
+            fakeLine->sucide();
+        }
+        auto thatGID = linkedGIDAt(gid);
+        auto& linkThat = thatNode->linkAt(thatGID);
+        linkThat.to.reset();
+        linkThat.at = GATEID_NO_MAPPING;
+        linkThis.to.reset();
+        linkThis.at = GATEID_NO_MAPPING;
+    }
+}
+
 ////////////////// NEXT TO FAKE LINE
 
 tmap::FakeLine_IMPL::~FakeLine_IMPL()
@@ -473,4 +500,12 @@ QPainterPath tmap::FakeLine_IMPL::shape() const
     QPainterPathStroker stroker;
     stroker.setWidth(5);
     return stroker.createStroke(path);
+}
+
+void tmap::FakeLine_IMPL::sucide()
+{
+    if (mOriNode) {
+        mOriNode->fakeLineAt(mFrom).reset();
+        mOriNode->qNodeAt(mFrom)->fakeLineAt(mOriNode->linkedGIDAt(mFrom)).reset();
+    }
 }

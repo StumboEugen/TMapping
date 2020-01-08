@@ -33,6 +33,8 @@ public:
 
     FakeLine_IMPL(const QPointF& p1, const QPointF& p2, QNode* node1, GateID fromGate);
 
+    void sucide();
+
     ~FakeLine_IMPL() override;
 };
 
@@ -57,8 +59,10 @@ class QNode : public QGraphicsItem, public MapNode
 private:
     explicit QNode(MergedExpPtr mergedExp);
     void refreshGateDrawing();
+    void removeConnection(size_t gid);
 
 protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
