@@ -50,7 +50,16 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     auto oriPen = painter->pen();
 
-    auto relatedExpData = expData();
+    const auto& relatedExpData = expData();
+
+    const auto& gates = relatedExpData->getGates();
+    refreshGateDrawing();
+    for (int i = 0; i < gates.size(); ++i) {
+        if (mDrawGate[i]) {
+            UIT::drawGate(painter, gates[i].get(), true, true);
+        }
+    }
+
     switch (relatedExpData->type()) {
         case ExpDataType::Intersection: {
             painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
@@ -58,7 +67,6 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setPen(oriPen);
 
             for (const auto& gate : relatedExpData->getGates()) {
-                UIT::drawGate(painter, gate.get(), true, false);
                 painter->setPen(QPen(Qt::darkGray, 2, Qt::DashDotLine, Qt::FlatCap));
                 painter->drawLine(centerPoint, UIT::TopoVec2QPt(gate->getPos()));
                 painter->setPen(oriPen);
@@ -105,12 +113,6 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             }
 
             ///绘制除了两端之外的其他Gate
-            const auto& gates = relatedExpData->getGates();
-            for (int i = 0; i < gates.size(); ++i) {
-                if (corr->getEndGateA() != i && corr->getEndGateB() != i) {
-                    UIT::drawGate(painter, gates[i].get(), true);
-                }
-            }
             break;
         }
         case ExpDataType::Stair:
@@ -127,9 +129,6 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
             painter->drawRect(middleHalfSq);
             painter->setPen(oriPen);
-            for (const auto& gate : relatedExpData->getGates()) {
-                UIT::drawGate(painter, gate.get(), true, false);
-            }
             break;
         }
     }
@@ -366,6 +365,27 @@ void tmap::QNode::mouseHoverAt(const QPointF& at)
 {
     mHighLightGate = expData()->findGateAtPos(UIT::QPt2TopoVec(at), UIT::pix2meter(15));
     update();
+}
+
+void tmap::QNode::refreshGateDrawing()
+{
+    while (mDrawGate.size() <= expData()->nGates()) {
+        mDrawGate.push_back(false);
+    }
+    for (int gid = 0; gid < expData()->nGates(); ++gid) {
+        if (auto connectedQNode = qNodeAt(gid)) {
+            if (!fakeLineAt(gid)) {
+                auto thatGID = linkedGIDAt(gid);
+                auto& thatDrawVec = connectedQNode->mDrawGate;
+                while (thatDrawVec.size() <= thatGID) {
+                    thatDrawVec.push_back(false);
+                }
+                mDrawGate[gid] = !thatDrawVec[thatGID];
+                continue;
+            }
+        }
+        mDrawGate[gid] = true;
+    }
 }
 
 ////////////////// NEXT TO FAKE LINE

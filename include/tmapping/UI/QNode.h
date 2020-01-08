@@ -42,10 +42,12 @@ class QNode : public QGraphicsItem, public MapNode
 {
     mutable QRectF mBoundingRect;
     std::vector<FakeLine> mFakeLines;
+    std::vector<bool> mDrawGate;
     GateID mHighLightGate = -1;
 
 private:
     explicit QNode(MergedExpPtr mergedExp);
+    void refreshGateDrawing();
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
