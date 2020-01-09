@@ -55,6 +55,7 @@ public:
     void loadMap(const std::string& fileName);
 
     void switch2realMode(bool);
+    void switch2simMode(bool);
 
     ~MainGView() override;
 

@@ -191,7 +191,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         addDockWidget(Qt::LeftDockWidgetArea, dockSimulation);
         dockSimulation->setShown(false);
 
-        QRegExp regx("[0-9\\.]+$");
+        QRegExp regx("[0-9]+.[0-9]+");
         uiDockSimulation->leDirError->setValidator(new QRegExpValidator(regx, this));
         uiDockSimulation->lePosError->setValidator(new QRegExpValidator(regx, this));
     }
@@ -470,9 +470,15 @@ void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
     if (lastMode == mode_REALTIME) {
         gvMain->switch2realMode(false);
     }
-
-    if (newMode == mode_REALTIME) {
+    else if (newMode == mode_REALTIME) {
         gvMain->switch2realMode(true);
+    }
+
+    if (lastMode == mode_SIMULATION) {
+        gvMain->switch2simMode(false);
+    }
+    else if (newMode == mode_SIMULATION) {
+        gvMain->switch2simMode(true);
     }
 
     dockSimulation->setShown(false);

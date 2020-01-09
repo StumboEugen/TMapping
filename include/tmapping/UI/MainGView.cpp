@@ -540,3 +540,24 @@ void tmap::MainGView::switch2realMode(bool toReal)
         setScene(&mScene4FakeMap);
     }
 }
+
+void tmap::MainGView::switch2simMode(bool toSim)
+{
+    if (toSim) {
+        for (auto& item : mScene4FakeMap.items()) {
+            item->setFlag(QGraphicsItem::ItemIsMovable, false);
+        }
+    } else {
+        for (auto& item : mScene4FakeMap.items()) {
+            if (auto qNode = dynamic_cast<QNode*>(item)) {
+                if (qNode->expData()->type() == ExpDataType::Corridor) {
+                    if (mMoveStragety != MoveStragety::NO_NODE_FOLLOW) {
+                        item->setFlag(QGraphicsItem::ItemIsMovable, false);
+                        continue;
+                    }
+                }
+                item->setFlag(QGraphicsItem::ItemIsMovable, true);
+            }
+        }
+    }
+}
