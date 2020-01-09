@@ -34,6 +34,8 @@ class MainGView : public QGraphicsView
     bool mAcceptAddingGate2Corridor = false;
     bool mIsDrawingDirectLink = false;
 
+    bool mAtSim = false;
+
     MoveStragety mMoveStragety = MoveStragety::EVERY_NODE;
 
 protected:
@@ -71,6 +73,9 @@ public Q_SLOTS:
     void SLOT_RemoveSelectedNodes();
     void SLOT_StartDirectLinking(bool startLink);
     void SLOT_SetMoveStrategy(int strategy);
+
+Q_SIGNALS:
+    void SIG_RobotMove2(Exp *);
 };
 }
 

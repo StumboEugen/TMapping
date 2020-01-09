@@ -52,6 +52,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         gvMain->setMinimumSize(601, 401);
         centerLayout->addWidget(gvMain);
 
+        connect(gvMain, SIGNAL(SIG_RobotMove2(Exp *)),
+                this, SLOT(SLOT_ROS_SendExp(Exp *)));
+
         smallWindowLayout = new QVBoxLayout();
         smallWindowLayout->setSpacing(3);
         smallWindowLayout->setContentsMargins(5, 0, 5, 0);
@@ -520,4 +523,9 @@ void tmap::TmapUI::SLOT_PlaceRobot()
     if (!checkROS()) {
         infoView->append("\n\nYou didn't connect to ROS!");
     }
+}
+
+void tmap::TmapUI::SLOT_ROS_SendExp(Exp* data)
+{
+    cout << "YEAH " << data << endl;
 }

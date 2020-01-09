@@ -36,4 +36,21 @@ void QRobot::updatePos()
 {
     auto cent = atNode->boundingRect().center();
     setPos(atNode->mapToScene(cent));
+    update();
+}
+
+ExpPtr QRobot::try2move(QPointF scenePos)
+{
+    auto nodePos = atNode->mapFromScene(scenePos);
+    auto gid = atNode->expData()->findGateAtPos(
+            UIT::QPt2TopoVec(nodePos), UIT::pix2meter(15));
+    if (gid >= 0) {
+        if (auto toQNode = atNode->qNodeAt(gid)) {
+            theLastMovedExp = make_shared<Exp>(toQNode->expData(), atNode->linkedGIDAt(gid));
+            atNode = toQNode;
+            updatePos();
+            return theLastMovedExp;
+        }
+    }
+    return nullptr;
 }

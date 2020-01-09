@@ -190,6 +190,12 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
             }
         }
     }
+
+    if (mAtSim && mRobot && event->button() & Qt::RightButton) {
+        if (auto exp = mRobot->try2move(clickPosInScene)) {
+            Q_EMIT SIG_RobotMove2(exp.get());
+        }
+    }
 }
 
 void tmap::MainGView::mouseMoveEvent(QMouseEvent* event)
@@ -543,6 +549,8 @@ void tmap::MainGView::switch2realMode(bool toReal)
 
 void tmap::MainGView::switch2simMode(bool toSim)
 {
+    mAtSim = toSim;
+
     if (toSim) {
         for (auto& item : mScene4FakeMap.items()) {
             item->setFlag(QGraphicsItem::ItemIsMovable, false);

@@ -8,18 +8,26 @@
 #include <QGraphicsEllipseItem>
 #include "QNode.h"
 
+#include <tmapping/Exp.h>
+
 namespace tmap
 {
 
 class QRobot : public QGraphicsEllipseItem
 {
     QNodePtr atNode;
+
+    ExpPtr theLastMovedExp;
+
 public:
     explicit QRobot(QNodePtr at);
 
     void updatePos();
 
-    virtual ~QRobot();
+    ~QRobot() override;
+
+    ExpPtr try2move(QPointF scenePos);
+
 };
 
 using QRobotPtr = std::unique_ptr<QRobot>;
