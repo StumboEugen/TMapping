@@ -531,3 +531,12 @@ void tmap::MainGView::SLOT_SetMoveStrategy(int strategy)
         }
     }
 }
+
+void tmap::MainGView::switch2realMode(bool toReal)
+{
+    if (toReal) {
+        setScene(&mScene4RealMap);
+    } else {
+        setScene(&mScene4FakeMap);
+    }
+}

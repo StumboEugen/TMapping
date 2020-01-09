@@ -25,6 +25,8 @@ namespace Ui
 class TmapWindow;
 class BuildExpDockUI;
 class BuildMapDockUI;
+class SimulationDockUI;
+class RealTimeDockUI;
 }
 
 namespace tmap
@@ -56,6 +58,10 @@ class TmapUI : public QMainWindow
     QDockWidget * dockExpBuilder;
     Ui::BuildMapDockUI* uiDockMapBuilder;
     QDockWidget * dockMapBuilder;
+    Ui::SimulationDockUI* uiDockSimulation;
+    QDockWidget * dockSimulation;
+    Ui::RealTimeDockUI* uiDockRealtime;
+    QDockWidget * dockRealtime;
 
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
@@ -84,6 +90,7 @@ private Q_SLOTS:
     void SLOT_EditJsonOfNodeInFakeMap(bool start);
     void SLOT_AddGate2Corridor(bool start);
     void SLOT_InitROS();
+    void SLOT_SwitchMode(QAction*);
 
 };
 }

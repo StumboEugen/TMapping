@@ -20,6 +20,7 @@ class MainGView : public QGraphicsView
 {
     Q_OBJECT
     QGraphicsScene mScene4FakeMap;
+    QGraphicsScene mScene4RealMap;
     std::set<QNodePtr> mNodesInFakeMap;
 
     QNodePtr mTheDrawingCorridor;
@@ -52,6 +53,8 @@ public:
     void saveFakeMap(const std::string& mapName);
 
     void loadMap(const std::string& fileName);
+
+    void switch2realMode(bool);
 
     ~MainGView() override;
 

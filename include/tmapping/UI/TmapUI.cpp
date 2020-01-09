@@ -13,6 +13,8 @@
 
 #include "ui_dockBuildExp.h"
 #include "ui_dockBuildMap.h"
+#include "ui_dockSimulation.h"
+#include "ui_dockRealtime.h"
 
 using namespace std;
 
@@ -26,7 +28,11 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiDockExpBuilder(new Ui::BuildExpDockUI),
         dockExpBuilder(new QDockWidget(this)),
         uiDockMapBuilder(new Ui::BuildMapDockUI),
-        dockMapBuilder(new QDockWidget(this))
+        dockMapBuilder(new QDockWidget(this)),
+        uiDockSimulation(new Ui::SimulationDockUI),
+        dockSimulation(new QDockWidget(this)),
+        uiDockRealtime(new Ui::RealTimeDockUI),
+        dockRealtime(new QDockWidget(this))
 {
     {   /// 添加UI组件
         uiMain->setupUi(this);
@@ -72,6 +78,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         mode_BUILD = modeGroup->addAction("build map mode");
         mode_SIMULATION = modeGroup->addAction("simulation mode");
         mode_REALTIME = modeGroup->addAction("realtime mode");
+        connect(modeGroup, SIGNAL(triggered(QAction*))
+                , this, SLOT(SLOT_SwitchMode(QAction*)));
 
         mode_BUILD->setCheckable(true);
         mode_SIMULATION->setCheckable(true);
@@ -178,6 +186,21 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 gvMain, SLOT(SLOT_SetMoveStrategy(int)));
     }
 
+    {
+        uiDockSimulation->setupUi(dockSimulation);
+        addDockWidget(Qt::LeftDockWidgetArea, dockSimulation);
+        dockSimulation->setShown(false);
+
+        QRegExp regx("[0-9\\.]+$");
+        uiDockSimulation->leDirError->setValidator(new QRegExpValidator(regx, this));
+        uiDockSimulation->lePosError->setValidator(new QRegExpValidator(regx, this));
+    }
+
+    {
+        uiDockRealtime->setupUi(dockRealtime);
+        addDockWidget(Qt::LeftDockWidgetArea, dockRealtime);
+        dockRealtime->setShown(false);
+    }
 }
 
 tmap::TmapUI::~TmapUI()
@@ -434,4 +457,41 @@ void tmap::TmapUI::SLOT_InitROS()
     }
 
     ros::NodeHandle n;
+}
+
+void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
+{
+    static QAction* lastMode = mode_BUILD;
+
+    if (newMode == lastMode) {
+        return;
+    }
+
+    if (lastMode == mode_REALTIME) {
+        gvMain->switch2realMode(false);
+    }
+
+    if (newMode == mode_REALTIME) {
+        gvMain->switch2realMode(true);
+    }
+
+    dockSimulation->setShown(false);
+    dockExpBuilder->setShown(false);
+    dockMapBuilder->setShown(false);
+    dockRealtime->setShown(false);
+
+    if (newMode == mode_BUILD) {
+        dockMapBuilder->setShown(true);
+        dockExpBuilder->setShown(true);
+    }
+
+    if (newMode == mode_SIMULATION) {
+        dockSimulation->setShown(true);
+    }
+
+    if (newMode == mode_REALTIME) {
+        dockRealtime->setShown(true);
+    }
+
+    lastMode = newMode;
 }
