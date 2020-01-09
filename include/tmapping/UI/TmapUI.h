@@ -16,6 +16,10 @@
 #include "tmapping/expDataTypes/ExpData.h"
 #include "tmapping/tools/TopoParams.h"
 
+#ifndef Q_MOC_RUN
+#include <ros/ros.h>
+#endif
+
 namespace Ui
 {
 class TmapWindow;
@@ -46,6 +50,8 @@ class TmapUI : public QMainWindow
     QAction* mode_SIMULATION;
     QAction* mode_REALTIME;
 
+    QAction * qactConnectToROS;
+
     Ui::BuildExpDockUI* uiDockExpBuilder;
     QDockWidget * dockExpBuilder;
     Ui::BuildMapDockUI* uiDockMapBuilder;
@@ -55,6 +61,7 @@ private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
     static QString getExpDataLabel(const ExpDataPtr& expData);
     void startEdittingNodes(bool start);
+    static bool checkROS();
 
 public:
 
@@ -76,6 +83,7 @@ private Q_SLOTS:
     void SLOT_LoadMap();
     void SLOT_EditJsonOfNodeInFakeMap(bool start);
     void SLOT_AddGate2Corridor(bool start);
+    void SLOT_InitROS();
 
 };
 }

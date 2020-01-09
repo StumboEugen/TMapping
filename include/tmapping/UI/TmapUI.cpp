@@ -89,6 +89,11 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiMain->mainToolBar->addAction(dragMode);
         uiMain->mainToolBar->addSeparator();
         connect(dragMode, SIGNAL(toggled(bool)), this, SLOT(SLOT_DragMode(bool)));
+
+        qactConnectToROS = new QAction("Connect to ROS", uiMain->mainToolBar);
+        uiMain->mainToolBar->addAction(qactConnectToROS);
+        connect(qactConnectToROS, SIGNAL(triggered())
+                , this, SLOT(SLOT_InitROS()));
     }
 
     {
@@ -399,4 +404,34 @@ void tmap::TmapUI::SLOT_AddGate2Corridor(bool start)
     uiDockMapBuilder->btnConnectGates->setDisabled(start);
     gvMain->SLOT_AcceptAddingGates2Corridor(start);
     startEdittingNodes(start);
+}
+
+bool tmap::TmapUI::checkROS()
+{
+    return ros::isStarted();
+}
+
+void tmap::TmapUI::SLOT_InitROS()
+{
+    if (checkROS()) {
+        infoView->setText("You have connected to ROS core");
+        return;
+    }
+    int argc = 0;
+    char ** argv = nullptr;
+    ros::init(argc, argv, "TMappingUI", ros::init_options::AnonymousName);
+
+    infoView->setText("connect ROS successfully!");
+    qactConnectToROS->setCheckable(true);
+    qactConnectToROS->setChecked(true);
+    qactConnectToROS->setEnabled(false);
+
+    ros::start();
+
+    if (!checkROS()) {
+        infoView->setText("CANT find the ROS master, plz run roscore and try again");
+        return;
+    }
+
+    ros::NodeHandle n;
 }
