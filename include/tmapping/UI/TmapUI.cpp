@@ -194,6 +194,10 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         QRegExp regx("[0-9]+.[0-9]+");
         uiDockSimulation->leDirError->setValidator(new QRegExpValidator(regx, this));
         uiDockSimulation->lePosError->setValidator(new QRegExpValidator(regx, this));
+
+        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(clicked()),
+                this, SLOT(SLOT_PlaceRobot()));
+
     }
 
     {
@@ -500,4 +504,20 @@ void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
     }
 
     lastMode = newMode;
+}
+
+void tmap::TmapUI::SLOT_PlaceRobot()
+{
+    if (gvMain->setRobotInFake()) {
+        uiDockSimulation->btnPlaceRobot->setCheckable(true);
+        uiDockSimulation->btnPlaceRobot->setChecked(true);
+        uiDockSimulation->btnPlaceRobot->setEnabled(false);
+        infoView->setText("right click the gate to move robot");
+    } else {
+        infoView->setText("Please select a node in the map to place the robot");
+    }
+
+    if (!checkROS()) {
+        infoView->append("\n\nYou didn't connect to ROS!");
+    }
 }

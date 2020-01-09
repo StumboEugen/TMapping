@@ -547,6 +547,10 @@ void tmap::MainGView::switch2simMode(bool toSim)
         for (auto& item : mScene4FakeMap.items()) {
             item->setFlag(QGraphicsItem::ItemIsMovable, false);
         }
+        if (mRobot) {
+            mRobot->setVisible(true);
+            mRobot->updatePos();
+        }
     } else {
         for (auto& item : mScene4FakeMap.items()) {
             if (auto qNode = dynamic_cast<QNode*>(item)) {
@@ -559,5 +563,21 @@ void tmap::MainGView::switch2simMode(bool toSim)
                 item->setFlag(QGraphicsItem::ItemIsMovable, true);
             }
         }
+
+        if (mRobot) {
+            mRobot->setVisible(false);
+        }
     }
+}
+
+bool tmap::MainGView::setRobotInFake()
+{
+    if (!mScene4FakeMap.selectedItems().empty()) {
+        if (auto qNode = dynamic_cast<QNode*>(mScene4FakeMap.selectedItems().front())) {
+            auto ptr = qNode->thisQnodePtr();
+            mRobot.reset(new QRobot(ptr));
+            return true;
+        }
+    }
+    return false;
 }

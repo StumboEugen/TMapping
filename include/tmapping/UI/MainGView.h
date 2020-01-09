@@ -12,6 +12,7 @@
 
 #include "tmapping/StructedMap.h"
 #include "QNode.h"
+#include "QRobot.h"
 
 namespace tmap
 {
@@ -25,6 +26,7 @@ class MainGView : public QGraphicsView
 
     QNodePtr mTheDrawingCorridor;
     FakeLine mTheDrawingFakeLine;
+    QRobotPtr mRobot;
 
     bool mEnableFakeNodesMoving = true;
     bool mEnableNodeRestriction = false;
@@ -56,6 +58,8 @@ public:
 
     void switch2realMode(bool);
     void switch2simMode(bool);
+
+    bool setRobotInFake();
 
     ~MainGView() override;
 

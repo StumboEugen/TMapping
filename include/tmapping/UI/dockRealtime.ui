@@ -10,6 +10,9 @@
     <height>371</height>
    </rect>
   </property>
+  <property name="allowedAreas">
+   <set>Qt::LeftDockWidgetArea</set>
+  </property>
   <property name="windowTitle">
    <string>real-time display</string>
   </property>

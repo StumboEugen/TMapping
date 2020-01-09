@@ -24,10 +24,10 @@
     <item>
      <widget class="QPushButton" name="btnPlaceRobot">
       <property name="text">
-       <string>Place the robot</string>
+       <string>Place robot at node</string>
       </property>
       <property name="checkable">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <property name="checked">
        <bool>false</bool>

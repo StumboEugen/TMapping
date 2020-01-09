@@ -91,6 +91,7 @@ private Q_SLOTS:
     void SLOT_AddGate2Corridor(bool start);
     void SLOT_InitROS();
     void SLOT_SwitchMode(QAction*);
+    void SLOT_PlaceRobot();
 
 };
 }
