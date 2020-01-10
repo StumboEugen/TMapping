@@ -80,3 +80,21 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose, b
     painter->setPen(oriPen);
 }
 
+void tmap::UIT::drawLandMark(QPainter* painter, PosLandmark* lm2draw, bool usePos)
+{
+    auto oriPen = painter->pen();
+    auto offset = TopoVec2QPt(lm2draw->getPos());
+    if (usePos) {
+        painter->translate(offset);
+    }
+
+    double r = UIT::QMeter(0.1);
+    painter->setBrush(Qt::green);
+    painter->drawEllipse({QPointF{-r, -r}, QPointF{r, r}});
+
+    if (usePos) {
+        painter->translate(-offset);
+    }
+    painter->setPen(oriPen);
+}
+

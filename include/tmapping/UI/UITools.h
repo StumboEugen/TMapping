@@ -8,6 +8,7 @@
 #include "tmapping/tools/TopoVec2.h"
 
 #include <QPointF>
+#include "tmapping/landmarkTypes/LandmarkTypes.h"
 
 class QPainter;
 
@@ -45,6 +46,11 @@ void drawGate(
         Gate* gate2draw,
         bool useGatePose = false,
         bool drawDetail =true);
+
+void drawLandMark(
+        QPainter* painter,
+        tmap::PosLandmark* lm2draw,
+        bool usePos = false);
 
 } /// namespace UIT
 

@@ -122,6 +122,10 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         }
     }
 
+    for (const auto& plm : relatedExpData->getPLMs()) {
+        UIT::drawLandMark(painter, plm.get(), true);
+    }
+
     const auto& gates = relatedExpData->getGates();
     refreshGateDrawing();
     for (int i = 0; i < gates.size(); ++i) {
@@ -374,6 +378,9 @@ void tmap::QNode::mouseHoverAt(const QPointF& at)
     update();
 }
 
+/**
+ * @brief 更新每个gate另一端的绘制情况, 从而确认this的gate要不要绘制
+ */
 void tmap::QNode::refreshGateDrawing()
 {
     while (mDrawGate.size() <= expData()->nGates()) {

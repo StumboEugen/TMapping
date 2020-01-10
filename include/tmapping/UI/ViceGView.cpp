@@ -8,6 +8,7 @@
 
 #include <QGraphicsEllipseItem>
 #include <QMouseEvent>
+#include <QGraphicsSceneMouseEvent>
 
 #include <iostream>
 
@@ -38,7 +39,11 @@ protected:
         QGraphicsItem::mousePressEvent(event);
         if (!used) {
             used = true;
-            parentVGV.startDrawingGateFromReferPoint(*this);
+            if (event->button() == Qt::RightButton) {
+                parentVGV.addLandMark(*this);
+            } else {
+                parentVGV.startDrawingGateFromReferPoint(*this);
+            }
         }
     }
 }; /// end of class ReferPoint
@@ -143,6 +148,21 @@ void tmap::ViceGView::startDrawingGateFromReferPoint(const ReferPoint& rp)
     mStatus = DisplayStatus::DRAWING_GATE;
 }
 
+void tmap::ViceGView::addLandMark(const tmap::ReferPoint& rp)
+{
+    double scale = 1.0;
+    if (auto room = dynamic_cast<Room*>(mRelatedExpData.get())) {
+        scale = room->getScaling();
+    }
+    mRelatedExpData->addLandmark(
+            make_shared<StrPLM>(UIT::QPt2TopoVec(rp.pos() * scale), mNextLM));
+    double r = UIT::QMeter(0.1);
+    auto circle = new QGraphicsEllipseItem({QPointF{-r, -r}, QPointF{r, r}});
+    circle->setBrush(Qt::green);
+    scene()->addItem(circle);
+    circle->setPos(rp.pos());
+}
+
 void tmap::ViceGView::mouseMoveEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseMoveEvent(event);
@@ -185,6 +205,18 @@ void tmap::ViceGView::displayTheExpData(tmap::ExpDataPtr data2show)
         scene()->addItem(g);
         mQGates.emplace_back(g);
     }
+    for (const auto& plm : mRelatedExpData->getPLMs()) {
+        double r = UIT::QMeter(0.1);
+        auto circle = new QGraphicsEllipseItem({QPointF{-r, -r}, QPointF{r, r}});
+        circle->setBrush(Qt::green);
+        scene()->addItem(circle);
+        circle->setPos(UIT::TopoVec2QPt(plm->getPos() / scale));
+    }
+}
+
+void tmap::ViceGView::SLOT_NextLandmarkStr(QString str)
+{
+    mNextLM = str.toStdString();
 }
 
 /////////////////////// QGate related

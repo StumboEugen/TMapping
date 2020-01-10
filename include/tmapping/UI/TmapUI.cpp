@@ -148,6 +148,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockExpBuilder->btnAdd2Map, SIGNAL(clicked()),
                 this, SLOT(SLOT_AddFakeNode()));
+
+        connect(uiDockExpBuilder->leLandmark, SIGNAL(textChanged(QString)),
+                gvVice, SLOT(SLOT_NextLandmarkStr(QString)));
     }
 
     {

@@ -45,6 +45,7 @@ class ViceGView : public QGraphicsView
     DisplayStatus mStatus = DisplayStatus::NOTHING;
     ExpDataPtr mRelatedExpData;
     std::vector<QGate*> mQGates;
+    std::string mNextLM = "";
 
     QGraphicsScene mScene;
     GateType mNextGateType = GateType::GateWay;
@@ -58,7 +59,11 @@ public:
 
     void setNextGateType(GateType type);
 
+    /// 添加Gate时, 先添加为QGate, 最后complete时再加入到mRelatedExpData
     void startDrawingGateFromReferPoint(const ReferPoint& rp);
+
+    /// 添加Landmark时则直接添加到mRelatedExpData中去, 绘制使用默认圆圈
+    void addLandMark(const ReferPoint& rp);
 
     void displayTheExpData(ExpDataPtr data2show);
 
@@ -66,6 +71,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+public Q_SLOTS:
+    void SLOT_NextLandmarkStr(QString str);
 };
 }
 
