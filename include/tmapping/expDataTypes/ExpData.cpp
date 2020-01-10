@@ -9,7 +9,7 @@
 
 #include "Corridor.h"
 #include "Intersection.h"
-#include "SmallRoom.h"
+#include "Room.h"
 
 using namespace std;
 using namespace tmap;
@@ -101,8 +101,8 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         else if (type == typeStr(ExpDataType::Intersection)) {
             res = make_shared<Intersection>();
         }
-        else if (type == typeStr(ExpDataType::SmallRoom)) {
-            res = make_shared<SmallRoom>();
+        else if (type == typeStr(ExpDataType::Room)) {
+            res = make_shared<Room>();
         }
         else {
             cerr << FILE_AND_LINE << " You input an UNKNOWN expData! typeStr=" << type << endl;
@@ -164,11 +164,8 @@ std::string ExpData::typeStr(ExpDataType type)
         case ExpDataType::Stair:
             res = "Stair";
             break;
-        case ExpDataType::BigRoom:
-            res = "BigRoom";
-            break;
-        case ExpDataType::SmallRoom:
-            res = "SmallRoom";
+        case ExpDataType::Room:
+            res = "Room";
             break;
     }
     return res;

@@ -118,10 +118,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         case ExpDataType::Stair:
             cerr << FILE_AND_LINE << " unimplemented exp type!" << endl;
             break;
-        case ExpDataType::BigRoom:
-            cerr << FILE_AND_LINE << " unimplemented exp type!" << endl;
-            break;
-        case ExpDataType::SmallRoom: {
+        case ExpDataType::Room: {
             auto bRect = relatedExpData->getOutBounding(0.);
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
@@ -243,7 +240,7 @@ void tmap::QNode::notifyNeighbours2Move()
                 const auto& linkedExpData = linkedQNode->expData();
                 switch (linkedExpData->type()) {
                     case ExpDataType::Intersection:
-                    case ExpDataType::SmallRoom:
+                    case ExpDataType::Room:
                         /// Intersection和SmallRoom采用相同的策略, 跟随current移动
                         movedNodes.insert(linkedQNode.get());
                         linkedQNode->setPos(currentGatePos - linkedGatePos);
@@ -280,8 +277,7 @@ QPainterPath tmap::QNode::shape() const
 
         case ExpDataType::Intersection:
         case ExpDataType::Stair:
-        case ExpDataType::BigRoom:
-        case ExpDataType::SmallRoom: {
+        case ExpDataType::Room: {
             auto bRect = expData()->getOutBounding(0.1);
             QRectF rect;
             rect.setTopLeft(UIT::TopoVec2QPt({bRect[2], bRect[0]}));

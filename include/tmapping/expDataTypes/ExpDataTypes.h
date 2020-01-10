@@ -8,6 +8,6 @@
 #include "ExpData.h"
 #include "Corridor.h"
 #include "Intersection.h"
-#include "SmallRoom.h"
+#include "Room.h"
 
 #endif //TMAPPING_EXPDATATYPES_H

@@ -10,12 +10,12 @@
 namespace tmap
 {
 
-class SmallRoom : public ExpData
+class Room : public ExpData
 {
 
 
 public:
-    ExpDataType type() const override { return ExpDataType::SmallRoom; }
+    ExpDataType type() const override { return ExpDataType::Room; }
 
     Json::Value toJS() const override;
 

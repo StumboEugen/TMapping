@@ -66,11 +66,8 @@ void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
         case ExpDataType::Stair:
             cerr << "Stair hasn't been impled" << endl;
             break;
-        case ExpDataType::BigRoom:
-            cerr << "BigRoom hasn't been impled" << endl;
-            break;
-        case ExpDataType::SmallRoom:
-            mRelatedExpData.reset(new SmallRoom());
+        case ExpDataType::Room:
+            mRelatedExpData.reset(new Room());
             break;
     }
 
@@ -165,7 +162,7 @@ void tmap::ViceGView::displayTheExpData(tmap::ExpDataPtr data2show)
     if (mRelatedExpData->type() == ExpDataType::Intersection) {
         scene()->addEllipse(rec, {Qt::gray, 1}, Qt::lightGray);
     }
-    else if (mRelatedExpData->type() == ExpDataType::SmallRoom) {
+    else if (mRelatedExpData->type() == ExpDataType::Room) {
         scene()->addRect(rec, {Qt::gray, 1}, Qt::lightGray);
     }
     for (const auto& gate : mRelatedExpData->getGates()) {

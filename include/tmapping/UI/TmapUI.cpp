@@ -115,7 +115,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiDockExpBuilder->cbExpType->setItemData(0,
                 QVariant::fromValue(ExpDataType::Intersection));
         uiDockExpBuilder->cbExpType->setItemData(1,
-                QVariant::fromValue(ExpDataType::SmallRoom));
+                QVariant::fromValue(ExpDataType::Room));
 
         uiDockExpBuilder->cbGateType->setItemData(0,
                 QVariant::fromValue(GateType::GateWay));

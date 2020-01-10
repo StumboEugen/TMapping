@@ -2,17 +2,17 @@
 // Created by stumbo on 2019/11/15.
 //
 
-#include "SmallRoom.h"
+#include "Room.h"
 
-Json::Value tmap::SmallRoom::toJS() const
+Json::Value tmap::Room::toJS() const
 {
     Json::Value res(ExpData::toJS());
     return res;
 }
 
-tmap::ExpDataPtr tmap::SmallRoom::clone()
+tmap::ExpDataPtr tmap::Room::clone()
 {
-    auto sr = new SmallRoom;
+    auto sr = new Room;
     this->copy2(sr);
     return tmap::ExpDataPtr(sr);
 }
