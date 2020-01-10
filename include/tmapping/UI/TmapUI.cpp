@@ -421,6 +421,7 @@ void tmap::TmapUI::startEdittingNodes(bool start)
     uiDockMapBuilder->cbRestrictGrid->setDisabled(start);
     uiDockMapBuilder->cbDrawCorridor->setDisabled(start);
     dockExpBuilder->setDisabled(start);
+    modeGroup->setDisabled(start);
 
     if (start) {
         uiDockMapBuilder->cbEnableNodesMoving->setChecked(false);
