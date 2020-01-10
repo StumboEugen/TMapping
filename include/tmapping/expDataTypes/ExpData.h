@@ -55,6 +55,8 @@ public:
 
     const std::vector<GatePtr>& getGates() const;
 
+    const std::vector<PLMPtr>& getPLMs() const;
+
     void addGate(GatePtr pGate);
 
     void addLandmark(PLMPtr pLandmark);

@@ -187,6 +187,14 @@ std::array<double, 4> ExpData::getOutBounding(double expandValue) const
         res[2] = min(res[2], pos.px);
         res[3] = max(res[3], pos.px);
     }
+
+    for (const auto& plm : mPosLandmarks) {
+        auto& pos = plm->getPos();
+        res[0] = max(res[0], pos.py);
+        res[1] = min(res[1], pos.py);
+        res[2] = min(res[2], pos.px);
+        res[3] = max(res[3], pos.px);
+    }
     res[0] += expandValue;
     res[1] -= expandValue;
     res[2] -= expandValue;
@@ -243,5 +251,10 @@ GatePtr ExpData::popBackGate()
 std::string ExpData::typeStr()
 {
     return typeStr(type());
+}
+
+const vector<PLMPtr>& ExpData::getPLMs() const
+{
+    return mPosLandmarks;
 }
 
