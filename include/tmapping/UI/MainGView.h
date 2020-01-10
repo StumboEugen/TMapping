@@ -38,6 +38,9 @@ class MainGView : public QGraphicsView
 
     MoveStragety mMoveStragety = MoveStragety::EVERY_NODE;
 
+private:
+    void setQNodeMovability(QNode* node) const;
+
 protected:
     void wheelEvent(QWheelEvent * event) override ;
 

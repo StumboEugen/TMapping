@@ -47,7 +47,7 @@ void tmap::MainGView::addNode2FakeMapFromExpData(const tmap::ExpDataPtr& usedExp
     auto qNode = QNode::makeOneFromExpData(usedExpData, mMoveStragety);
     mNodesInFakeMap.insert(qNode);
     mScene4FakeMap.addItem(qNode.get());
-    qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
+    setQNodeMovability(qNode.get());
     qNode->setPos(sceneRect().center());
 }
 
@@ -56,9 +56,7 @@ void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
     mEnableFakeNodesMoving = enableMove;
     for (auto& item : mScene4FakeMap.items()) {
         if (auto qNode = dynamic_cast<QNode*>(item)) {
-            if (qNode->expData()->type() != ExpDataType::Corridor) {
-                qNode->setFlag(QGraphicsItem::ItemIsMovable, enableMove);
-            }
+            setQNodeMovability(qNode);
         }
     }
 }
@@ -238,6 +236,9 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
 
     /// FakeLine不在QNode的继承体系中, 可能会在空白处松开, 因此单独考虑
     if (mIsDrawingDirectLink && mTheDrawingFakeLine) {
+        /**
+         * 画fakeLine的模式
+         */
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
             if (clickedQNode != mTheDrawingCorridor.get()) {
                 /// 被点中的QNode的坐标系中的点击的位置
@@ -266,13 +267,17 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
     else if (item) {
         if (auto clickedQNode = dynamic_cast<QNode*>(item)) {
             if (mEnableNodeRestriction) {
-                /// 位置限定模式
+                /**
+                 * 位置限定模式
+                 */
                 if (clickedQNode->expData()->type() != ExpDataType::Corridor) {
                     restrictQNode(clickedQNode);
                 }
             }
             else if (mIsDrawingEdge && mTheDrawingCorridor) {
-                /// Corridor链接模式
+                /**
+                 * Corridor链接模式
+                 */
                 if (clickedQNode != mTheDrawingCorridor.get()) {
                     /// 被点中的QNode的坐标系中点击的位置
                     const auto& clickPosInItem = clickedQNode->mapFromScene(clickPosInScene);
@@ -426,10 +431,6 @@ void tmap::MainGView::loadMap(const std::string& fileName)
             /// BFS中的元素是已经添加过的QNode
             lookupQueue.push(qNode.get());
             qNode->setPos(0., 0.);
-            if (qNode->expData()->type() != ExpDataType::Corridor) {
-                /// TODO, 将来Corridor在某些模式下可移动
-                qNode->setFlag(QGraphicsItem::ItemIsMovable, mEnableFakeNodesMoving);
-            }
             mScene4FakeMap.addItem(qNode.get());
             mNodesInFakeMap.insert(std::move(qNode));
 
@@ -465,10 +466,6 @@ void tmap::MainGView::loadMap(const std::string& fileName)
                             /// 没有被遍历过, 则加入scene以及collection
                             linkedQNode->setPos(currentLinkGatePos - anotherGatePosInNode);
                             mNodesInFakeMap.insert(linkedQNode);
-                            if (linkedQNode->expData()->type() != ExpDataType::Corridor) {
-                                linkedQNode->setFlag(QGraphicsItem::ItemIsMovable,
-                                                     mEnableFakeNodesMoving);
-                            }
                             mScene4FakeMap.addItem(linkedQNode.get());
                             lookupQueue.push(linkedQNode.get());
                         }
@@ -476,6 +473,10 @@ void tmap::MainGView::loadMap(const std::string& fileName)
                 }
             }
         }
+    }
+
+    for (auto& node : mNodesInFakeMap) {
+        setQNodeMovability(node.get());
     }
 }
 
@@ -562,13 +563,7 @@ void tmap::MainGView::switch2simMode(bool toSim)
     } else {
         for (auto& item : mScene4FakeMap.items()) {
             if (auto qNode = dynamic_cast<QNode*>(item)) {
-                if (qNode->expData()->type() == ExpDataType::Corridor) {
-                    if (mMoveStragety != MoveStragety::NO_NODE_FOLLOW) {
-                        item->setFlag(QGraphicsItem::ItemIsMovable, false);
-                        continue;
-                    }
-                }
-                item->setFlag(QGraphicsItem::ItemIsMovable, true);
+                setQNodeMovability(qNode);
             }
         }
 
@@ -588,4 +583,19 @@ bool tmap::MainGView::setRobotInFake()
         }
     }
     return false;
+}
+
+void tmap::MainGView::setQNodeMovability(tmap::QNode* node) const
+{
+    if (mEnableFakeNodesMoving) {
+        if (node->expData()->type() != ExpDataType::Corridor) {
+            node->setFlag(QGraphicsItem::ItemIsMovable);
+        } else {
+            if (mMoveStragety == MoveStragety::NO_NODE_FOLLOW) {
+                node->setFlag(QGraphicsItem::ItemIsMovable);
+            }
+        }
+    } else {
+        node->setFlag(QGraphicsItem::ItemIsMovable, false);
+    }
 }
