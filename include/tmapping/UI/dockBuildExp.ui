@@ -135,7 +135,12 @@
         </item>
         <item>
          <property name="text">
-          <string>SmallRoom</string>
+          <string>SmallerRoom (3x)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>BiggerRoom (10x)</string>
          </property>
         </item>
        </widget>

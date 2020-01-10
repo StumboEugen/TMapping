@@ -52,14 +52,6 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     const auto& relatedExpData = expData();
 
-    const auto& gates = relatedExpData->getGates();
-    refreshGateDrawing();
-    for (int i = 0; i < gates.size(); ++i) {
-        if (mDrawGate[i]) {
-            UIT::drawGate(painter, gates[i].get(), true, true);
-        }
-    }
-
     switch (relatedExpData->type()) {
         case ExpDataType::Intersection: {
             painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
@@ -127,6 +119,14 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->drawRect(middleHalfSq);
             painter->setPen(oriPen);
             break;
+        }
+    }
+
+    const auto& gates = relatedExpData->getGates();
+    refreshGateDrawing();
+    for (int i = 0; i < gates.size(); ++i) {
+        if (mDrawGate[i]) {
+            UIT::drawGate(painter, gates[i].get(), true, true);
         }
     }
 

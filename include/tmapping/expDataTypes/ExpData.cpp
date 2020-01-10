@@ -102,7 +102,9 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
             res = make_shared<Intersection>();
         }
         else if (type == typeStr(ExpDataType::Room)) {
-            res = make_shared<Room>();
+            auto room = make_shared<Room>();
+            room->setScaling(jexp["scaling"].asDouble());
+            res = room;
         }
         else {
             cerr << FILE_AND_LINE << " You input an UNKNOWN expData! typeStr=" << type << endl;

@@ -12,7 +12,7 @@ namespace tmap
 
 class Room : public ExpData
 {
-
+    double mScaling = 1.0;
 
 public:
     ExpDataType type() const override { return ExpDataType::Room; }
@@ -20,6 +20,10 @@ public:
     Json::Value toJS() const override;
 
     ExpDataPtr clone() override;
+
+    void setScaling(double scaling);
+
+    double getScaling() const;
 };
 }
 

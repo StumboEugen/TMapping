@@ -67,8 +67,18 @@ void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
             cerr << "Stair hasn't been impled" << endl;
             break;
         case ExpDataType::Room:
-            mRelatedExpData.reset(new Room());
+        case ExpDataType::Room3x: {
+            auto room = new Room();
+            room->setScaling(3);
+            mRelatedExpData.reset(room);
             break;
+        }
+        case ExpDataType::Room10x: {
+            auto room = new Room();
+            room->setScaling(10);
+            mRelatedExpData.reset(room);
+            break;
+        }
     }
 
     for (int i = -2; i < 3; ++i) {
@@ -99,7 +109,6 @@ tmap::ExpDataPtr tmap::ViceGView::completeExpBuilding()
 
 void tmap::ViceGView::setNextGateType(tmap::GateType type)
 {
-    cout << "change gate type: " << (int)type << endl;
     mNextGateType = type;
 }
 
@@ -108,6 +117,9 @@ void tmap::ViceGView::startDrawingGateFromReferPoint(const ReferPoint& rp)
     GatePtr newGate;
     const auto& qp = rp.pos();
     TopoVec2 ori = UIT::QPt2TopoVec(qp);
+    if (auto room = dynamic_cast<Room*>(mRelatedExpData.get())) {
+        ori *= room->getScaling();
+    }
     TopoVec2 nor(1, 0);
 
     switch(mNextGateType) {
@@ -159,15 +171,17 @@ void tmap::ViceGView::displayTheExpData(tmap::ExpDataPtr data2show)
     mStatus = DisplayStatus::DISPLAYING_EXP;
     mRelatedExpData = std::move(data2show);
     QRectF rec({-RPR, -RPR}, QPointF{RPR, RPR});
+    double scale = 1.0;
     if (mRelatedExpData->type() == ExpDataType::Intersection) {
         scene()->addEllipse(rec, {Qt::gray, 1}, Qt::lightGray);
     }
     else if (mRelatedExpData->type() == ExpDataType::Room) {
         scene()->addRect(rec, {Qt::gray, 1}, Qt::lightGray);
+        scale = dynamic_cast<Room*>(mRelatedExpData.get())->getScaling();
     }
     for (const auto& gate : mRelatedExpData->getGates()) {
         auto g = new QGate(gate);
-        g->setPos(UIT::TopoVec2QPt(gate->getPos()));
+        g->setPos(UIT::TopoVec2QPt(gate->getPos() / scale));
         scene()->addItem(g);
         mQGates.emplace_back(g);
     }
