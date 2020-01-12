@@ -115,9 +115,10 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiDockExpBuilder->cbExpType->setItemData(0,
                 QVariant::fromValue(ExpDataType::Intersection));
         uiDockExpBuilder->cbExpType->setItemData(1,
-                QVariant::fromValue(ExpDataType::Room3x));
-        uiDockExpBuilder->cbExpType->setItemData(2,
-                QVariant::fromValue(ExpDataType::Room10x));
+                QVariant::fromValue(ExpDataType::Room));
+
+        QRegExp regx("[0-9]+.[0-9]+");
+        uiDockExpBuilder->leExpSize->setValidator(new QRegExpValidator(regx, this));
 
         uiDockExpBuilder->cbGateType->setItemData(0,
                 QVariant::fromValue(GateType::GateWay));
@@ -237,7 +238,9 @@ void tmap::TmapUI::SLOT_BuildExp(bool start)
     if (start) {
         uiDockExpBuilder->btnBuildExp->setText("Complete Building");
         auto& cbET = uiDockExpBuilder->cbExpType;
-        gvVice->beginExpBuilding(cbET->itemData(cbET->currentIndex()).value<ExpDataType>());
+        auto type = cbET->itemData(cbET->currentIndex()).value<ExpDataType>();
+        double size = uiDockExpBuilder->leExpSize->text().toDouble();
+        gvVice->beginExpBuilding(type, size);
     } else {
         uiDockExpBuilder->btnBuildExp->setText("Build an Exp");
         auto theBuiltExp = gvVice->completeExpBuilding();

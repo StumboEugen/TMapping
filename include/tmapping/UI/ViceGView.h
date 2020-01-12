@@ -53,7 +53,7 @@ class ViceGView : public QGraphicsView
 public:
     explicit ViceGView(QWidget* parent = nullptr);
 
-    void beginExpBuilding(ExpDataType type);
+    void beginExpBuilding(ExpDataType type, double size);
 
     ExpDataPtr completeExpBuilding();
 

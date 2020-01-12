@@ -54,8 +54,10 @@ tmap::ViceGView::ViceGView(QWidget* parent) : QGraphicsView(parent)
     setScene(&mScene);
 }
 
-void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
+void tmap::ViceGView::beginExpBuilding(ExpDataType type, double size)
 {
+    size = max(size, 2.0);
+    size /= 2.0;
     mStatus = DisplayStatus::BUILDING_EXP;
     mQGates.clear();
 
@@ -71,16 +73,9 @@ void tmap::ViceGView::beginExpBuilding(tmap::ExpDataType type)
         case ExpDataType::Stair:
             cerr << "Stair hasn't been impled" << endl;
             break;
-        case ExpDataType::Room:
-        case ExpDataType::Room3x: {
+        case ExpDataType::Room: {
             auto room = new Room();
-            room->setScaling(3);
-            mRelatedExpData.reset(room);
-            break;
-        }
-        case ExpDataType::Room10x: {
-            auto room = new Room();
-            room->setScaling(10);
+            room->setScaling(size);
             mRelatedExpData.reset(room);
             break;
         }

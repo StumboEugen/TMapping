@@ -15,7 +15,7 @@
 namespace tmap
 {
 
-enum class ExpDataType{Intersection, Corridor, Stair, Room, Room3x, Room10x};
+enum class ExpDataType{Intersection, Corridor, Stair, Room};
 
 class ExpData;
 using ExpDataPtr = std::shared_ptr<ExpData>;
