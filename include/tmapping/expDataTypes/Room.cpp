@@ -15,6 +15,7 @@ tmap::ExpDataPtr tmap::Room::clone()
 {
     auto sr = new Room;
     this->copy2(sr);
+    sr->mScaling = this->mScaling;
     return tmap::ExpDataPtr(sr);
 }
 

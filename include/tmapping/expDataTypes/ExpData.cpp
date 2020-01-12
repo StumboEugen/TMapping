@@ -258,3 +258,18 @@ const vector<PLMPtr>& ExpData::getPLMs() const
     return mPosLandmarks;
 }
 
+const vector<ExpData::SubLink>& ExpData::getSubLinks() const
+{
+    return mSubLinks;
+}
+
+void ExpData::addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB)
+{
+    SubLink s;
+    s.a.type = typeA;
+    s.a.index = indexA;
+    s.b.type = typeB;
+    s.b.index = indexB;
+    mSubLinks.push_back(s);
+}
+
