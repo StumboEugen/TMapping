@@ -151,7 +151,7 @@ void tmap::ViceGView::addLandMark(const tmap::ReferPoint& rp)
     }
     mRelatedExpData->addLandmark(
             make_shared<StrPLM>(UIT::QPt2TopoVec(rp.pos() * scale), mNextLM));
-    double r = UIT::QMeter(0.1);
+    double r = UIT::QMeter(LANDMARK_RAD);
     auto circle = new QGraphicsEllipseItem({QPointF{-r, -r}, QPointF{r, r}});
     circle->setBrush(Qt::green);
     scene()->addItem(circle);

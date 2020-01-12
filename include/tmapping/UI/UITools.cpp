@@ -88,7 +88,7 @@ void tmap::UIT::drawLandMark(QPainter* painter, PosLandmark* lm2draw, bool usePo
         painter->translate(offset);
     }
 
-    double r = UIT::QMeter(0.1);
+    double r = UIT::QMeter(LANDMARK_RAD);
     painter->setBrush(Qt::green);
     painter->drawEllipse({QPointF{-r, -r}, QPointF{r, r}});
 

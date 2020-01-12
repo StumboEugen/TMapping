@@ -18,6 +18,7 @@ class Gate;
 
 static constexpr double METER2PIX = 60.0;
 static constexpr double DOOR_RAD = 0.4;
+static constexpr double LANDMARK_RAD = 0.1;
 
 /// UI TOOLS
 namespace UIT {
