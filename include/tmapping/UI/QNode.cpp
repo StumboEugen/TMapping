@@ -54,6 +54,14 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     switch (relatedExpData->type()) {
         case ExpDataType::Intersection: {
+
+            painter->setPen(QPen{Qt::black, 1, Qt::DashLine});
+            auto bRect = relatedExpData->getOutBounding(0.);
+            auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
+            auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
+            painter->drawRect(QRectF{tl,br});
+            painter->setPen(oriPen);
+
             painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
             painter->drawEllipse(middleHalfSq);
             painter->setPen(oriPen);
