@@ -87,6 +87,12 @@ Json::Value ExpData::toJS() const
         res["name"] = mName;
     }
     res["type"] = typeStr(type());
+    for (const auto& subLink : mSubLinks) {
+        Jsobj link;
+        link.append(subLink.a.index + subLink.a.type * mGates.size());
+        link.append(subLink.b.index + subLink.b.type * mGates.size());
+        res["sLink"].append(std::move(link));
+    }
     return res;
 }
 
@@ -130,6 +136,18 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         marks.reserve(nMark);
         for (int i = 0; i < nMark; ++i) {
             marks.emplace_back(PosLandmark::madeFromJS(jmarks[i]));
+        }
+
+        auto& subLinks = res->mSubLinks;
+        subLinks.reserve(jexp["sLink"].size());
+        for (const auto& jSubLink : jexp["sLink"]) {
+            size_t l0 = jSubLink[0].asUInt64();
+            size_t l1 = jSubLink[1].asUInt64();
+            subLinks.push_back({});
+            subLinks.back().a.type = l0 / nGate;
+            subLinks.back().a.index = l0 % nGate;
+            subLinks.back().b.type = l1 / nGate;
+            subLinks.back().b.index = l1 % nGate;
         }
 
         if (auto c = dynamic_cast<Corridor*>(res.get())) {
