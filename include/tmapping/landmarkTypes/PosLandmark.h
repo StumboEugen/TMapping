@@ -32,6 +32,8 @@ public:
     Json::Value toJS() const override;
 
     virtual PLMPtr clone() = 0;
+
+    void setPos(const TopoVec2& pos);
 };
 }
 

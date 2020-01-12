@@ -6,6 +6,7 @@
 #include "ExpData.h"
 #include <iostream>
 #include "../tools/TopoParams.h"
+#include "../landmarkTypes/LandmarkTypes.h"
 
 #include "Corridor.h"
 #include "Intersection.h"
@@ -233,6 +234,9 @@ TopoVec2 ExpData::normalizeSelf()
     TopoVec2 offset = mGates.front()->getPos();
     for (auto& gate : mGates) {
         gate->setPos(gate->getPos() - offset);
+    }
+    for (auto& plm : mPosLandmarks) {
+        plm->setPos(plm->getPos() - offset);
     }
     return offset;
 }

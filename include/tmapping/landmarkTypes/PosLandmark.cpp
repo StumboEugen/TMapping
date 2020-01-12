@@ -38,3 +38,8 @@ tmap::PLMPtr tmap::PosLandmark::madeFromJS(const tmap::Jsobj& jPLM)
     }
     return res;
 }
+
+void tmap::PosLandmark::setPos(const tmap::TopoVec2& pos)
+{
+    PosLandmark::pos = pos;
+}
