@@ -190,8 +190,12 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
     }
 
     if (mAtSim && mRobot && event->button() & Qt::RightButton) {
-        if (auto exp = mRobot->try2move(clickPosInScene)) {
-            Q_EMIT SIG_RobotMove2(exp.get());
+        if (mRobot->try2move(clickPosInScene)) {
+            if (event->modifiers() & Qt::CTRL) {
+                if (auto oldExp = mRobot->try2ThroughGate()) {
+                    Q_EMIT SIG_RobotThroughGate(oldExp);
+                }
+            }
         }
     }
 }

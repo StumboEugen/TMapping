@@ -98,6 +98,8 @@ public:
 
     QPointF gateQPos(size_t index, bool atScene = true) const;
 
+    QPointF plmQPos(size_t index, bool atScene = true) const;
+
     void mouseHoverAt(const QPointF& at);
 
     void setMoveStragety(MoveStragety moveStragety);

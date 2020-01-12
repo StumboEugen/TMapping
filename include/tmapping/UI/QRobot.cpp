@@ -13,16 +13,18 @@ using namespace std;
 using namespace tmap;
 
 tmap::QRobot::QRobot(tmap::QNodePtr at)
-        : atNode(std::move(at))
+        : currentAtNode(std::move(at)) ,
+          currentExp(make_shared<Exp>(currentAtNode->expData()->clone(), GATEID_BEGINNING_POINT))
 {
-    atNode->scene()->addItem(this);
+    currentAtNode->scene()->addItem(this);
     double r = UIT::QMeter(0.13);
     setRect({QPointF{-r, -r}, QPointF{r, r}});
     QColor c(Qt::red);
     c.setAlphaF(0.5);
     setBrush(c);
-    auto cent = atNode->boundingRect().center();
-    setPos(atNode->mapToScene(cent));
+    setPos(currentAtNode->gateQPos(0, true));
+    atLM.type = LMTYPE_GATE;
+    atLM.index = 0;
 }
 
 tmap::QRobot::~QRobot()
@@ -34,22 +36,64 @@ tmap::QRobot::~QRobot()
 
 void QRobot::updatePos()
 {
-    auto cent = atNode->boundingRect().center();
-    setPos(atNode->mapToScene(cent));
+    switch (atLM.type) {
+        case LMTYPE_LM:
+            setPos(currentAtNode->plmQPos(atLM.index));
+            break;
+        case LMTYPE_GATE:
+            setPos(currentAtNode->gateQPos(atLM.index));
+            break;
+        default:
+            cerr << FILE_AND_LINE << " a UNKNOWN EXPDATA VERTEX TYPE:" << atLM.type << endl;
+    }
     update();
 }
 
-ExpPtr QRobot::try2move(QPointF scenePos)
+bool QRobot::try2move(QPointF scenePos)
 {
-    auto nodePos = atNode->mapFromScene(scenePos);
-    auto gid = atNode->expData()->findGateAtPos(
+    bool clickAtGate = false;
+    ExpData::Vertex newVertex = atLM;
+    auto nodePos = currentAtNode->mapFromScene(scenePos);
+    const auto& expData = currentAtNode->expData();
+    auto gid = expData->findGateAtPos(
             UIT::QPt2TopoVec(nodePos), UIT::pix2meter(15));
     if (gid >= 0) {
-        if (auto toQNode = atNode->qNodeAt(gid)) {
-            theLastMovedExp = make_shared<Exp>(toQNode->expData(), atNode->linkedGIDAt(gid));
-            atNode = toQNode;
+        clickAtGate = true;
+        newVertex.type = LMTYPE_GATE;
+        newVertex.index = gid;
+    } else {
+        auto PLMid = expData->findLmAtPos(
+                UIT::QPt2TopoVec(nodePos), UIT::pix2meter(15));
+        if (PLMid >= 0) {
+            newVertex.type = LMTYPE_LM;
+            newVertex.index = PLMid;
+        }
+    }
+    
+    if (newVertex != atLM) {
+        currentExp->expData()->addSubLink(newVertex.type, newVertex.index,
+                            atLM.type, atLM.index, true);
+        atLM = newVertex;
+        updatePos();
+    }
+    return clickAtGate;
+}
+
+ExpPtr QRobot::try2ThroughGate()
+{
+    if (atLM.type == LMTYPE_GATE) {
+        if (auto linkedQNode = currentAtNode->qNodeAt(atLM.index)) {
+            currentExp->setLeftGate(atLM.index);
+            atLM.type = LMTYPE_GATE;
+            atLM.index = currentAtNode->linkedGIDAt(atLM.index);
+            ExpPtr newExp = make_shared<Exp>(
+                    currentAtNode->expData()->clone(), atLM.index);
+            swap(newExp, currentExp);
+
+            currentAtNode = linkedQNode;
+            currentAtNode->setSelected(true);
             updatePos();
-            return theLastMovedExp;
+            return newExp;
         }
     }
     return nullptr;

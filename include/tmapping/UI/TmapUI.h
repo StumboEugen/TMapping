@@ -92,7 +92,7 @@ private Q_SLOTS:
     void SLOT_InitROS();
     void SLOT_SwitchMode(QAction*);
     void SLOT_PlaceRobot();
-    void SLOT_ROS_SendExp(Exp*);
+    void SLOT_ROS_ThroughGate(ExpPtr);
 
 };
 }

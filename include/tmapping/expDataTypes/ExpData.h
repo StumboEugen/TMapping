@@ -37,30 +37,47 @@ struct MatchResult_IMPL{
 
 using MatchResult = std::unique_ptr<MatchResult_IMPL>;
 
-static constexpr int32_t EXP_POINT_TYPE_GATE = 0;
-static constexpr int32_t EXP_POINT_TYPE_PLM = 1;
+static constexpr int32_t LMTYPE_GATE = 0;
+static constexpr int32_t LMTYPE_LM = 1;
 
 /// 代表观测得到的一次地形数据, 比如一个路口, 一个房间的信息
 class ExpData
 {
     std::string mName;
 
+public:
+    /// 表示ExpData中的Vertex, 可以用来表示连接关系也可以用来表示机器人位置
+    struct Vertex{
+        /**
+         * @brief 类型, 如果是Gate为1, 如果是PLM为2
+         */
+        uint32_t type;
+        uint32_t index;
+
+
+        Vertex(uint32_t type, uint32_t index) : type(type), index(index){}
+
+        Vertex() : Vertex(0,0) {};
+
+        bool operator==(const Vertex& rhs) const {
+            return std::tie(type, index) == std::tie(rhs.type, rhs.index);
+        }
+
+        bool operator!=(const Vertex& rhs) const {
+            return !(rhs == *this);
+        }
+    };
+
+    /// 用于辅助表示ExpData内部的连接关系, 这种连接关系表示机器人的运动历史, 也表示了里程计准确度的相关性
+    struct SubLink{
+        Vertex a;
+        Vertex b;
+    };
+
 protected:
     std::vector<GatePtr> mGates;
     std::vector<PLMPtr> mPosLandmarks;
 
-    /// 用于辅助表示ExpData内部的连接关系, 这种连接关系表示机器人的运动历史, 也表示了里程计准确度的相关性
-    struct SubLink{
-        struct Vertex{
-            /**
-             * @brief 类型, 如果是Gate为1, 如果是PLM为2
-             */
-            uint32_t type;
-            uint32_t index;
-        };
-        Vertex a;
-        Vertex b;
-    };
     std::vector<SubLink> mSubLinks;
 
     void copy2(ExpData* copy2);
@@ -119,13 +136,15 @@ public:
 
     GateID findGateAtPos(const TopoVec2& pos, double threshold = 0.5) const;
 
+    GateID findLmAtPos(const TopoVec2& pos, double threshold = 0.5) const;
+
     virtual TopoVec2 normalizeSelf();
 
     GatePtr popBackGate();
 
     const std::vector<SubLink>& getSubLinks() const;
 
-    void addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB);
+    void addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB, bool findDup);
 };
 
 }

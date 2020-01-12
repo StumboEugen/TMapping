@@ -78,7 +78,7 @@ public Q_SLOTS:
     void SLOT_SetMoveStrategy(int strategy);
 
 Q_SIGNALS:
-    void SIG_RobotMove2(Exp *);
+    void SIG_RobotThroughGate(ExpPtr);
 };
 }
 

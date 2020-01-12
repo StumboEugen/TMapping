@@ -21,6 +21,7 @@ using namespace std;
 Q_DECLARE_METATYPE(tmap::ExpDataType);
 Q_DECLARE_METATYPE(tmap::ExpDataPtr);
 Q_DECLARE_METATYPE(tmap::GateType);
+Q_DECLARE_METATYPE(tmap::ExpPtr);
 
 tmap::TmapUI::TmapUI(QWidget* parent) :
         QMainWindow(parent),
@@ -52,8 +53,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         gvMain->setMinimumSize(601, 401);
         centerLayout->addWidget(gvMain);
 
-        connect(gvMain, SIGNAL(SIG_RobotMove2(Exp *)),
-                this, SLOT(SLOT_ROS_SendExp(Exp *)));
+        connect(gvMain, SIGNAL(SIG_RobotThroughGate(ExpPtr)),
+                this, SLOT(SLOT_ROS_ThroughGate(ExpPtr)));
 
         smallWindowLayout = new QVBoxLayout();
         smallWindowLayout->setSpacing(3);
@@ -534,7 +535,7 @@ void tmap::TmapUI::SLOT_PlaceRobot()
     }
 }
 
-void tmap::TmapUI::SLOT_ROS_SendExp(Exp* data)
+void tmap::TmapUI::SLOT_ROS_ThroughGate(ExpPtr exp)
 {
-    cout << "YEAH " << data << endl;
+    cout << "Yeah " << exp.get() << exp->serial() << endl;
 }

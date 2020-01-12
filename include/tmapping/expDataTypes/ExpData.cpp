@@ -247,6 +247,16 @@ GateID ExpData::findGateAtPos(const TopoVec2& pos, double threshold) const
     return GATEID_NOT_FOUND;
 }
 
+GateID ExpData::findLmAtPos(const TopoVec2& pos, double threshold) const
+{
+    for (int i = 0; i < mPosLandmarks.size(); ++i) {
+        if ((pos - mPosLandmarks[i]->getPos()).len() < threshold) {
+            return i;
+        }
+    }
+    return GATEID_NOT_FOUND;
+}
+
 TopoVec2 ExpData::normalizeSelf()
 {
     TopoVec2 offset = mGates.front()->getPos();
@@ -285,13 +295,23 @@ const vector<ExpData::SubLink>& ExpData::getSubLinks() const
     return mSubLinks;
 }
 
-void ExpData::addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB)
+void
+ExpData::addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB, bool findDup)
 {
-    SubLink s;
-    s.a.type = typeA;
-    s.a.index = indexA;
-    s.b.type = typeB;
-    s.b.index = indexB;
-    mSubLinks.push_back(s);
+    Vertex va(typeA, indexA);
+    Vertex vb(typeB, indexB);
+
+    if (findDup) {
+        for (const auto& link : mSubLinks) {
+            if (link.a == va && link.b == vb) {
+                return;
+            }
+            if (link.a == vb && link.b == va) {
+                return;
+            }
+        }
+    }
+
+    mSubLinks.push_back({va, vb});
 }
 

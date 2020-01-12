@@ -63,6 +63,9 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->setPen(oriPen);
 
             painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
+//            if (isSelected()) {
+//                painter->setPen(QPen{Qt::black, 4});
+//            }
             painter->drawEllipse(middleHalfSq);
             painter->setPen(oriPen);
 
@@ -367,6 +370,20 @@ QPointF tmap::QNode::gateQPos(size_t index, bool atScene) const
     return res;
 }
 
+QPointF tmap::QNode::plmQPos(size_t index, bool atScene) const
+{
+    QPointF res{0,0};
+    if (expData()->getPLMs().size() <= index) {
+        cerr << FILE_AND_LINE << " you are getting an invalid PLM pos!" << index << endl;
+        return res;
+    }
+    res = UIT::TopoVec2QPt(expData()->getPLMs()[index]->getPos());
+    if (atScene) {
+        res = mapToScene(res);
+    }
+    return res;
+}
+
 void tmap::QNode::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 {
     QGraphicsItem::hoverMoveEvent(event);
@@ -421,7 +438,7 @@ void tmap::QNode::setMoveStragety(tmap::MoveStragety moveStragety)
 void tmap::QNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mousePressEvent(event);
-    if (event->modifiers() & Qt::CTRL && event->button() == Qt::RightButton) {
+    if (event->modifiers() & Qt::CTRL && event->button() == Qt::MidButton) {
         auto gid = expData()->findGateAtPos(UIT::QPt2TopoVec(event->pos()), UIT::pix2meter(15));
         if (gid >= 0) {
             removeConnection(gid);
