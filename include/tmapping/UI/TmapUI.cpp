@@ -16,6 +16,10 @@
 #include "ui_dockSimulation.h"
 #include "ui_dockRealtime.h"
 
+#include <tmapping/NewExp.h>
+#include <tmapping/GateMovement.h>
+#include <tmapping/GetMaps.h>
+
 using namespace std;
 
 Q_DECLARE_METATYPE(tmap::ExpDataType);
@@ -474,6 +478,9 @@ void tmap::TmapUI::SLOT_InitROS()
     }
 
     ros::NodeHandle n;
+
+    RSC_newExp = n.serviceClient<tmapping::NewExp>(TMAP_STD_SERVICE_NAME_NEW_EXP);
+    RSC_throughGate = n.serviceClient<tmapping::GateMovement>(TMAP_STD_SERVICE_NAME_GATE_MOVE);
 }
 
 void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
@@ -535,7 +542,15 @@ void tmap::TmapUI::SLOT_PlaceRobot()
     }
 }
 
-void tmap::TmapUI::SLOT_ROS_ThroughGate(ExpPtr exp)
+void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 {
-    cout << "Yeah " << exp.get() << exp->serial() << endl;
+    if (checkROS()) {
+        tmapping::NewExp srvExp;
+        srvExp.request.jNewExp = JsonHelper::JS2Str(exp->toJS());
+        if (!RSC_newExp.call(srvExp)) {
+            cerr << "ROS service calling failed!" << endl;
+        }
+    } else {
+        cout << "ROS hasn't started, the message will not be sent" << endl;
+    }
 }

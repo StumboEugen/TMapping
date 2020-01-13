@@ -8,11 +8,15 @@
 
 #include "tmapping/Tmapping.h"
 
+#include "TmapRosNode.h"
 
 using namespace std;
 using namespace tmap;
 
 int main(int argc, char **argv)
 {
-
+    ros::init(argc, argv, "TmappingCore");
+    TmapRosNode t;
+    cout << "Tmapping Core started!" << endl;
+    ros::spin();
 }

@@ -63,6 +63,9 @@ class TmapUI : public QMainWindow
     Ui::RealTimeDockUI* uiDockRealtime;
     QDockWidget * dockRealtime;
 
+    ros::ServiceClient RSC_newExp;
+    ros::ServiceClient RSC_throughGate;
+
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
     static QString getExpDataLabel(const ExpDataPtr& expData);
@@ -92,7 +95,7 @@ private Q_SLOTS:
     void SLOT_InitROS();
     void SLOT_SwitchMode(QAction*);
     void SLOT_PlaceRobot();
-    void SLOT_ROS_ThroughGate(ExpPtr);
+    void SLOT_ROS_ThroughGate(const ExpPtr&);
 
 };
 }

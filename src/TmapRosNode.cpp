@@ -23,7 +23,8 @@ bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
                               tmapping::NewExpResponse& res)
 {
     const auto& newExp = make_shared<Exp>(JsonHelper::Str2JS(req.jNewExp));
-    mTmappingCore.arriveNewExp(newExp);
+//    mTmappingCore.arriveNewExp(newExp);
+    cout << "i get it" << newExp->expData()->typeStr() << endl;
     return true;
 }
 

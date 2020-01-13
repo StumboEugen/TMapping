@@ -87,12 +87,12 @@ ExpPtr QRobot::try2ThroughGate()
             atLM.type = LMTYPE_GATE;
             atLM.index = currentAtNode->linkedGIDAt(atLM.index);
             ExpPtr newExp = make_shared<Exp>(
-                    currentAtNode->expData()->clone(), atLM.index);
-            swap(newExp, currentExp);
-
+                    linkedQNode->expData()->clone(), atLM.index);
+            ExpPtr oldExp = currentExp;
+            currentExp = newExp;
             currentAtNode = linkedQNode;
             updatePos();
-            return newExp;
+            return oldExp;
         }
     }
     return nullptr;
