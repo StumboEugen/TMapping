@@ -91,10 +91,14 @@ ExpPtr QRobot::try2ThroughGate()
             swap(newExp, currentExp);
 
             currentAtNode = linkedQNode;
-            currentAtNode->setSelected(true);
             updatePos();
             return newExp;
         }
     }
     return nullptr;
+}
+
+const QNodePtr& QRobot::atNode() const
+{
+    return currentAtNode;
 }

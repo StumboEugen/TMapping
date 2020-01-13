@@ -41,6 +41,8 @@ public:
      */
     ExpPtr try2ThroughGate();
 
+    const QNodePtr& atNode() const;
+
 };
 
 using QRobotPtr = std::unique_ptr<QRobot>;

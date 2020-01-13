@@ -196,6 +196,7 @@ void tmap::MainGView::mousePressEvent(QMouseEvent* event)
                     Q_EMIT SIG_RobotThroughGate(oldExp);
                 }
             }
+            mRobot->atNode()->setSelected(true);
         }
     }
 }

@@ -62,7 +62,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             painter->drawRect(QRectF{tl,br});
             painter->setPen(oriPen);
 
-            painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
+            painter->setBrush(isSelected() ? Qt::green : Qt::yellow);
 //            if (isSelected()) {
 //                painter->setPen(QPen{Qt::black, 4});
 //            }
@@ -126,7 +126,7 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
             painter->drawRect(QRectF{tl,br});
-            painter->setBrush(isSelected() ? Qt::lightGray : Qt::yellow);
+            painter->setBrush(isSelected() ? Qt::green : Qt::yellow);
             painter->drawRect(middleHalfSq);
             painter->setPen(oriPen);
             break;
