@@ -96,7 +96,6 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         auto adam = twigCollection.generateAdam();
         adam->addMergedExp(theSingleMergedExp);
         theSingleMergedExp->addRelatedMapTwig(adam);
-        twigCollection.add2NextGeneration(std::move(adam));
     }
 
     twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);

@@ -98,6 +98,7 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
 
     while (!DFS_Stack.empty())
     {
+        /// 这里没有立刻pop_back, 因为我们希望以一个引用的形式使用更长时间
         const auto & currentTwig = DFS_Stack.back();
         /// 先检查当前的这个MapTwig有没有使用了衍生自this的MergedExp, 如果是, 则不予采用
         bool thisTwigSafe = true;
@@ -140,7 +141,7 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
                 mLastSearchResult.emplace_back(currentTwig);
                 DFS_Stack.pop_back();
                 break;
-            }
+        }
     }
 
     return res;

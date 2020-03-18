@@ -57,6 +57,9 @@ void Exp::addMergedExpIns(const MergedExpPtr& newMerged)
     mMergedExps.emplace_back(newMerged);
 }
 
+/**
+ * @brief 获得Exp的第一个MergedExp, 由于构造时第一个位置是一定被空出来的,所以不会发生SEG
+ */
 MergedExpWePtr& Exp::theSingleMergedExp()
 {
     return mMergedExps.front();

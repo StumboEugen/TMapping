@@ -123,6 +123,7 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, GateID 
 
     /// 构建从this到targetExp对应的MapTwig的链条
     vector<MapTwig*> chainToFather;
+    chainToFather.reserve(this->mExpUsages.back()->serialOfLastExp());
     MapTwig* current = this;
     std::size_t targetSerial = targetExp->serial();
     while (current->borndAt > targetSerial) {
@@ -133,7 +134,7 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, GateID 
     /// 构建完毕
 
     /// 从过去往现在查找, 找到对应的Exp最新的MergedExp, 并记录下来
-    auto& theSimilarMergedExp = current->mExpUsages.at(targetSerial - current->borndAt);
+    auto theSimilarMergedExp = current->mExpUsages.at(targetSerial - current->borndAt);
     for (auto iter = chainToFather.rbegin(); iter != chainToFather.rend(); ++iter) {
         for (const auto& mergedExp : (*iter)->mExpUsages) {
             if (mergedExp->isChildOf(theSimilarMergedExp.get())) {
