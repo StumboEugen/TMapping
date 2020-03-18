@@ -17,7 +17,7 @@ class QRobot : public QGraphicsEllipseItem
 {
     QNodePtr currentAtNode;
 
-    ExpData::Vertex atLM;
+    SubNode atLM;
 
     ExpPtr currentExp;
 

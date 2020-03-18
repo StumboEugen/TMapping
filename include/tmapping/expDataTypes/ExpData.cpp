@@ -57,6 +57,7 @@ MatchResult ExpData::detailedMatch(const ExpData& another, double selfWeight) co
     /// MatchResult->mergedExpData 的gate序号和another完全相同
     /// selfWeight指的是this的权重, 比如selfWeight=3, 说明this可能是3次结果融合而成的
 
+
 }
 
 double ExpData::quickMatch(const ExpData& another, double selfWeight) const
@@ -89,8 +90,8 @@ Json::Value ExpData::toJS() const
     res["type"] = typeStr(type());
     for (const auto& subLink : mSubLinks) {
         Jsobj link;
-        link.append(subLink.a.index + subLink.a.type * mGates.size());
-        link.append(subLink.b.index + subLink.b.type * mGates.size());
+        link.append(subLink.a.index + static_cast<int32_t>(subLink.a.type) * mGates.size());
+        link.append(subLink.b.index + static_cast<int32_t>(subLink.b.type) * mGates.size());
         res["sLink"].append(std::move(link));
     }
     return res;
@@ -143,10 +144,10 @@ ExpDataPtr ExpData::madeFromJS(const Jsobj& jexp)
         for (const auto& jSubLink : jexp["sLink"]) {
             size_t l0 = jSubLink[0].asUInt64();
             size_t l1 = jSubLink[1].asUInt64();
-            subLinks.push_back({});
-            subLinks.back().a.type = l0 / nGate;
+            subLinks.emplace_back();
+            subLinks.back().a.type = static_cast<SubNodeType>(l0 / nGate);
             subLinks.back().a.index = l0 % nGate;
-            subLinks.back().b.type = l1 / nGate;
+            subLinks.back().b.type = static_cast<SubNodeType>(l1 / nGate);
             subLinks.back().b.index = l1 % nGate;
         }
 
@@ -296,10 +297,10 @@ const vector<ExpData::SubLink>& ExpData::getSubLinks() const
 }
 
 void
-ExpData::addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB, bool findDup)
+ExpData::addSubLink(SubNodeType typeA, size_t indexA, SubNodeType typeB, size_t indexB, bool findDup)
 {
-    Vertex va(typeA, indexA);
-    Vertex vb(typeB, indexB);
+    SubNode va(typeA, indexA);
+    SubNode vb(typeB, indexB);
 
     if (findDup) {
         for (const auto& link : mSubLinks) {
@@ -312,6 +313,6 @@ ExpData::addSubLink(int32_t typeA, size_t indexA, int32_t typeB, size_t indexB, 
         }
     }
 
-    mSubLinks.push_back({va, vb});
+    mSubLinks.emplace_back(va, vb);
 }
 
