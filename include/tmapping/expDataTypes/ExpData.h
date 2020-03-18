@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "SubNode.h"
+#include "GeoHash.h"
 
 #include "../tools/TopoTools.h"
 #include "../gateTypes/GateTypes.h"
@@ -63,6 +64,8 @@ protected:
     std::vector<SubLink> mSubLinks;
 
     void copy2(ExpData* copy2);
+
+    std::unique_ptr<GeoHash> geoHash;
 
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
