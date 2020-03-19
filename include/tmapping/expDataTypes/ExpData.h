@@ -65,7 +65,9 @@ protected:
 
     void copy2(ExpData* copy2);
 
-    std::unique_ptr<GeoHash> geoHash;
+    mutable std::unique_ptr<GeoHash> mGeoHash;
+
+    const GeoHash& getHashTable() const;
 
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
@@ -84,11 +86,11 @@ public:
 
     /**
      * @brief 计算两个ExpData是否类似
-     * @param another 另一个用于比较的ExpData实例
+     * @param that 另一个用于比较的ExpData实例
      * @param selfWeight this的比重, 1:1就是1, 1:4就是0.25, 5:1就是5
      * @return 匹配的详细结果, 包含融合后的ExpData
      */
-    MatchResult detailedMatch(const ExpData& another, double selfWeight = 1.0) const;
+    MatchResult detailedMatch(const ExpData& that, double selfWeight = 1.0) const;
 
     /**
      * @brief 计算两个ExpData是否类似

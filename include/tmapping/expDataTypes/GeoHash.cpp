@@ -70,7 +70,7 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
     }
 }
 
-std::vector<Entrance>* tmap::GeoHash::getEntrancesAtPos(const tmap::TopoVec2& pos)
+const std::vector<Entrance>* tmap::GeoHash::lookUpEntersAtPos(const tmap::TopoVec2& pos) const
 {
     int64_t X = floor(pos.px / TABLE_RES);
     int64_t Y = floor(pos.py / TABLE_RES);

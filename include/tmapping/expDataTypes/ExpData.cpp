@@ -3,8 +3,10 @@
 //
 
 #include <cfloat>
-#include "ExpData.h"
 #include <iostream>
+#include <algorithm>
+
+#include "ExpData.h"
 #include "../tools/TopoParams.h"
 #include "../landmarkTypes/LandmarkTypes.h"
 
@@ -50,14 +52,84 @@ GateID ExpData::findTheCloestGate(const TopoVec2& gatePos)
     return res;
 }
 
-MatchResult ExpData::detailedMatch(const ExpData& another, double selfWeight) const
+MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
 {
     /// TODO 完成两个未对齐数据的匹配工作
-    /// 要求: MatchResult->gatesMapping是从 [another's gate] = this's gate
+    /// 要求: MatchResult->gatesMapping是从 [that's gate] = this's gate
     /// MatchResult->mergedExpData 的gate序号和another完全相同
     /// selfWeight指的是this的权重, 比如selfWeight=3, 说明this可能是3次结果融合而成的
 
+    /// TODO 挑选合适的模型
+    size_t nPointsThis = this->nGates() + this->mPosLandmarks.size();
+    size_t nPointsThat = this->nGates() + this->mPosLandmarks.size();
 
+    const auto& table = that.getHashTable();
+
+    /// 选取最合适的基点 TODO RANSAC
+    double maxPoss = 0.0;
+    const auto& gates = this->getGates();
+    const auto& lms = this->getPLMs();
+    SubNode baseNode{SubNodeType::GATE, 0};
+    for (int i = 0; i < this->getGates().size(); ++i) {
+        if (gates[i]->getPossibility() > maxPoss) {
+            maxPoss = gates[i]->getPossibility();
+            baseNode.index = i;
+        }
+    }
+
+    /// 确定数据集合匹配基点的坐标
+    const TopoVec2* basePos;
+    switch (baseNode.type) {
+        case SubNodeType::GATE:
+            basePos = &this->getGates()[baseNode.index]->getPos();
+            break;
+        case SubNodeType::LandMark:
+            basePos = &this->getPLMs()[baseNode.index]->getPos();
+            break;
+        default:
+            cerr << FILE_AND_LINE << " error!";
+            throw;
+    }
+
+    /// 开始投票, 投票箱中存储对应base的映射关系
+    unordered_map<int, vector<pair<SubNode, SubNode>>> records;
+    records.reserve(max(nPointsThat, nPointsThis));
+    for (int i = 0; i < gates.size(); ++i) {
+        if(auto res = table.lookUpEntersAtPos(gates[i]->getPos() - *basePos)) {
+            for (const auto& bin : *res) {
+                if (bin.base.type == baseNode.type &&
+                    bin.node.type == SubNodeType::GATE) {
+                    auto j = bin.node.index;
+                    const auto& currentGate = gates[i];
+                    const auto& targetGate = that.getGates()[j];
+//                    if (currentGate->alike(targetGate)) { /// TODO ALIKE
+                    {
+                        records[bin.base.index].push_back(make_pair(
+                                SubNode(SubNodeType::GATE, i),
+                                SubNode(SubNodeType::GATE, j)));
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < lms.size(); ++i) {
+        /// TODO LMS
+    }
+
+    size_t winnerIndex;
+    const vector<pair<SubNode, SubNode>>* pairMapping;
+    {
+        size_t nCountMax = 0;
+        for (const auto& record : records) {
+            if (record.second.size() > nCountMax) {
+                winnerIndex = record.first;
+                pairMapping = &record.second;
+            }
+        }
+    }
+
+    /// TODO PLC
 }
 
 double ExpData::quickMatch(const ExpData& another, double selfWeight) const
@@ -314,5 +386,13 @@ ExpData::addSubLink(SubNodeType typeA, size_t indexA, SubNodeType typeB, size_t 
     }
 
     mSubLinks.emplace_back(va, vb);
+}
+
+const GeoHash& ExpData::getHashTable() const
+{
+    if (!mGeoHash) {
+        mGeoHash.reset(new GeoHash(*this));
+    }
+    return *mGeoHash;
 }
 

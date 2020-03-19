@@ -28,6 +28,8 @@ public:
     bool operator==(const SubNode& rhs) const;
 
     bool operator!=(const SubNode& rhs) const;
+
+    int toInt() const;
 };
 }
 

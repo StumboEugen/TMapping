@@ -32,7 +32,7 @@ public:
      * @brief 得到哈希表上对应位置的入口
      * @return 对应集合的指针,如果对应位置没有入口,则返回 nullptr
      */
-    std::vector<Entrance>* getEntrancesAtPos(const TopoVec2& pos);
+    const std::vector<Entrance>* lookUpEntersAtPos(const TopoVec2& pos) const;
 
 private:
 
