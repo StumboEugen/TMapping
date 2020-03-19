@@ -25,11 +25,18 @@ class GeoHash
 {
     std::unordered_map<int64_t, std::vector<Entrance>> mTable;
 
-    explicit GeoHash(const ExpData&, double odomErr);
+public:
+    explicit GeoHash(const ExpData&, double odomErr = 0.1);
 
-    std::vector<Entrance>* hitThePos(const TopoVec2& pos);
+    /**
+     * @brief 得到哈希表上对应位置的入口
+     * @return 对应集合的指针,如果对应位置没有入口,则返回 nullptr
+     */
+    std::vector<Entrance>* getEntrancesAtPos(const TopoVec2& pos);
 
+private:
 
+    void fillEntrances(TopoVec2 midPos, double err, const SubNode& base, const SubNode& anotherNode);
 };
 
 }
