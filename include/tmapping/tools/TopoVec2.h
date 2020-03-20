@@ -71,7 +71,7 @@ struct TopoVec2
 
     double crossProduct(const TopoVec2& that);
 
-    double dotProduct(const TopoVec2& that);
+    double dotProduct(const TopoVec2& that) const;
 
     double tan() const;
 

@@ -178,7 +178,7 @@ double TopoVec2::crossProduct(const TopoVec2& that)
     return this->px * that.py - this->py * that.px;
 }
 
-double TopoVec2::dotProduct(const TopoVec2& that)
+double TopoVec2::dotProduct(const TopoVec2& that) const
 {
     return this->px * that.px + this->py * that.py;
 }

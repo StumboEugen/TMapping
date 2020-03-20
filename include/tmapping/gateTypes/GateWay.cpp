@@ -16,3 +16,8 @@ tmap::GatePtr tmap::GateWay::clone()
     gateWay->setPossibility(this->getPossibility());
     return GatePtr{gateWay};
 }
+
+bool tmap::GateWay::alike(const tmap::GatePtr& that) const
+{
+    return Gate::alike(that);
+}

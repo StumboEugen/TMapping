@@ -230,7 +230,7 @@ void tmap::QGate::paint(QPainter* painter, const QStyleOptionGraphicsItem* optio
 void tmap::QGate::changeNormalVec(const QPointF& toPointInScene)
 {
     auto diff = toPointInScene - scenePos();
-    mData->changeNormalVec2(UIT::QPt2TopoVec(diff).restrictDir());
+    mData->setNormalVec(UIT::QPt2TopoVec(diff).restrictDir());
     update();
 }
 

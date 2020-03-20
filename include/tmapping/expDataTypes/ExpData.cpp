@@ -102,8 +102,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
                     auto j = bin.node.index;
                     const auto& currentGate = gates[i];
                     const auto& targetGate = that.getGates()[j];
-//                    if (currentGate->alike(targetGate)) { /// TODO ALIKE
-                    {
+                    if (currentGate->alike(targetGate)) {
                         records[bin.base.index].push_back(make_pair(
                                 SubNode(SubNodeType::GATE, i),
                                 SubNode(SubNodeType::GATE, j)));

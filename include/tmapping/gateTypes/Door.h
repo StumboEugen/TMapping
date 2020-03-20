@@ -29,6 +29,8 @@ public:
     Json::Value toJS() const override;
 
     GatePtr clone() override;
+
+    bool alike(const GatePtr& that) const override;
 };
 }
 

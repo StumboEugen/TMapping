@@ -96,7 +96,6 @@ void GeoHash::fillEntrances(TopoVec2 midPos, double err,
     double xr = xmid + errInRes; // right
     double xl = xmid - errInRes; // left
 
-    const int64_t MIDX = floor(xmid);
     const int64_t MIDY = floor(ymid);
 
     for (int64_t y = floor(yu); y > MIDY; --y) {

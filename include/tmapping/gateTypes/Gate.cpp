@@ -66,11 +66,6 @@ tmap::GatePtr tmap::Gate::madeFromJS(const tmap::Jsobj& jgate)
     return res;
 }
 
-void tmap::Gate::changeNormalVec2(const tmap::TopoVec2& to)
-{
-    mNormalVec = to.unitize();
-}
-
 std::string tmap::Gate::typeStr(tmap::GateType type)
 {
     string res;
@@ -99,7 +94,19 @@ void tmap::Gate::setPos(const tmap::TopoVec2& pos)
     Gate::mPos = pos;
 }
 
-void tmap::Gate::setNormalVec(const tmap::TopoVec2& mNormalVec)
+void tmap::Gate::setNormalVec(const tmap::TopoVec2& normalVec)
 {
-    Gate::mNormalVec = mNormalVec;
+    Gate::mNormalVec = normalVec.unitize();
+}
+
+bool tmap::Gate::alike(const tmap::GatePtr& that) const
+{
+    ///DEBUG SFAE TODO REMOVE
+    if (abs(this->mNormalVec.len() - 1.0) > 0.1 ||
+        abs(that->mNormalVec.len() - 1.0) > 0.1) {
+        cerr << FILE_AND_LINE << " normalVec not unit!" << endl;
+    }
+
+    double res = this->mNormalVec.dotProduct(that->mNormalVec);
+    return res > 0.85;
 }

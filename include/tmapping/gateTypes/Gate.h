@@ -45,15 +45,15 @@ public:
 
     virtual Json::Value toJS() const;
 
-    void changeNormalVec2(const TopoVec2& to);
-
     static std::string typeStr(GateType type);
 
     virtual GatePtr clone() = 0;
 
     void setPos(const TopoVec2& pos);
 
-    void setNormalVec(const TopoVec2& mNormalVec);
+    void setNormalVec(const TopoVec2& normalVec);
+
+    virtual bool alike(const GatePtr& that) const;
 };
 
 }
