@@ -24,6 +24,8 @@ public:
     const std::string& getStr() const;
 
     Json::Value toJS() const override;
+
+    bool alike(const LMPtr& that) const override;
 };
 }
 

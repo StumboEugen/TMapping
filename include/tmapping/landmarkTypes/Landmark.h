@@ -27,6 +27,8 @@ public:
 
     virtual Json::Value toJS() const;
 
+    virtual bool alike(const LMPtr& that) const = 0;
+
     static std::string typeStr(LandmarkType type);
 
 };

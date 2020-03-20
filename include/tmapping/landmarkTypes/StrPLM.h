@@ -25,6 +25,8 @@ public:
     Json::Value toJS() const override;
 
     PLMPtr clone() override;
+
+    bool alike(const LMPtr& that) const override;
 };
 }
 

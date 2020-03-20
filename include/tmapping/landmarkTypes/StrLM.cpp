@@ -21,3 +21,8 @@ Json::Value tmap::StrLM::toJS() const
     return res;
 }
 
+bool tmap::StrLM::alike(const tmap::LMPtr& that) const
+{
+    return that->type() == LandmarkType::StrLM && this->str == ((StrLM*)that.get())->str;
+}
+

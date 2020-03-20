@@ -28,3 +28,8 @@ tmap::PLMPtr tmap::StrPLM::clone()
     auto newsp = new StrPLM(this->getPos(), this->str);
     return PLMPtr{newsp};
 }
+
+bool tmap::StrPLM::alike(const tmap::LMPtr& that) const
+{
+    return that->type() == LandmarkType::StrPLM && this->str == ((StrPLM*)that.get())->str;
+}
