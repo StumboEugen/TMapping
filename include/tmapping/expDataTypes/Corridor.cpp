@@ -26,6 +26,18 @@ tmap::ExpDataPtr tmap::Corridor::clone()
     this->copy2(c);
     c->mEndGateA = this->mEndGateA;
     c->mEndGateB = this->mEndGateB;
+    c->mEndPointA = this->mEndPointA;
+    c->mEndPointB = this->mEndPointB;
+    return tmap::ExpDataPtr(c);
+}
+
+ExpDataPtr Corridor::cloneShell() const
+{
+    auto c = new Corridor;
+    c->mEndGateA = this->mEndGateA;
+    c->mEndGateB = this->mEndGateB;
+    c->mEndPointA = this->mEndPointA;
+    c->mEndPointB = this->mEndPointB;
     return tmap::ExpDataPtr(c);
 }
 

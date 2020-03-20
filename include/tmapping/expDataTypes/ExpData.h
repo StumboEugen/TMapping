@@ -121,6 +121,8 @@ public:
 
     virtual ExpDataPtr clone() = 0;
 
+    virtual ExpDataPtr cloneShell() const = 0 ;
+
     GateID findGateAtPos(const TopoVec2& pos, double threshold = 0.5) const;
 
     GateID findLmAtPos(const TopoVec2& pos, double threshold = 0.5) const;

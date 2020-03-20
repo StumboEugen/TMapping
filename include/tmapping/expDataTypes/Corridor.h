@@ -26,6 +26,8 @@ public:
 
     ExpDataPtr clone() override;
 
+    ExpDataPtr cloneShell() const override;
+
     GateID getEndGateA() const;
 
     GateID getEndGateB() const;

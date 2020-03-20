@@ -19,6 +19,8 @@ public:
     Json::Value toJS() const override;
 
     ExpDataPtr clone() override;
+
+    ExpDataPtr cloneShell() const override;
 };
 }
 

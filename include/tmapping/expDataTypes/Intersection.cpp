@@ -16,3 +16,9 @@ tmap::ExpDataPtr tmap::Intersection::clone()
     this->copy2(i);
     return tmap::ExpDataPtr(i);
 }
+
+tmap::ExpDataPtr tmap::Intersection::cloneShell() const
+{
+    auto i = new Intersection;
+    return tmap::ExpDataPtr(i);
+}

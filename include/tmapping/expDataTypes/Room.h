@@ -21,6 +21,8 @@ public:
 
     ExpDataPtr clone() override;
 
+    ExpDataPtr cloneShell() const override;
+
     void setScaling(double scaling);
 
     double getScaling() const;

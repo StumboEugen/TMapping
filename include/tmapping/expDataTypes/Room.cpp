@@ -28,3 +28,10 @@ double tmap::Room::getScaling() const
 {
     return mScaling;
 }
+
+tmap::ExpDataPtr tmap::Room::cloneShell() const
+{
+    auto sr = new Room;
+    sr->mScaling = this->mScaling;
+    return tmap::ExpDataPtr(sr);
+}
