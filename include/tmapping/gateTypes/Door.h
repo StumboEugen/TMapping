@@ -30,6 +30,8 @@ public:
 
     GatePtr clone() override;
 
+    GatePtr newMergedGate(const GatePtr& that, const TopoVec2& thatPos, double thisWeight) const override;
+
     bool alike(const GatePtr& that) const override;
 };
 }

@@ -110,3 +110,11 @@ bool tmap::Gate::alike(const tmap::GatePtr& that) const
     double res = this->mNormalVec.dotProduct(that->mNormalVec);
     return res > 0.85;
 }
+
+void tmap::Gate::mergeBasicInfo(const Gate* A, const Gate* B,
+                                const tmap::TopoVec2& BPos, double thisWeight)
+{
+    this->mPos = (A->mPos * thisWeight + BPos) / (thisWeight + 1);
+    this->mNormalVec = (A->mNormalVec * thisWeight + B->mNormalVec) / (thisWeight + 1);
+    this->possibility = (A->possibility * thisWeight + B->possibility) / (thisWeight + 1);
+}

@@ -28,6 +28,9 @@ class Gate
 protected:
     void copy2(Gate* target);
 
+    void mergeBasicInfo(const Gate* A, const Gate* B
+            , const TopoVec2& BPos , double thisWeight);
+
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);
 
@@ -48,6 +51,9 @@ public:
     static std::string typeStr(GateType type);
 
     virtual GatePtr clone() = 0;
+
+    virtual GatePtr
+    newMergedGate(const GatePtr& that, const TopoVec2& thatPos, double thisWeight) const = 0;
 
     void setPos(const TopoVec2& pos);
 

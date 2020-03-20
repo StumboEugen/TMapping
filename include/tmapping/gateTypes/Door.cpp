@@ -7,6 +7,7 @@
 #include "Door.h"
 
 using namespace std;
+using namespace tmap;
 
 tmap::Door::Door(const tmap::TopoVec2& pos, const tmap::TopoVec2& normalVec, bool oepned,
                  std::string doorMark)
@@ -57,4 +58,16 @@ bool tmap::Door::alike(const tmap::GatePtr& that) const
 
     auto realThat = (Door*)(that.get());
     return Gate::alike(that) && this->doorMark == realThat->doorMark;
+}
+
+GatePtr
+tmap::Door::newMergedGate(const GatePtr& that, const TopoVec2& thatPos, double thisWeight) const
+{
+    auto res = new Door(
+            {0,0},
+            {1,0},
+            this->opened,
+            this->doorMark);
+    res->mergeBasicInfo(this, that.get(), thatPos, thisWeight);
+    return GatePtr{res};
 }
