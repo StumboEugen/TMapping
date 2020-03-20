@@ -33,3 +33,11 @@ bool tmap::StrPLM::alike(const tmap::LMPtr& that) const
 {
     return that->type() == LandmarkType::StrPLM && this->str == ((StrPLM*)that.get())->str;
 }
+
+tmap::PLMPtr tmap::StrPLM::newMergedPLM(const tmap::PLMPtr& that,
+        const tmap::TopoVec2& thatPos, double thisWeight) const
+{
+    auto newPos = (this->getPos() * thisWeight + thatPos) / (thisWeight + 1);
+    auto newsp = new StrPLM(newPos, this->str);
+    return PLMPtr{newsp};
+}

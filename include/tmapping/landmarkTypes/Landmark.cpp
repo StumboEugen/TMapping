@@ -31,3 +31,13 @@ std::string tmap::Landmark::typeStr(LandmarkType type)
     }
     return res;
 }
+
+double tmap::Landmark::getPossibility() const
+{
+    return mPoss;
+}
+
+void tmap::Landmark::setPossibility(double poss)
+{
+    Landmark::mPoss = poss;
+}

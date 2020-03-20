@@ -19,6 +19,7 @@ enum class LandmarkType {StrLM, NumLM, StrPLM};
 
 class Landmark
 {
+    double mPoss = 0;
 
 public:
     static LMUnPtr madeFromJS(const Jsobj& jMark) = delete;
@@ -31,6 +32,9 @@ public:
 
     static std::string typeStr(LandmarkType type);
 
+    double getPossibility() const;
+
+    void setPossibility(double poss);
 };
 }
 

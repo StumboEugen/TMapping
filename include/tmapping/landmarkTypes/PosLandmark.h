@@ -34,6 +34,8 @@ public:
     virtual PLMPtr clone() = 0;
 
     void setPos(const TopoVec2& pos);
+
+    virtual PLMPtr newMergedPLM(const PLMPtr& that, const TopoVec2& thatPos, double thisWeight) const = 0;
 };
 }
 

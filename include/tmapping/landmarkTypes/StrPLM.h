@@ -27,6 +27,9 @@ public:
     PLMPtr clone() override;
 
     bool alike(const LMPtr& that) const override;
+
+    PLMPtr
+    newMergedPLM(const PLMPtr& that, const TopoVec2& thatPos, double thisWeight) const override;
 };
 }
 
