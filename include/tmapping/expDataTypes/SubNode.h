@@ -29,7 +29,7 @@ public:
 
     bool operator!=(const SubNode& rhs) const;
 
-    int toInt() const;
+    uint32_t toUIndex(uint32_t nGate) const;
 };
 }
 

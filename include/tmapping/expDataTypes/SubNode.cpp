@@ -23,14 +23,13 @@ bool tmap::SubNode::operator!=(const tmap::SubNode& rhs) const
     return !(rhs == *this);
 }
 
-int tmap::SubNode::toInt() const
+uint32_t tmap::SubNode::toUIndex(uint32_t nGate) const
 {
     switch (type) {
-
         case SubNodeType::GATE:
             return index;
         case SubNodeType::LandMark:
-            return -(index + 1);
+            return index + nGate;
         default:
             cerr << FILE_AND_LINE << " DEFAULT?!";
             return INT32_MAX;

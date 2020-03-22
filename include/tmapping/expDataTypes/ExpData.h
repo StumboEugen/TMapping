@@ -69,6 +69,8 @@ protected:
 
     const GeoHash& getHashTable() const;
 
+    const TopoVec2* getPosOfSubNode(const SubNode& node) const;
+
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
 
@@ -134,6 +136,10 @@ public:
     const std::vector<SubLink>& getSubLinks() const;
 
     void addSubLink(SubNodeType typeA, size_t indexA, SubNodeType typeB, size_t indexB, bool findDup);
+
+private:
+    static std::vector<std::pair<SubNode, SubNode>>
+    matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsThis);
 };
 
 }

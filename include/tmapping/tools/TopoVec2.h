@@ -62,7 +62,7 @@ struct TopoVec2
     TopoVec2 changeLen(double l) const;
 
     /// ENU, 逆时针为正
-    TopoVec2 rotate(int degree) const;
+    TopoVec2 rotate(double degree) const;
 
     /**
      * @brief 取整到lidu
@@ -74,6 +74,8 @@ struct TopoVec2
     double dotProduct(const TopoVec2& that) const;
 
     double tan() const;
+
+    double len2() const;
 
 };
 

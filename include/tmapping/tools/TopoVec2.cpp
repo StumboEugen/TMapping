@@ -137,7 +137,7 @@ const TopoVec2& TopoVec2::restrictDir(size_t nSlice)
     return *this;
 }
 
-TopoVec2 TopoVec2::rotate(int degree) const
+TopoVec2 TopoVec2::rotate(double degree) const
 {
     double rotation = M_PI / 180.0 * degree;
     const double dir = atan2(py, px);
@@ -196,5 +196,10 @@ bool TopoVec2::operator!=(const TopoVec2& that) const
 double TopoVec2::tan() const
 {
     return atan2(py, px) * 180 / M_PI;
+}
+
+double TopoVec2::len2() const
+{
+    return px * px + py * py;
 }
 

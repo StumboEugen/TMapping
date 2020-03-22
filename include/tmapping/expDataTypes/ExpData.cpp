@@ -59,76 +59,172 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     /// MatchResult->mergedExpData 的gate序号和another完全相同
     /// selfWeight指的是this的权重, 比如selfWeight=3, 说明this可能是3次结果融合而成的
 
-    /// TODO 挑选合适的模型
-    size_t nPointsThis = this->nGates() + this->mPosLandmarks.size();
-    size_t nPointsThat = this->nGates() + this->mPosLandmarks.size();
+    const auto& nGateThis = this->nGates();
+    const auto& nGateThat = that.nGates();
+    const auto& nPointsThis = nGateThis + this->mPosLandmarks.size();
+    const auto& nPointsThat = nGateThat + that.mPosLandmarks.size();
 
-    const auto& table = that.getHashTable();
+    MatchResult res(new MatchResult_IMPL);
+    /// 预分配gate的映射表,在本函数结束前,landmark的映射关系也使用此表
+    res->gateMapping2mergedExpData.assign(nPointsThis, GATEID_NO_MAPPING);
+    /// +nGateThis是因为可能nPointsMerged > nPointsThat, 而前者的上限是nGateThat + nGateThis
+    res->gateMapping2this.assign(nPointsThat + nGateThis, GATEID_NO_MAPPING);
 
-    /// 选取最合适的基点 TODO RANSAC
-    double maxPoss = 0.0;
-    const auto& gates = this->getGates();
-    const auto& lms = this->getPLMs();
-    SubNode baseNode{SubNodeType::GATE, 0};
-    for (int i = 0; i < this->getGates().size(); ++i) {
-        if (gates[i]->getPossibility() > maxPoss) {
-            maxPoss = gates[i]->getPossibility();
-            baseNode.index = i;
+    /// 匹配得到两个点集之间的配对情况
+    vector<std::pair<SubNode, SubNode>> pointsMap;
+    if (nPointsThat >= nPointsThis) {
+        pointsMap = matchPairs(*this, that, true);
+    } else {
+        pointsMap = matchPairs(that, *this, false);
+    }
+
+    /// 开始融合出我们的结果, 首先生成一个没有具体信息的新 ExpData
+    res->mergedExpData = that.cloneShell();
+
+    TopoVec2 thatCenter{}, thisCenter{};
+
+    /// 遍历我们获得的最佳匹配
+    for (const auto& pair : pointsMap) {
+        const auto& thisNode = pair.first;
+        const auto& thatNode = pair.second;
+        /// 累加后从而认得到匹配点集的中心
+        thisCenter += *this->getPosOfSubNode(thisNode);
+        thatCenter += *that.getPosOfSubNode(thatNode);
+        /// 记录映射关系, 目前表中存储包括gate和landmark的所有映射,而不只是gate
+        auto& idMerged = res->gateMapping2mergedExpData[thisNode.toUIndex(nGateThis)];
+        if (idMerged != GATEID_NO_MAPPING) {
+            cerr << FILE_AND_LINE << "double trend happened[idMerged]!" << endl;
+        }
+        auto& idThis = res->gateMapping2this[thatNode.toUIndex(nGateThat)];
+        if (idThis != GATEID_NO_MAPPING) {
+            cerr << FILE_AND_LINE << "double trend happened[idThis]!" << endl;
+        }
+        idMerged = thatNode.toUIndex(nGateThat);
+        idThis = thisNode.toUIndex(nGateThis);
+    }
+    thisCenter /= pointsMap.size();
+    thatCenter /= pointsMap.size();
+    /// from this 2 that
+    const auto setsDiff = thatCenter - thisCenter; // TODO rotate?
+
+    /// 用于计算概率的中间变量
+    double possDiffSum = 0.0;
+    double odomDiffSum = 0.0;
+    double singlePtPossSum = 0.0;
+    uint32_t nMatches = 0;
+    /// 调整后的方差
+    double C0 = convEdgePerMeter * (1.0 + 1.0 / selfWeight);
+
+    /// @note 这里为了保证index的一致性,我们从that开始遍历
+    /// 首先遍历that的所有gate
+    for (int idThat = 0; idThat < nGateThat; ++idThat) {
+        auto idThis = res->gateMapping2this[idThat];
+        const auto& thatGate = that.mGates[idThat];
+
+        if (idThis == GATEID_NO_MAPPING) {
+            /// 意味着that的gate没有映射到this的任何gate
+            auto clonedGate = thatGate->clone();
+            double posblt = clonedGate->getPossibility();
+            /// 用于概率减益的计算
+            singlePtPossSum += posblt;
+            /// 概率需要减半,相当于(0+p)/2
+            clonedGate->setPossibility(posblt / 2.0);
+            /// 那么我们将that单按照其位置单独加入
+            res->mergedExpData->addGate(std::move(clonedGate));
+        } else {
+            const auto& thisGate = this->mGates[idThis];
+            
+            nMatches ++;
+            const auto& posThat = thatGate->getPos();
+            const auto& posThis = setsDiff + thisGate->getPos();
+            const auto& posDiff = posThis - posThat;
+            const auto& centerErr = posThat - thatCenter;
+            /// 位置偏差带来的概率修正
+            odomDiffSum += exp(-0.5 * posDiff.len2() / (C0 * centerErr.len2()) );
+            /// 存在性的修正
+            possDiffSum += abs(thatGate->getPossibility() - thisGate->getPossibility());
+            /// 将两者的融合添加到融合的节点中
+            res->mergedExpData->addGate(thatGate->newMergedGate(
+                    thisGate, posThis, 1.0 / selfWeight));
         }
     }
 
-    /// 确定数据集合匹配基点的坐标
-    const TopoVec2* basePos;
-    switch (baseNode.type) {
-        case SubNodeType::GATE:
-            basePos = &this->getGates()[baseNode.index]->getPos();
-            break;
-        case SubNodeType::LandMark:
-            basePos = &this->getPLMs()[baseNode.index]->getPos();
-            break;
-        default:
-            cerr << FILE_AND_LINE << " error!";
-            throw;
-    }
+    /// 遍历that的所有LM
+    for (int idThat = 0; idThat < nPointsThat - nGateThat; ++idThat) {
+        auto idThis = res->gateMapping2this[idThat + nGateThat];
+        const auto& thatlm = that.mPosLandmarks[idThat];
+        
+        if (idThis == GATEID_NO_MAPPING) {
+            auto clonedLM = thatlm->clone();
+            double posblt = clonedLM->getPossibility();
+            singlePtPossSum += posblt;
+            clonedLM->setPossibility(posblt / 2.0);
+            res->mergedExpData->addLandmark(std::move(clonedLM));
+        } else {
+            const auto& thislm = this->mPosLandmarks[idThis];
+            
+            nMatches ++;
+            const auto& posThat = thatlm->getPos();
+            const auto& posThis = setsDiff + thislm->getPos();
+            const auto& posDiff = posThis - posThat;
+            const auto& centerErr = posThat - thatCenter;
+            odomDiffSum += exp(-0.5 * posDiff.len2() / (C0 * centerErr.len2()) );
 
-    /// 开始投票, 投票箱中存储对应base的映射关系
-    unordered_map<int, vector<pair<SubNode, SubNode>>> records;
-    records.reserve(max(nPointsThat, nPointsThis));
-    for (int i = 0; i < gates.size(); ++i) {
-        if(auto res = table.lookUpEntersAtPos(gates[i]->getPos() - *basePos)) {
-            for (const auto& bin : *res) {
-                if (bin.base.type == baseNode.type &&
-                    bin.node.type == SubNodeType::GATE) {
-                    auto j = bin.node.index;
-                    const auto& currentGate = gates[i];
-                    const auto& targetGate = that.getGates()[j];
-                    if (currentGate->alike(targetGate)) {
-                        records[bin.base.index].push_back(make_pair(
-                                SubNode(SubNodeType::GATE, i),
-                                SubNode(SubNodeType::GATE, j)));
-                    }
-                }
-            }
+            possDiffSum += abs(thatlm->getPossibility() - thislm->getPossibility());
+            
+            res->mergedExpData->addLandmark(thatlm->newMergedPLM(
+                    thislm, posThis, 1.0 / selfWeight));
         }
     }
 
-    for (int i = 0; i < lms.size(); ++i) {
-        /// TODO LMS
-    }
-
-    size_t winnerIndex;
-    const vector<pair<SubNode, SubNode>>* pairMapping;
-    {
-        size_t nCountMax = 0;
-        for (const auto& record : records) {
-            if (record.second.size() > nCountMax) {
-                winnerIndex = record.first;
-                pairMapping = &record.second;
-            }
+    /// 遍历this的所有未匹配Gate
+    for (int i = 0; i < nGateThis; ++i) {
+        if (res->gateMapping2mergedExpData[i] == GATEID_NO_MAPPING) {
+            auto clonedGate = this->mGates[i]->clone();
+            clonedGate->setPossibility(clonedGate->getPossibility() / 2.0);
+            clonedGate->setPos(clonedGate->getPos() + setsDiff);
+            res->mergedExpData->addGate(std::move(clonedGate));
         }
     }
 
-    /// TODO PLC
+    /// 遍历this的所有未匹配LM
+    for (int i = 0; i < nPointsThis - nGateThis; ++i) {
+        if (res->gateMapping2mergedExpData[i + nGateThis] == GATEID_NO_MAPPING) {
+            auto clonedLM = this->mPosLandmarks[i]->clone();
+            clonedLM->setPossibility(clonedLM->getPossibility() / 2.0);
+            clonedLM->setPos(clonedLM->getPos() + setsDiff);
+            res->mergedExpData->addLandmark(std::move(clonedLM));
+        }
+    }
+
+    const size_t& nGateMerged = res->mergedExpData->nGates();
+    res->displacement = -setsDiff;
+
+    /// 融合节点到老观测的映射表中nGateThat以后的部分必然没有映射关系,
+    /// 这里原本的数据有landemark的映射关系
+    for (int i = nGateThat; i < nGateMerged; ++i) {
+        res->gateMapping2this[i] = GATEID_NO_MAPPING;
+    }
+
+    { /// 从新观测到老的映射表, 从nGateMerged开始erase
+        const auto& b = res->gateMapping2this.begin();
+        const auto& e = res->gateMapping2this.end();
+        res->gateMapping2this.erase(b + nGateMerged,e);
+    }
+
+    { /// 从老观测到新观测的映射表, 从nGateThis开始erase
+        const auto& b = res->gateMapping2mergedExpData.begin();
+        const auto& e = res->gateMapping2mergedExpData.end();
+        res->gateMapping2mergedExpData.erase(b + nGateThis,e);
+    }
+
+    auto nMergedPoints =
+            res->mergedExpData->nGates() + res->mergedExpData->mPosLandmarks.size();
+    double possS1 = odomDiffSum / nMatches;
+    double possS2 = (1 - possDiffSum / nMatches) * (1 - singlePtPossSum / nMergedPoints);
+    res->possibility = possS1 * possS2;
+
+    return res;
 }
 
 double ExpData::quickMatch(const ExpData& another, double selfWeight) const
@@ -393,5 +489,174 @@ const GeoHash& ExpData::getHashTable() const
         mGeoHash.reset(new GeoHash(*this));
     }
     return *mGeoHash;
+}
+
+const TopoVec2* ExpData::getPosOfSubNode(const SubNode& node) const
+{
+    const TopoVec2* res;
+    switch (node.type) {
+        case SubNodeType::GATE:
+            res = &this->getGates()[node.index]->getPos();
+            break;
+        case SubNodeType::LandMark:
+            res = &this->getPLMs()[node.index]->getPos();
+            break;
+        default:
+            cerr << FILE_AND_LINE << " error!";
+            throw;
+    }
+    return res;
+}
+
+/**
+ * @brief 获得两个ExpData点集之间的匹配
+ * @param shape 作为图案的data
+ * @param pattern 作为模板的data (生成哈希表)
+ * @param shapeIsThis shape是否由this产生, 会影响输出的格式
+ * @return 一个匹配表, first是this的点, second是that的点
+ */
+vector<std::pair<SubNode, SubNode>>
+ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsThis)
+{
+    const auto& table = pattern.getHashTable();
+    auto nPointsPat = pattern.nGates() + pattern.mPosLandmarks.size();
+
+    /// 从shape中选取最合适的基点 TODO RANSAC
+    double maxPoss = 0.0;
+    const auto& gatesOfShape = shape.getGates();
+    const auto& lmsOfShape = shape.getPLMs();
+    SubNode baseOfShape{SubNodeType::GATE, 0};
+    for (int i = 0; i < gatesOfShape.size(); ++i) {
+        if (gatesOfShape[i]->getPossibility() > maxPoss) {
+            maxPoss = gatesOfShape[i]->getPossibility();
+            baseOfShape.index = i;
+        }
+    }
+
+    /// shape中选取的base的坐标
+    const TopoVec2* basePosOfShape = shape.getPosOfSubNode(baseOfShape);
+
+    /// 开始投票, 投票箱中存储对应base的映射关系
+    /// pair<this, that>
+    /// 对应int的patternBase下的匹配结果
+    vector<vector<pair<SubNode, SubNode>>> hitsOfBase(nPointsPat);
+    /// TODO 发生歧义匹配时应该怎么办? 1->2 3->2
+
+    /// 先筛选哪些base是合适的
+    if (baseOfShape.type == SubNodeType::GATE) {
+        auto i = baseOfShape.index;
+        const auto& baseGate = shape.mGates[i];
+        for (int j = 0; j < pattern.nGates(); ++j) {
+            if (baseGate->alike(pattern.mGates[j])) {
+                /// 合适的base所对应的pair添加base的匹配
+                hitsOfBase[j].reserve(nPointsPat);
+                if (shapeIsThis) {
+                    hitsOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::GATE, i),
+                            SubNode(SubNodeType::GATE, j)));
+                } else {
+                    hitsOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::GATE, j),
+                            SubNode(SubNodeType::GATE, i)));
+                }
+            }
+        }
+    }
+    else if (baseOfShape.type == SubNodeType::LandMark) {
+        auto i = baseOfShape.index;
+        const auto& baseLM = shape.mPosLandmarks[i];
+        for (int j = 0; j < pattern.mPosLandmarks.size(); ++j) {
+            if (baseLM->alike(pattern.mPosLandmarks[j])) {
+                /// 合适的base所对应的pair添加base的匹配
+                hitsOfBase[j].reserve(nPointsPat);
+                if (shapeIsThis) {
+                    hitsOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::LandMark, i),
+                            SubNode(SubNodeType::LandMark, j)));
+                } else {
+                    hitsOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::LandMark, j),
+                            SubNode(SubNodeType::LandMark, i)));
+                }
+            }
+        }
+    } else {
+        cerr << FILE_AND_LINE << "WRONG SUBNODE TYPE" << (int)baseOfShape.type << endl;
+        throw;
+    }
+
+    /// 开始投票
+    for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
+        if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - *basePosOfShape)) {
+            if (bins != nullptr) {
+                for (const auto& bin : *bins) {
+                    auto& hitVec = hitsOfBase[bin.base.index];
+                    /// 如果为空,表明base本身就不匹配, 不使用
+                    if (!hitVec.empty() &&
+                        bin.node.type == SubNodeType::GATE) {
+                        auto idPatGate = bin.node.index;
+                        const auto& shapesGate = gatesOfShape[idShapeGate];
+                        const auto& patternsGate = pattern.getGates()[idPatGate];
+                        if (shapesGate->alike(patternsGate)) {
+                            if (shapeIsThis) {
+                                hitVec.emplace_back(
+                                        SubNode(SubNodeType::GATE, idShapeGate),
+                                        SubNode(SubNodeType::GATE, idPatGate));
+                            } else {
+                                hitVec.emplace_back(
+                                        SubNode(SubNodeType::GATE, idPatGate),
+                                        SubNode(SubNodeType::GATE, idShapeGate));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
+        if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - *basePosOfShape)) {
+            if (bins != nullptr) {
+                for (const auto& bin : *bins) {
+                    auto& hitVec = hitsOfBase[bin.base.index];
+                    if (!hitVec.empty() &&
+                        bin.node.type == SubNodeType::LandMark) {
+                        auto idPatLM = bin.node.index;
+                        const auto& currentLM = lmsOfShape[idShapeLM];
+                        const auto& targetLM = pattern.getPLMs()[idPatLM];
+                        if (currentLM->alike(targetLM)) {
+                            if (shapeIsThis) {
+                                hitVec.emplace_back(
+                                        SubNode(SubNodeType::LandMark, idShapeLM),
+                                        SubNode(SubNodeType::LandMark, idPatLM));
+                            } else {
+                                hitVec.emplace_back(
+                                        SubNode(SubNodeType::LandMark, idPatLM),
+                                        SubNode(SubNodeType::LandMark, idShapeLM));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// 挑选里面最好的一组结果, 以数量为准
+    vector<pair<SubNode, SubNode>>* theBestPairs = nullptr;
+    {
+        size_t nCountMax = 0;
+        for (auto& vecPairs : hitsOfBase) {
+            if (vecPairs.size() > nCountMax) {
+                theBestPairs = &vecPairs;
+                nCountMax = vecPairs.size();
+            }
+        }
+    }
+
+    if (theBestPairs) {
+        return std::move(*theBestPairs);
+    } else {
+        return vector<std::pair<SubNode, SubNode>>();
+    }
 }
 

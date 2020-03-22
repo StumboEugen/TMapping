@@ -29,7 +29,7 @@ protected:
     void copy2(Gate* target);
 
     void mergeBasicInfo(const Gate* A, const Gate* B
-            , const TopoVec2& BPos , double thisWeight);
+            , const TopoVec2& BPos , double weightA);
 
 public:
     Gate(const TopoVec2& pos, const TopoVec2& normalVec);

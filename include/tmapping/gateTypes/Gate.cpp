@@ -112,9 +112,12 @@ bool tmap::Gate::alike(const tmap::GatePtr& that) const
 }
 
 void tmap::Gate::mergeBasicInfo(const Gate* A, const Gate* B,
-                                const tmap::TopoVec2& BPos, double thisWeight)
+                                const tmap::TopoVec2& BPos, double weightA)
 {
-    this->mPos = (A->mPos * thisWeight + BPos) / (thisWeight + 1);
-    this->mNormalVec = (A->mNormalVec * thisWeight + B->mNormalVec) / (thisWeight + 1);
-    this->possibility = (A->possibility * thisWeight + B->possibility) / (thisWeight + 1);
+    this->mPos = (A->mPos * weightA + BPos) / (weightA + 1);
+    double ad = A->mNormalVec.tan();
+    double bd = B->mNormalVec.tan();
+    double td = (ad * weightA + bd) / (weightA + 1);
+    this->mNormalVec = A->mNormalVec.rotate(td - ad);
+    this->possibility = (A->possibility * weightA + B->possibility) / (weightA + 1);
 }
