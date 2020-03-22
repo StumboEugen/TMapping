@@ -140,6 +140,8 @@ public:
 private:
     static std::vector<std::pair<SubNode, SubNode>>
     matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsThis);
+
+    double getPbtyOfGivenSubNode(const SubNode& node, bool discrimLM = false) const;
 };
 
 }

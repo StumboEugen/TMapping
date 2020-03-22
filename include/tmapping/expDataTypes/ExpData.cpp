@@ -502,10 +502,27 @@ const TopoVec2* ExpData::getPosOfSubNode(const SubNode& node) const
             res = &this->getPLMs()[node.index]->getPos();
             break;
         default:
-            cerr << FILE_AND_LINE << " error!";
+            cerr << FILE_AND_LINE << " error SubNode!";
             throw;
     }
     return res;
+}
+
+double ExpData::getPbtyOfGivenSubNode(const SubNode& node, bool discrimLM) const
+{
+    switch (node.type) {
+        case SubNodeType::GATE:
+            return this->getGates()[node.index]->getPossibility();
+        case SubNodeType::LandMark:
+            if (discrimLM) {
+                return this->getPLMs()[node.index]->getPossibility() * 0.8;
+            } else {
+                return this->getPLMs()[node.index]->getPossibility();
+            }
+        default:
+            cerr << FILE_AND_LINE << " error SubNode!";
+            throw;
+    }
 }
 
 /**
@@ -520,143 +537,169 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
 {
     const auto& table = pattern.getHashTable();
     auto nPointsPat = pattern.nGates() + pattern.mPosLandmarks.size();
+    auto nPointsShape = shape.nGates() + shape.mPosLandmarks.size();
 
-    /// 从shape中选取最合适的基点 TODO RANSAC
-    double maxPoss = 0.0;
     const auto& gatesOfShape = shape.getGates();
     const auto& lmsOfShape = shape.getPLMs();
-    SubNode baseOfShape{SubNodeType::GATE, 0};
-    for (int i = 0; i < gatesOfShape.size(); ++i) {
-        if (gatesOfShape[i]->getPossibility() > maxPoss) {
-            maxPoss = gatesOfShape[i]->getPossibility();
-            baseOfShape.index = i;
-        }
+
+    vector<SubNode> baseCandidates(nPointsShape);
+    for (int i = 0; i < shape.nGates(); ++i) {
+        baseCandidates[i].type = SubNodeType::GATE;
+        baseCandidates[i].index = i;
+    }
+    for (int i = 0; i < shape.mPosLandmarks.size(); ++i) {
+        baseCandidates[i + shape.nGates()].type = SubNodeType::LandMark;
+        baseCandidates[i + shape.nGates()].index = i;
     }
 
-    /// shape中选取的base的坐标
-    const TopoVec2* basePosOfShape = shape.getPosOfSubNode(baseOfShape);
+    auto comp = [&shape](const SubNode& a, const SubNode&b) {
+        return shape.getPbtyOfGivenSubNode(a, true) >
+               shape.getPbtyOfGivenSubNode(b, true);
+    };
 
-    /// 开始投票, 投票箱中存储对应base的映射关系
-    /// pair<this, that>
-    /// 对应int的patternBase下的匹配结果
-    vector<vector<pair<SubNode, SubNode>>> hitsOfBase(nPointsPat);
-    /// TODO 发生歧义匹配时应该怎么办? 1->2 3->2
+    partial_sort(baseCandidates.begin(), baseCandidates.begin() + nPointsShape / 2,
+            baseCandidates.end(), comp);
 
-    /// 先筛选哪些base是合适的
-    if (baseOfShape.type == SubNodeType::GATE) {
-        auto i = baseOfShape.index;
-        const auto& baseGate = shape.mGates[i];
-        for (int j = 0; j < pattern.nGates(); ++j) {
-            if (baseGate->alike(pattern.mGates[j])) {
-                /// 合适的base所对应的pair添加base的匹配
-                hitsOfBase[j].reserve(nPointsPat);
-                if (shapeIsThis) {
-                    hitsOfBase[j].emplace_back(make_pair(
-                            SubNode(SubNodeType::GATE, i),
-                            SubNode(SubNodeType::GATE, j)));
-                } else {
-                    hitsOfBase[j].emplace_back(make_pair(
-                            SubNode(SubNodeType::GATE, j),
-                            SubNode(SubNodeType::GATE, i)));
+    ////////////////////// 开始RANSAC, 一次一次地尝试
+    for (int nRansac = 0; nRansac < nPointsShape / 2; ++nRansac) {
+        /// shape中选取的base的坐标
+        const auto& baseOfShape = baseCandidates[nRansac];
+        const TopoVec2* basePosOfShape = shape.getPosOfSubNode(baseOfShape);
+
+        /// 开始投票, 投票箱中存储对应base的映射关系
+        /// pair<this, that>
+        /// 对应int的patternBase下的匹配结果
+        vector<vector<pair<SubNode, SubNode>>> hitsOfBase(nPointsPat);
+        /// TODO 发生歧义匹配时应该怎么办? 1->2 3->2
+
+        size_t nValidBase = 0;
+
+        /// 先筛选哪些base是合适的
+        if (baseOfShape.type == SubNodeType::GATE) {
+            auto i = baseOfShape.index;
+            const auto& baseGate = shape.mGates[i];
+            for (int j = 0; j < pattern.nGates(); ++j) {
+                if (baseGate->alike(pattern.mGates[j])) {
+                    /// 合适的base所对应的pair添加base的匹配
+                    hitsOfBase[j].reserve(nPointsPat);
+                    nValidBase++;
+                    if (shapeIsThis) {
+                        hitsOfBase[j].emplace_back(make_pair(
+                                SubNode(SubNodeType::GATE, i),
+                                SubNode(SubNodeType::GATE, j)));
+                    } else {
+                        hitsOfBase[j].emplace_back(make_pair(
+                                SubNode(SubNodeType::GATE, j),
+                                SubNode(SubNodeType::GATE, i)));
+                    }
                 }
             }
         }
-    }
-    else if (baseOfShape.type == SubNodeType::LandMark) {
-        auto i = baseOfShape.index;
-        const auto& baseLM = shape.mPosLandmarks[i];
-        for (int j = 0; j < pattern.mPosLandmarks.size(); ++j) {
-            if (baseLM->alike(pattern.mPosLandmarks[j])) {
-                /// 合适的base所对应的pair添加base的匹配
-                hitsOfBase[j].reserve(nPointsPat);
-                if (shapeIsThis) {
-                    hitsOfBase[j].emplace_back(make_pair(
-                            SubNode(SubNodeType::LandMark, i),
-                            SubNode(SubNodeType::LandMark, j)));
-                } else {
-                    hitsOfBase[j].emplace_back(make_pair(
-                            SubNode(SubNodeType::LandMark, j),
-                            SubNode(SubNodeType::LandMark, i)));
+        else if (baseOfShape.type == SubNodeType::LandMark) {
+            auto i = baseOfShape.index;
+            const auto& baseLM = shape.mPosLandmarks[i];
+            for (int j = 0; j < pattern.mPosLandmarks.size(); ++j) {
+                if (baseLM->alike(pattern.mPosLandmarks[j])) {
+                    /// 合适的base所对应的pair添加base的匹配
+                    hitsOfBase[j].reserve(nPointsPat);
+                    nValidBase++;
+                    if (shapeIsThis) {
+                        hitsOfBase[j].emplace_back(make_pair(
+                                SubNode(SubNodeType::LandMark, i),
+                                SubNode(SubNodeType::LandMark, j)));
+                    } else {
+                        hitsOfBase[j].emplace_back(make_pair(
+                                SubNode(SubNodeType::LandMark, j),
+                                SubNode(SubNodeType::LandMark, i)));
+                    }
                 }
             }
+        } else {
+            cerr << FILE_AND_LINE << "WRONG SUBNODE TYPE" << (int)baseOfShape.type << endl;
+            throw;
         }
-    } else {
-        cerr << FILE_AND_LINE << "WRONG SUBNODE TYPE" << (int)baseOfShape.type << endl;
-        throw;
-    }
 
-    /// 开始投票
-    for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
-        if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - *basePosOfShape)) {
-            if (bins != nullptr) {
-                for (const auto& bin : *bins) {
-                    auto& hitVec = hitsOfBase[bin.base.index];
-                    /// 如果为空,表明base本身就不匹配, 不使用
-                    if (!hitVec.empty() &&
-                        bin.node.type == SubNodeType::GATE) {
-                        auto idPatGate = bin.node.index;
-                        const auto& shapesGate = gatesOfShape[idShapeGate];
-                        const auto& patternsGate = pattern.getGates()[idPatGate];
-                        if (shapesGate->alike(patternsGate)) {
-                            if (shapeIsThis) {
-                                hitVec.emplace_back(
-                                        SubNode(SubNodeType::GATE, idShapeGate),
-                                        SubNode(SubNodeType::GATE, idPatGate));
-                            } else {
-                                hitVec.emplace_back(
-                                        SubNode(SubNodeType::GATE, idPatGate),
-                                        SubNode(SubNodeType::GATE, idShapeGate));
+        if (nValidBase == 0) {
+            /// 连base都没有相同的, 下一个
+            continue;
+        }
+
+        /// 开始投票
+        for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
+            if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - *basePosOfShape)) {
+                if (bins != nullptr) {
+                    for (const auto& bin : *bins) {
+                        auto& hitVec = hitsOfBase[bin.base.index];
+                        /// 如果为空,表明base本身就不匹配, 不使用
+                        if (!hitVec.empty() &&
+                            bin.node.type == SubNodeType::GATE) {
+                            auto idPatGate = bin.node.index;
+                            const auto& shapesGate = gatesOfShape[idShapeGate];
+                            const auto& patternsGate = pattern.getGates()[idPatGate];
+                            if (shapesGate->alike(patternsGate)) {
+                                if (shapeIsThis) {
+                                    hitVec.emplace_back(
+                                            SubNode(SubNodeType::GATE, idShapeGate),
+                                            SubNode(SubNodeType::GATE, idPatGate));
+                                } else {
+                                    hitVec.emplace_back(
+                                            SubNode(SubNodeType::GATE, idPatGate),
+                                            SubNode(SubNodeType::GATE, idShapeGate));
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-    for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
-        if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - *basePosOfShape)) {
-            if (bins != nullptr) {
-                for (const auto& bin : *bins) {
-                    auto& hitVec = hitsOfBase[bin.base.index];
-                    if (!hitVec.empty() &&
-                        bin.node.type == SubNodeType::LandMark) {
-                        auto idPatLM = bin.node.index;
-                        const auto& currentLM = lmsOfShape[idShapeLM];
-                        const auto& targetLM = pattern.getPLMs()[idPatLM];
-                        if (currentLM->alike(targetLM)) {
-                            if (shapeIsThis) {
-                                hitVec.emplace_back(
-                                        SubNode(SubNodeType::LandMark, idShapeLM),
-                                        SubNode(SubNodeType::LandMark, idPatLM));
-                            } else {
-                                hitVec.emplace_back(
-                                        SubNode(SubNodeType::LandMark, idPatLM),
-                                        SubNode(SubNodeType::LandMark, idShapeLM));
+        for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
+            if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - *basePosOfShape)) {
+                if (bins != nullptr) {
+                    for (const auto& bin : *bins) {
+                        auto& hitVec = hitsOfBase[bin.base.index];
+                        if (!hitVec.empty() &&
+                            bin.node.type == SubNodeType::LandMark) {
+                            auto idPatLM = bin.node.index;
+                            const auto& currentLM = lmsOfShape[idShapeLM];
+                            const auto& targetLM = pattern.getPLMs()[idPatLM];
+                            if (currentLM->alike(targetLM)) {
+                                if (shapeIsThis) {
+                                    hitVec.emplace_back(
+                                            SubNode(SubNodeType::LandMark, idShapeLM),
+                                            SubNode(SubNodeType::LandMark, idPatLM));
+                                } else {
+                                    hitVec.emplace_back(
+                                            SubNode(SubNodeType::LandMark, idPatLM),
+                                            SubNode(SubNodeType::LandMark, idShapeLM));
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-    /// 挑选里面最好的一组结果, 以数量为准
-    vector<pair<SubNode, SubNode>>* theBestPairs = nullptr;
-    {
-        size_t nCountMax = 0;
-        for (auto& vecPairs : hitsOfBase) {
-            if (vecPairs.size() > nCountMax) {
-                theBestPairs = &vecPairs;
-                nCountMax = vecPairs.size();
+        /// 挑选里面最好的一组结果, 以数量为准
+        vector<pair<SubNode, SubNode>>* theBestPairs = nullptr;
+        {
+            size_t nCountMax = 0;
+            for (auto& vecPairs : hitsOfBase) {
+                if (vecPairs.size() > nCountMax) {
+                    theBestPairs = &vecPairs;
+                    nCountMax = vecPairs.size();
+                }
             }
         }
-    }
 
-    if (theBestPairs) {
-        return std::move(*theBestPairs);
-    } else {
-        return vector<std::pair<SubNode, SubNode>>();
+        if (theBestPairs == nullptr || theBestPairs->size() < nPointsShape / 2) {
+            /// 如果压根没有pairs, 或者有一半的点都没有匹配, 则换一个点试试
+            continue;
+        } else {
+            return std::move(*theBestPairs);
+        }
     }
+    /// 所有的basePoint都失败了!
+    return vector<std::pair<SubNode, SubNode>>();
 }
 
