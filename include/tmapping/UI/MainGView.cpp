@@ -519,6 +519,26 @@ void tmap::MainGView::keyPressEvent(QKeyEvent* event)
         case Qt::Key_Delete:
             SLOT_RemoveSelectedNodes();
             break;
+        case Qt::Key_M: {
+            QNode* a = nullptr;
+            QNode* b = nullptr;
+            for(const auto& item : mScene4FakeMap.selectedItems()) {
+                if (auto node = dynamic_cast<QNode*>(item)) {
+                    if (a == nullptr) {
+                        a = node;
+                        continue;
+                    } else {
+                        b = node;
+                        break;
+                    }
+                }
+            }
+            if (a && b) {
+                auto res = a->expData()->detailedMatch(*b->expData());
+                this->addNode2FakeMapFromExpData(res->mergedExpData);
+            }
+        }
+            break;
         default:
             break;
     }

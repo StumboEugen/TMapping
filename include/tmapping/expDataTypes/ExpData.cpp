@@ -542,7 +542,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
     const auto& gatesOfShape = shape.getGates();
     const auto& lmsOfShape = shape.getPLMs();
 
-    vector<SubNode> baseCandidates(nPointsShape);
+    vector<SubNode> baseCandidates(nPointsShape, {SubNodeType::UNSET, 0});
     for (int i = 0; i < shape.nGates(); ++i) {
         baseCandidates[i].type = SubNodeType::GATE;
         baseCandidates[i].index = i;
@@ -557,11 +557,11 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                shape.getPbtyOfGivenSubNode(b, true);
     };
 
-    partial_sort(baseCandidates.begin(), baseCandidates.begin() + nPointsShape / 2,
-            baseCandidates.end(), comp);
+    partial_sort(baseCandidates.begin(), baseCandidates.begin() +
+            ceil(nPointsShape / 2.0), baseCandidates.end(), comp);
 
     ////////////////////// 开始RANSAC, 一次一次地尝试
-    for (int nRansac = 0; nRansac < nPointsShape / 2; ++nRansac) {
+    for (int nRansac = 0; nRansac < ceil(nPointsShape / 2.0); ++nRansac) {
         /// shape中选取的base的坐标
         const auto& baseOfShape = baseCandidates[nRansac];
         const TopoVec2* basePosOfShape = shape.getPosOfSubNode(baseOfShape);

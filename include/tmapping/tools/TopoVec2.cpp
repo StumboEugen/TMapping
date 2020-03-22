@@ -35,7 +35,7 @@ TopoVec2& TopoVec2::operator/=(double d)
         px /= d;
         py /= d;
     } else {
-        cerr << FILE_AND_LINE << " You are trying to let a TopoVec2 / 0.0!";
+        cerr << FILE_AND_LINE << " You are trying to let a TopoVec2 / 0.0!" << endl;
     }
     return *this;
 }
@@ -195,7 +195,13 @@ bool TopoVec2::operator!=(const TopoVec2& that) const
 
 double TopoVec2::tan() const
 {
-    return atan2(py, px) * 180 / M_PI;
+    double res = atan2(py, px) * 180 / M_PI;
+    if (res >= 180.0) {
+        res = 180;
+    } else if (res <= - 180) {
+        res = 180;
+    }
+    return res;
 }
 
 double TopoVec2::len2() const

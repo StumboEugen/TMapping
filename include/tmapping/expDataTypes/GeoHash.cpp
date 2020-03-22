@@ -32,7 +32,7 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             TopoVec2 posDiff = targetPos - zeroPos;
             double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(targetPos, err, base, anotherNode);
+            fillEntrances(posDiff, err, base, anotherNode);
         }
 
         anotherNode.type = SubNodeType::LandMark;
@@ -41,7 +41,7 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             TopoVec2 posDiff = targetPos - zeroPos;
             double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(targetPos, err, base, anotherNode);
+            fillEntrances(posDiff, err, base, anotherNode);
         }
     }
 
@@ -55,7 +55,7 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             TopoVec2 posDiff = targetPos - zeroPos;
             double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(targetPos, err, base, anotherNode);
+            fillEntrances(posDiff, err, base, anotherNode);
         }
 
         anotherNode.type = SubNodeType::LandMark;
@@ -65,7 +65,7 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             TopoVec2 posDiff = targetPos - zeroPos;
             double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(targetPos, err, base, anotherNode);
+            fillEntrances(posDiff, err, base, anotherNode);
         }
     }
 }
