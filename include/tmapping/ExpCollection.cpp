@@ -47,8 +47,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
     auto & vecSameType = mClassification[newExp->expData()->type()];
 
     for (auto& sameTypeExp : vecSameType) {
-        double poss1 = sameTypeExp->expData()->quickMatch(*newExp->expData(), 1);
-        if (poss1 < TOLLERANCE_1ST_MATCH_EXP) {
+        if (!sameTypeExp->expData()->quickMatch(*newExp->expData(), 1)) {
             continue;
         }
 

@@ -181,7 +181,9 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     for (int i = 0; i < nGateThis; ++i) {
         if (res->gateMapping2mergedExpData[i] == GATEID_NO_MAPPING) {
             auto clonedGate = this->mGates[i]->clone();
-            clonedGate->setPossibility(clonedGate->getPossibility() / 2.0);
+            auto posblt = clonedGate->getPossibility();
+            singlePtPossSum += posblt;
+            clonedGate->setPossibility(posblt / 2.0);
             clonedGate->setPos(clonedGate->getPos() + setsDiff);
             res->mergedExpData->addGate(std::move(clonedGate));
         }
@@ -191,7 +193,9 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     for (int i = 0; i < nPointsThis - nGateThis; ++i) {
         if (res->gateMapping2mergedExpData[i + nGateThis] == GATEID_NO_MAPPING) {
             auto clonedLM = this->mPosLandmarks[i]->clone();
-            clonedLM->setPossibility(clonedLM->getPossibility() / 2.0);
+            auto posblt = clonedLM->getPossibility();
+            singlePtPossSum += posblt;
+            clonedLM->setPossibility(posblt / 2.0);
             clonedLM->setPos(clonedLM->getPos() + setsDiff);
             res->mergedExpData->addLandmark(std::move(clonedLM));
         }
@@ -227,14 +231,25 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     return res;
 }
 
-double ExpData::quickMatch(const ExpData& another, double selfWeight) const
+bool ExpData::quickMatch(const ExpData& that, double selfWeight) const
 {
     /// 快速的数据匹配工作
-    if (another.type() == this->type()) {
-        return 1.0;
-    } else {
-        return 0.0;
+    if (that.type() != this->type()) {
+        return false;
     }
+    const auto& nGateThis = this->nGates();
+    const auto& nGateThat = that.nGates();
+    const auto& nPointsThis = nGateThis + this->mPosLandmarks.size();
+    const auto& nPointsThat = nGateThat + that.mPosLandmarks.size();
+
+    vector<std::pair<SubNode, SubNode>> pointsMap;
+    if (nPointsThat >= nPointsThis) {
+        pointsMap = matchPairs(*this, that, true);
+    } else {
+        pointsMap = matchPairs(that, *this, false);
+    }
+
+    return !pointsMap.empty();
 }
 
 size_t ExpData::nGates() const

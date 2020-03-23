@@ -96,11 +96,11 @@ public:
 
     /**
      * @brief 计算两个ExpData是否类似
-     * @param another 另一个用于比较的ExpData实例
+     * @param that 另一个用于比较的ExpData实例
      * @param selfWeight this的比重, 1:1就是1, 1:4就是0.25, 5:1就是5
-     * @return 匹配的结果, 只包含一个概率评分
+     * @return 是否相似
      */
-    double quickMatch(const ExpData& another, double selfWeight) const;
+    bool quickMatch(const ExpData& that, double selfWeight) const;
 
     size_t nGates() const;
 
