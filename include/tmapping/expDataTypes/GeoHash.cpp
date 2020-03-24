@@ -5,9 +5,14 @@
 #include "GeoHash.h"
 #include "ExpDataTypes.h"
 
+static constexpr double TABLE_RES = 0.25;
+
 using namespace tmap;
 
-static constexpr double TABLE_RES = 0.25;
+static double __tool_ERR(const TopoVec2& posDiff, double odomErr) {
+    return 0.35;
+//    return posDiff.len() * odomErr;
+}
 
 /**
  * @brief 计算用于GeoHash::mTable的坐标位置
@@ -30,18 +35,16 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             if (i == j) continue;
             const auto& targetPos = gates[j]->getPos();
             TopoVec2 posDiff = targetPos - zeroPos;
-            double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(posDiff, err, base, anotherNode);
+            fillEntrances(posDiff, __tool_ERR(posDiff, odomErr), base, anotherNode);
         }
 
         anotherNode.type = SubNodeType::LandMark;
         for (uint32_t j = 0; j < lms.size(); ++j) {
             const auto& targetPos = lms[j]->getPos();
             TopoVec2 posDiff = targetPos - zeroPos;
-            double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(posDiff, err, base, anotherNode);
+            fillEntrances(posDiff, __tool_ERR(posDiff, odomErr), base, anotherNode);
         }
     }
 
@@ -53,9 +56,8 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
         for (uint32_t j = 0; j < gates.size(); ++j) {
             const auto& targetPos = gates[j]->getPos();
             TopoVec2 posDiff = targetPos - zeroPos;
-            double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(posDiff, err, base, anotherNode);
+            fillEntrances(posDiff, __tool_ERR(posDiff, odomErr), base, anotherNode);
         }
 
         anotherNode.type = SubNodeType::LandMark;
@@ -63,9 +65,8 @@ tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
             if (i == j) continue;
             const auto& targetPos = lms[j]->getPos();
             TopoVec2 posDiff = targetPos - zeroPos;
-            double err = posDiff.len() * odomErr;
             anotherNode.index = j;
-            fillEntrances(posDiff, err, base, anotherNode);
+            fillEntrances(posDiff, __tool_ERR(posDiff, odomErr), base, anotherNode);
         }
     }
 }

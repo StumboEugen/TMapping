@@ -212,6 +212,15 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockSimulation->btnPlaceRobot, SIGNAL(clicked()),
                 this, SLOT(SLOT_PlaceRobot()));
 
+        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
+                uiDockSimulation->cbNoDetailMoving, SLOT(setDisabled(bool)));
+
+        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
+                uiDockSimulation->cbAccidents, SLOT(setDisabled(bool)));
+
+        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+                uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
+
     }
 
     {
@@ -528,7 +537,7 @@ void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
 
 void tmap::TmapUI::SLOT_PlaceRobot()
 {
-    if (gvMain->setRobotInFake()) {
+    if (gvMain->setRobotInFake(uiDockSimulation->cbNoDetailMoving->isChecked())) {
         uiDockSimulation->btnPlaceRobot->setCheckable(true);
         uiDockSimulation->btnPlaceRobot->setChecked(true);
         uiDockSimulation->btnPlaceRobot->setEnabled(false);

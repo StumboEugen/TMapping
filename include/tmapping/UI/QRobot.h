@@ -21,8 +21,10 @@ class QRobot : public QGraphicsEllipseItem
 
     ExpPtr currentExp;
 
+    bool directMove;
+
 public:
-    explicit QRobot(QNodePtr at);
+    explicit QRobot(tmap::QNodePtr at, bool directMove);
 
     void updatePos();
 
@@ -36,7 +38,7 @@ public:
     bool try2move(QPointF scenePos);
 
     /**
-     * @brief 让机器人直接通过这个gate进入下一个Exp
+     * @brief 让机器人直接通过当前的gate进入下一个Exp
      * @return 如果成功, 返回上一个Exp的信息, 失败的话返回nullptr
      */
     ExpPtr try2ThroughGate();

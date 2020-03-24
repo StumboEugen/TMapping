@@ -598,12 +598,12 @@ void tmap::MainGView::switch2simMode(bool toSim)
     }
 }
 
-bool tmap::MainGView::setRobotInFake()
+bool tmap::MainGView::setRobotInFake(bool directMove)
 {
     if (!mScene4FakeMap.selectedItems().empty()) {
         if (auto qNode = dynamic_cast<QNode*>(mScene4FakeMap.selectedItems().front())) {
             auto ptr = qNode->thisQnodePtr();
-            mRobot.reset(new QRobot(ptr));
+            mRobot.reset(new QRobot(ptr, directMove));
             return true;
         }
     }

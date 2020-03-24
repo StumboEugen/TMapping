@@ -64,7 +64,7 @@ public:
     void switch2realMode(bool);
     void switch2simMode(bool);
 
-    bool setRobotInFake();
+    bool setRobotInFake(bool directMove);
 
     ~MainGView() override;
 
