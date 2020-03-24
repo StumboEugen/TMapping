@@ -68,7 +68,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     /// 预分配gate的映射表,在本函数结束前,landmark的映射关系也使用此表
     res->gateMapping2mergedExpData.assign(nPointsThis, GATEID_NO_MAPPING);
     /// +nGateThis是因为可能nPointsMerged > nPointsThat, 而前者的上限是nGateThat + nGateThis
-    res->gateMapping2this.assign(nPointsThat + nGateThis, GATEID_NO_MAPPING);
+    res->gateMapping2old.assign(nPointsThat + nGateThis, GATEID_NO_MAPPING);
 
     /// 匹配得到两个点集之间的配对情况
     vector<std::pair<SubNode, SubNode>> pointsMap;
@@ -95,7 +95,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
         if (idMerged != GATEID_NO_MAPPING) {
             cerr << FILE_AND_LINE << "double trend happened[idMerged]!" << endl;
         }
-        auto& idThis = res->gateMapping2this[thatNode.toUIndex(nGateThat)];
+        auto& idThis = res->gateMapping2old[thatNode.toUIndex(nGateThat)];
         if (idThis != GATEID_NO_MAPPING) {
             cerr << FILE_AND_LINE << "double trend happened[idThis]!" << endl;
         }
@@ -118,7 +118,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     /// @note 这里为了保证index的一致性,我们从that开始遍历
     /// 首先遍历that的所有gate
     for (int idThat = 0; idThat < nGateThat; ++idThat) {
-        auto idThis = res->gateMapping2this[idThat];
+        auto idThis = res->gateMapping2old[idThat];
         const auto& thatGate = that.mGates[idThat];
 
         if (idThis == GATEID_NO_MAPPING) {
@@ -151,7 +151,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
 
     /// 遍历that的所有LM
     for (int idThat = 0; idThat < nPointsThat - nGateThat; ++idThat) {
-        auto idThis = res->gateMapping2this[idThat + nGateThat];
+        auto idThis = res->gateMapping2old[idThat + nGateThat];
         const auto& thatlm = that.mPosLandmarks[idThat];
         
         if (idThis == GATEID_NO_MAPPING) {
@@ -207,13 +207,13 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     /// 融合节点到老观测的映射表中nGateThat以后的部分必然没有映射关系,
     /// 这里原本的数据有landemark的映射关系
     for (int i = nGateThat; i < nGateMerged; ++i) {
-        res->gateMapping2this[i] = GATEID_NO_MAPPING;
+        res->gateMapping2old[i] = GATEID_NO_MAPPING;
     }
 
     { /// 从新观测到老的映射表, 从nGateMerged开始erase
-        const auto& b = res->gateMapping2this.begin();
-        const auto& e = res->gateMapping2this.end();
-        res->gateMapping2this.erase(b + nGateMerged,e);
+        const auto& b = res->gateMapping2old.begin();
+        const auto& e = res->gateMapping2old.end();
+        res->gateMapping2old.erase(b + nGateMerged, e);
     }
 
     { /// 从老观测到新观测的映射表, 从nGateThis开始erase

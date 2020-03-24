@@ -43,6 +43,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                                       tmap::MapTwigCollection& twigMaster)
 {
     newExp->setSerial(mExperiencesData.size());
+    newExp->setOdomInfoFromFatherExp(mExperiencesData.back());
 
     auto & vecSameType = mClassification[newExp->expData()->type()];
 
@@ -65,7 +66,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                 if (poss2 > TOLLERANCE_2ND_MATCH_MERGEDEXP)
                 {
                     auto conflictRes = mergedExp->checkGateConflict
-                            (currentMatchResult->gateMapping2this[newExp->getEnterGate()]);
+                            (currentMatchResult->gateMapping2old[newExp->getEnterGate()]);
                     /// 而且这个入口不能和之前的出入口发生冲突, 闭环必须发生在没有走过的gate上
 
                     if (conflictRes.conflictExp == nullptr)

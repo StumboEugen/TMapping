@@ -25,6 +25,10 @@ class Exp
     GateID mEnterGate = GATEID_BEGINNING_POINT;
     /// 离开时对应的Gate, GATEID_HAVENT_LEFT(-3)表示还没离开
     GateID mLeaveGate = GATEID_HAVENT_LEFT;
+    /// 从开始到现在移动的距离, 用于对全局位置的简单评估
+    double mWalkedDisSinceEnter = 0.0;
+    /// 累计的所认为的全局里程(起点Gate)
+    TopoVec2 mGlobalPosInOdom{};
 
 public:
     Exp(ExpDataPtr expData, GateID enterGateID);
@@ -55,6 +59,12 @@ public:
     GateID getLeaveGate() const;
 
     Jsobj toJS() const;
+
+    void setOdomInfoFromFatherExp(const ExpPtr& father);
+
+    double getMovedDist() const;
+
+    const TopoVec2& getOdomGbPos() const;
 };
 }
 

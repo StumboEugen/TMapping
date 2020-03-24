@@ -26,10 +26,10 @@ using ExpDataUnPtr = std::unique_ptr<ExpData>;
 using ExpDataWePtr = std::weak_ptr<ExpData>;
 
 struct MatchResult_IMPL{
-    /// 可能性系数, 如果为0表示完全不可能
+    /// 相似性系数, 如果为0表示完全不可能
     double possibility;
-    /// k = gateMapping2this[j], 则 mergedExpData->gates[j] 与this->gates[k]为同一gate
-    std::vector<GateID> gateMapping2this;
+    /// k = gateMapping2old[j], 则 mergedExpData->gates[j] 与this->gates[k]为同一gate
+    std::vector<GateID> gateMapping2old;
     /// k = gateMapping2mergedExpData[j], 则 this->gates[j] 与mergedExpData->gates[k]为同一gate
     std::vector<GateID> gateMapping2mergedExpData;
     /// 两个ExpData的相对位移, 相对于that而言

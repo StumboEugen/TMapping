@@ -14,19 +14,9 @@
 
 using namespace std;
 
-void tmap::TopoMapping::addNewExp(tmap::ExpDataPtr newExpData)
-{
-
-}
-
 void tmap::TopoMapping::setLeftGate(GateID gateID)
 {
     mExperiences.setLeftGateOfCurrent(gateID);
-}
-
-void tmap::TopoMapping::setLeftGate(TopoVec2 gatePos)
-{
-    mExperiences.setLeftGateOfCurrent(gatePos);
 }
 
 void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
@@ -76,8 +66,8 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                     /// 对应的MergedExp没有生成, 自己尝试生成, 先进行匹配
                     auto matchResult = oldSimiliarExp->detailedMatching(*newExp->expData());
                     double poss = matchResult->possibility;
-                    bool gateCorrect = matchResult->gateMapping2this[newExp->getEnterGate()] ==
-                            oneAliveTwig->gateOfSimilarMergedExp();
+                    bool gateCorrect = matchResult->gateMapping2old[newExp->getEnterGate()] ==
+                                       oneAliveTwig->gateOfSimilarMergedExp();
                     if (gateCorrect && poss > TOLLERANCE_2ND_MATCH_MERGEDEXP) {
                         /// 一致性通过而且匹配概率也符合阈值, 生成对应的mergedExp
                         auto newMergedExp =

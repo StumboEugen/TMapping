@@ -17,7 +17,7 @@ MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult
           nMergedExps(father->nMergedExps + 1),
           mMergedExpData(std::move(matchResult->mergedExpData)),
           mTrans(matchResult->displacement),
-          mGatesMapping2Father(std::move(matchResult->gateMapping2this)),
+          mGatesMapping2Father(std::move(matchResult->gateMapping2old)),
           mGatesMappingFromFather(std::move(matchResult->gateMapping2mergedExpData)),
           mPossDecConf(matchResult->possibility)
 {}
@@ -149,11 +149,34 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
 
 MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
 {
+    /// 计算回环可能性系数
+    double coe = 0.0;
+    double movedDist = newExp->getMovedDist() - this->mRelatedExp->getMovedDist();
+    const auto& maps = matchResult->gateMapping2old;
+    /// 找到两个节点之间存在的映射关系, 用于将全局里程计信息放到一个坐标系中
+    for (int i = 0; i < maps.size(); ++i) {
+        const auto& j = maps[i]; 
+        if (j != GATEID_NO_MAPPING) {
+            const auto& thisGates = this->mMergedExpData->getGates();
+            const auto& thatGates = matchResult->mergedExpData->getGates();
+            const auto& jGblPos = this->mRelatedExp->getOdomGbPos() + thisGates[j]->getPos() -
+                    thisGates[this->mRelatedExp->getEnterGate()]->getPos();
+            const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
+                    thatGates[newExp->getEnterGate()]->getPos();
+            double posDif2 = (iGblPos - jGblPos).len2();
+            double C = (1.0 + 1.0 / this->nMergedExps) * convDistPerMeter * movedDist;
+            coe = exp(-0.5 * posDif2 / C);
+            break;
+        }
+    }
+
     Exp* expBareP = newExp.get();
     MergedExpPtr res(new MergedExp(
             shared_from_this(), std::move(newExp), std::move(matchResult)));
     mNewestChild = res;
     expBareP->addMergedExpIns(res);
+    res->mPossDecConf *= coe;
+
     return res;
 }
 

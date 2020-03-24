@@ -22,10 +22,7 @@ class TopoMapping
     size_t mSurviverSetting = 0;
 
 public:
-    void addNewExp(ExpDataPtr newExpData);
-
     void setLeftGate(GateID gateID);
-    void setLeftGate(TopoVec2 gatePos);
 
     void arriveNewExp(const ExpPtr& newExp);
 

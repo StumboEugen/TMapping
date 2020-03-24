@@ -92,3 +92,22 @@ Exp::Exp(const Jsobj& jexp)
     mEnterGate = jexp["enterGate"].asInt();
     mLeaveGate = jexp["leaveGate"].asInt();
 }
+
+void Exp::setOdomInfoFromFatherExp(const ExpPtr& father)
+{
+    const auto& fatherLeavePos = father->expData()->getGates()[father->mLeaveGate]->getPos();
+    const auto& fatherEnterPos = father->expData()->getGates()[father->mEnterGate]->getPos();
+    const auto& PosDiffInFather = fatherLeavePos - fatherEnterPos;
+    this->mGlobalPosInOdom = father->mGlobalPosInOdom + PosDiffInFather;
+    this->mWalkedDisSinceEnter = father->mWalkedDisSinceEnter + PosDiffInFather.len();
+}
+
+double Exp::getMovedDist() const
+{
+    return mWalkedDisSinceEnter;
+}
+
+const TopoVec2& Exp::getOdomGbPos() const
+{
+    return mGlobalPosInOdom;
+}
