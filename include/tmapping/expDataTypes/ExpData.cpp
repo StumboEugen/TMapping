@@ -259,6 +259,11 @@ size_t ExpData::nGates() const
     return mGates.size();
 }
 
+size_t ExpData::nPoints() const
+{
+    return mGates.size() + mPosLandmarks.size();
+}
+
 Json::Value ExpData::toJS() const
 {
     Json::Value res;
@@ -757,80 +762,80 @@ vector<SubNode> ExpData::vecOfSubNodes(const ExpData& expData)
 }
 
 std::pair<ExpDataPtr, std::vector<SubNode>>
-ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr,
-                        bool copyAccordingSubLinks) const {
+ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
+                           const std::vector<SubNode>& whiteList,
+                           double carelessPercentage, size_t nErasedNode) const {
+    /// @note 这是个工具函数, 所以完全没考虑效率问题
     static default_random_engine engine(
             std::chrono::system_clock::now().time_since_epoch().count());
 
     /// 根据SubLinks来部分拷贝
     std::pair<ExpDataPtr, std::vector<SubNode>> res;
     res.first = this->cloneShell();
-    const auto& resExpData = res.first;
-    res.second = this->copy2(resExpData.get(), copyAccordingSubLinks);
+    res.second = this->copy2(res.first.get(), copyAccordingSubLinks);
 
-    /// 添加一些"意外"
-
-    /// 寻找最长的两点
-    SubNode p0, p1;
-    double maxLen = 0.0;
-    auto subnodes = vecOfSubNodes(*resExpData);
-    for (const auto& node1: subnodes) {
-        for (const auto& node2: subnodes) {
-            if (node1 == node2) continue;
-            const auto& pn1 = resExpData->getPosOfSubNode(node1);
-            const auto& pn2 = resExpData->getPosOfSubNode(node2);
-            double len = (pn1 - pn2).len();
-            if (len > maxLen) {
-                maxLen = len;
-                p0 = node1;
-                p1 = node2;
+    /// 看看本次是否需要随机忘记一些节点
+    uniform_real_distribution<> r(0.0, 1.0);
+    if (r(engine) >= carelessPercentage) {
+        /// 是的
+        const auto& copy = res.first;
+        const auto& nodesMap2Copy = res.second;
+        /// 使用这个变量记录copy中可以被抹去的节点
+        auto nodesOfCopy = vecOfSubNodes(*copy);
+        /// 根据白名单, 从nodesOfCopy中剔除对应的SubNode, 先标记为UNSET
+        for (auto guanXiHu : whiteList) {
+            /// 将白名单节点转换到copy对应的SubNode编号
+            auto xNodeInCopy = nodesMap2Copy[guanXiHu.toUIndex(this->nGates())];
+            if (xNodeInCopy.type != SubNodeType::UNSET) {
+                /// 如果白名单的确被使用了, 那么将其标记为要删除, 这里用UNSET实现
+                nodesOfCopy[xNodeInCopy.toUIndex(copy->nGates())].type = SubNodeType::UNSET;
             }
         }
-    }
-    /// 其中的一个作为原点, 计算得到单位向量
-    TopoVec2 O = resExpData->getPosOfSubNode(p0);
-    TopoVec2 X = (resExpData->getPosOfSubNode(p1) - O).unitize();
-    TopoVec2 Y = X.rotate(90);
 
-    /// 随机得到两个方向上的噪声 ex ey
-    TopoVec2 ex{}, ey{};
-    double errMax = maxOdomErrPerM * maxLen;
-    normal_distribution<> g{0, errMax / 4.5};
-    while (true) {
-        ex.px = g(engine);
-        ex.py = g(engine);
-        ey.px = g(engine);
-        ey.py = g(engine);
-        if (ex.len() + ey.len() > errMax) {
-            continue;
-        }
-        break;
-    }
-
-    for (const auto& pGate : resExpData->getGates()) {
-        const auto& gatePos = pGate->getPos();
-        /// 根据坐标,添加噪声
-        const auto& corr = gatePos - O;
-        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
-        pGate->setPos(gatePos + err);
-
-        while(true) {
-            normal_distribution<> dg{0, maxDegreeErr / 2.0};
-            double derr = dg(engine);
-            if (abs(derr) < maxDegreeErr) {
-                pGate->setNormalVec(pGate->getNormalVec().rotate(derr));
-                break;
+        /// 如果是走廊, 我们不希望忽略端点, 因为那样就不方便可视化了, 把端点也保留下来
+        if (auto pCorridor = dynamic_cast<Corridor*>(copy.get())) {
+            if (pCorridor->getEndGateA() >= 0) {
+                nodesOfCopy[pCorridor->getEndGateA()].type = SubNodeType::UNSET;
+            }
+            if (pCorridor->getEndGateB() >= 0) {
+                nodesOfCopy[pCorridor->getEndGateB()].type = SubNodeType::UNSET;
             }
         }
-    }
 
-    for (const auto& pLM : resExpData->mPosLandmarks) {
-        const auto& gatePos = pLM->getPos();
-        const auto& corr = gatePos - O;
-        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
-        pLM->setPos(gatePos + err);
-    }
+        /// 把这些白名单消掉
+        for (int i = 0; i < nodesOfCopy.size(); ++i) {
+            if (nodesOfCopy[i].type == SubNodeType::UNSET) {
+                nodesOfCopy.erase(nodesOfCopy.begin() + i);
+            }
+        }
 
+        /// 主要不要让要"忘记"的节点数量多于可以忘掉的数量
+        if (nErasedNode >= nodesOfCopy.size()) {
+            nErasedNode = nodesOfCopy.size();
+            cout << FILE_AND_LINE << " you erase almost all points in expData!" << endl;
+        }
+
+        /// 警告一下SubLinks我们无法处理
+        if (nErasedNode >= 0 && !copy->mSubLinks.empty()) {
+            cerr << FILE_AND_LINE << " the sublinks will be affected!" << endl;
+        }
+
+        /// 随机选一些幸运儿,然后忘掉并删掉
+        for (int i = 0; i < nErasedNode; ++i) {
+            uniform_int_distribution<> p(0,nodesOfCopy.size());
+            int luckyNumber = p(engine);
+            const auto& luckBoy = nodesOfCopy[luckyNumber];
+            /// 找到luckBoy在映射表中的位置, 设置为没有映射 (这里我们不注重效率)
+            for (auto& item: res.second) {
+                if (item == luckBoy) {
+                    item.type = SubNodeType::UNSET;
+                }
+            }
+            copy->eraseSubNode(luckBoy);
+            nodesOfCopy.erase(nodesOfCopy.begin() + i);
+        }
+    }
+    
     return res;
 }
 
@@ -848,5 +853,87 @@ SubNode ExpData::copySubNode2(ExpData& dest, const SubNode& subNode) const
         default:
             cerr << FILE_AND_LINE << "Unknown SubNode type!" << (int)subNode.type << endl;
             return SubNode();
+    }
+}
+
+void ExpData::addNoise(double maxOdomErrPerM, double maxDegreeErr)
+{
+    static default_random_engine engine(
+            std::chrono::system_clock::now().time_since_epoch().count());
+
+    /// 寻找最长的两点
+    SubNode p0, p1;
+    double maxLen = 0.0;
+    auto subnodes = vecOfSubNodes(*this);
+    for (const auto& node1: subnodes) {
+        for (const auto& node2: subnodes) {
+            if (node1 == node2) continue;
+            const auto& pn1 = this->getPosOfSubNode(node1);
+            const auto& pn2 = this->getPosOfSubNode(node2);
+            double len = (pn1 - pn2).len();
+            if (len > maxLen) {
+                maxLen = len;
+                p0 = node1;
+                p1 = node2;
+            }
+        }
+    }
+    /// 其中的一个作为原点, 计算得到单位向量
+    TopoVec2 O = this->getPosOfSubNode(p0);
+    TopoVec2 X = (this->getPosOfSubNode(p1) - O).unitize();
+    TopoVec2 Y = X.rotate(90);
+
+    /// 随机得到两个方向上的噪声 ex ey
+    TopoVec2 ex{}, ey{};
+    double errMax = maxOdomErrPerM * maxLen;
+    normal_distribution<> g{0, errMax / 4.5};
+    while (true) {
+        ex.px = g(engine);
+        ex.py = g(engine);
+        ey.px = g(engine);
+        ey.py = g(engine);
+        if (ex.len() + ey.len() > errMax) {
+            continue;
+        }
+        break;
+    }
+
+    for (const auto& pGate : this->getGates()) {
+        const auto& gatePos = pGate->getPos();
+        /// 根据坐标,添加噪声
+        const auto& corr = gatePos - O;
+        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
+        pGate->setPos(gatePos + err);
+
+        while(true) {
+            normal_distribution<> dg{0, maxDegreeErr / 2.0};
+            double derr = dg(engine);
+            if (abs(derr) < maxDegreeErr) {
+                pGate->setNormalVec(pGate->getNormalVec().rotate(derr));
+                break;
+            }
+        }
+    }
+
+    for (const auto& pLM : this->mPosLandmarks) {
+        const auto& gatePos = pLM->getPos();
+        const auto& corr = gatePos - O;
+        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
+        pLM->setPos(gatePos + err);
+    }
+}
+
+void ExpData::eraseSubNode(const SubNode& target)
+{
+    switch (target.type) {
+        case SubNodeType::GATE:
+            mGates.erase(mGates.begin() + target.index);
+            break;
+        case SubNodeType::LandMark:
+            mPosLandmarks.erase(mPosLandmarks.begin() + target.index);
+            break;
+        default:
+            cerr << FILE_AND_LINE << " UNKNOWN SubNode Type: " << (int)target.index << endl;
+            break;
     }
 }
