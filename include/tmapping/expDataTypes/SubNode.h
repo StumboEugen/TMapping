@@ -19,11 +19,12 @@ enum class SubNodeType : int32_t {
 /// 表示ExpData中的SubNode, 可以用来表示连接关系也可以用来表示机器人位置
 struct SubNode
 {
-    SubNodeType type;
-    uint32_t index;
+    SubNodeType type = SubNodeType::UNSET;
+    uint32_t index = 0;
 
 public:
-    explicit SubNode(SubNodeType type = SubNodeType::UNSET, uint32_t index = 0);
+    SubNode(SubNodeType type, uint32_t index);
+    SubNode() = default;
 
     bool operator==(const SubNode& rhs) const;
 

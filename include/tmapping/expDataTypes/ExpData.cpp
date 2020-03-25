@@ -825,10 +825,21 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
             uniform_int_distribution<> p(0,nodesOfCopy.size());
             int luckyNumber = p(engine);
             const auto& luckBoy = nodesOfCopy[luckyNumber];
-            /// 找到luckBoy在映射表中的位置, 设置为没有映射 (这里我们不注重效率)
+            bool startMinus = false;
             for (auto& item: res.second) {
-                if (item == luckBoy) {
+                if (!startMinus && item == luckBoy) {
+                    /// 找到luckBoy在映射表中的位置, 设置为没有映射 (这里我们不注重效率)
+                    startMinus = true;
                     item.type = SubNodeType::UNSET;
+                }
+                /// 随后把和其相同type的node的index--
+                else if (startMinus) {
+                    if (item.type == luckBoy.type) {
+                        item.index -= 1;
+                    } else {
+                        /// 相同类型已经结束了, 可以结束循环了
+                        break;
+                    }
                 }
             }
             copy->eraseSubNode(luckBoy);

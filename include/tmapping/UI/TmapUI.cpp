@@ -19,6 +19,7 @@
 #include <tmapping/NewExp.h>
 #include <tmapping/GateMovement.h>
 #include <tmapping/GetMaps.h>
+#include <tmapping/Exp.h>
 
 using namespace std;
 
@@ -538,6 +539,11 @@ void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
 void tmap::TmapUI::SLOT_PlaceRobot()
 {
     if (gvMain->setRobotInFake(uiDockSimulation->cbNoDetailMoving->isChecked())) {
+
+        if (!uiDockSimulation->cbNoDetailMoving->isChecked()) {
+            uiDockSimulation->cbAccidents->setChecked(false);
+        }
+
         uiDockSimulation->btnPlaceRobot->setCheckable(true);
         uiDockSimulation->btnPlaceRobot->setChecked(true);
         uiDockSimulation->btnPlaceRobot->setEnabled(false);
@@ -555,8 +561,58 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 {
     if (checkROS()) {
         tmapping::NewExp srvExp;
-        srvExp.request.jNewExp = JsonHelper::JS2Str(exp->toJS());
+        ExpPtr theExp2Send;
+        /// 根据机器人运动的设置, 选择拷贝的方式
+        if (uiDockSimulation->cbNoDetailMoving->isChecked()) {
+            if (!uiDockSimulation->cbAccidents->isChecked()) {
+                /// 无脑移动方式, 直接把节点的信息丢出去
+                theExp2Send = exp;
+            } else {
+                /// 有一定概率发生遗忘, 目前的设置是0.8的概率忘记一个点
+                uint32_t leftGate = exp->getLeaveGate();
+                const auto& res = exp->expData()->buildShrinkedCopy(
+                        false,
+                        {
+                                {SubNodeType::GATE,0},
+                                {SubNodeType::GATE,leftGate}
+                        },
+                        0.8,
+                        1);
+                theExp2Send.reset(new Exp(res.first, res.second[exp->getEnterGate()].index));
+                theExp2Send->setLeftGate(res.second[exp->getLeaveGate()].index);
+            }
+        } else {
+            /// 根据机器人在节点内的移动来选择观测到哪些信息
+            const auto& res = exp->expData()->buildShrinkedCopy(true);
+            theExp2Send.reset(new Exp(res.first, res.second[exp->getEnterGate()].index));
+            theExp2Send->setLeftGate(res.second[exp->getLeaveGate()].index);
+        }
+
+        /// 添加噪声
+        double posErr = 0., dirErr = 0.;
+        if(uiDockSimulation->cbPosError->isChecked()) {
+            posErr = uiDockSimulation->lePosError->text().toDouble();
+        }
+        if (uiDockSimulation->cbDirError->isChecked()) {
+            dirErr = uiDockSimulation->leDirError->text().toDouble();
+        }
+        if (posErr != 0. || dirErr != 0.) {
+            theExp2Send->expData()->addNoise(posErr, dirErr);
+        }
+
+        /// 发送数据
+        srvExp.request.jNewExp = JsonHelper::JS2Str(theExp2Send->toJS());
+
         if (!RSC_newExp.call(srvExp)) {
+            cerr << "ROS service calling failed!" << endl;
+            return;
+        }
+
+        tmapping::GateMovement gateMovement;
+        Jsobj gateMove = theExp2Send->getLeaveGate();
+        gateMovement.request.jGateMove = JsonHelper::JS2Str(gateMove);
+
+        if (!RSC_throughGate.call(gateMovement)) {
             cerr << "ROS service calling failed!" << endl;
         }
     } else {
