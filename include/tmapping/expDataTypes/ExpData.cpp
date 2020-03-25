@@ -407,19 +407,48 @@ std::array<double, 4> ExpData::getOutBounding(double expandValue) const
     return res;
 }
 
-void ExpData::copy2(ExpData* copy2) const
+std::vector<SubNode> ExpData::copy2(ExpData* copy2, bool accordingSubLinks) const
 {
-    copy2->mGates.reserve(this->mGates.size());
-    for (auto& gate : this->mGates) {
-        copy2->mGates.emplace_back(gate->clone());
-    }
-
-    copy2->mPosLandmarks.reserve(this->mPosLandmarks.size());
-    for (auto& plm : this->mPosLandmarks) {
-        copy2->mPosLandmarks.emplace_back(plm->clone());
-    }
-
     copy2->mName = this->mName;
+    std::vector<SubNode> res;
+
+    if (accordingSubLinks && !this->mSubLinks.empty()) {
+        /// 需要部分拷贝
+        res.reserve(this->nGates() + this->mPosLandmarks.size());
+        const auto& nGate = this->nGates();
+        /// 我们希望enterGate始终是enterGate, index为0
+        res[0] = this->copySubNode2(*copy2,
+                SubNode{SubNodeType::GATE, 0});
+        for (const auto& subLink : this->mSubLinks) {
+            uint32_t ida = subLink.a.toUIndex(nGate);
+            uint32_t idb = subLink.b.toUIndex(nGate);
+            /// 这意味着这个subnode还没有被拷贝
+            if (res[ida].type == SubNodeType::UNSET) {
+                res[ida] = this->copySubNode2(*copy2, subLink.a);
+            }
+            if (res[ida].type == SubNodeType::UNSET) {
+                res[idb] = this->copySubNode2(*copy2, subLink.b);
+            }
+            copy2->addSubLink(res[ida].type, res[ida].index,
+                              res[idb].type, res[idb].index, true);
+        }
+    } else {
+        copy2->mGates.reserve(this->mGates.size());
+        for (auto& gate : this->mGates) {
+            copy2->mGates.emplace_back(gate->clone());
+        }
+
+        copy2->mPosLandmarks.reserve(this->mPosLandmarks.size());
+        for (auto& plm : this->mPosLandmarks) {
+            copy2->mPosLandmarks.emplace_back(plm->clone());
+        }
+
+        copy2->mSubLinks = this->mSubLinks;
+
+        res = vecOfSubNodes(*this);
+    }
+
+    return res;
 }
 
 GateID ExpData::findGateAtPos(const TopoVec2& pos, double threshold) const
@@ -727,18 +756,29 @@ vector<SubNode> ExpData::vecOfSubNodes(const ExpData& expData)
     return baseCandidates;
 }
 
-ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) const {
-    auto res = this->clone();
-    auto subnodes = vecOfSubNodes(*res);
+std::pair<ExpDataPtr, std::vector<SubNode>>
+ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr,
+                        bool copyAccordingSubLinks) const {
+    static default_random_engine engine(
+            std::chrono::system_clock::now().time_since_epoch().count());
+
+    /// 根据SubLinks来部分拷贝
+    std::pair<ExpDataPtr, std::vector<SubNode>> res;
+    res.first = this->cloneShell();
+    const auto& resExpData = res.first;
+    res.second = this->copy2(resExpData.get(), copyAccordingSubLinks);
+
+    /// 添加一些"意外"
 
     /// 寻找最长的两点
     SubNode p0, p1;
     double maxLen = 0.0;
+    auto subnodes = vecOfSubNodes(*resExpData);
     for (const auto& node1: subnodes) {
         for (const auto& node2: subnodes) {
             if (node1 == node2) continue;
-            const auto& pn1 = res->getPosOfSubNode(node1);
-            const auto& pn2 = res->getPosOfSubNode(node2);
+            const auto& pn1 = resExpData->getPosOfSubNode(node1);
+            const auto& pn2 = resExpData->getPosOfSubNode(node2);
             double len = (pn1 - pn2).len();
             if (len > maxLen) {
                 maxLen = len;
@@ -748,15 +788,13 @@ ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) c
         }
     }
     /// 其中的一个作为原点, 计算得到单位向量
-    TopoVec2 O = res->getPosOfSubNode(p0);
-    TopoVec2 X = (res->getPosOfSubNode(p1) - O).unitize();
+    TopoVec2 O = resExpData->getPosOfSubNode(p0);
+    TopoVec2 X = (resExpData->getPosOfSubNode(p1) - O).unitize();
     TopoVec2 Y = X.rotate(90);
 
     /// 随机得到两个方向上的噪声 ex ey
     TopoVec2 ex{}, ey{};
     double errMax = maxOdomErrPerM * maxLen;
-    static default_random_engine engine(
-            std::chrono::system_clock::now().time_since_epoch().count());
     normal_distribution<> g{0, errMax / 4.5};
     while (true) {
         ex.px = g(engine);
@@ -769,7 +807,7 @@ ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) c
         break;
     }
 
-    for (const auto& pGate : res->getGates()) {
+    for (const auto& pGate : resExpData->getGates()) {
         const auto& gatePos = pGate->getPos();
         /// 根据坐标,添加噪声
         const auto& corr = gatePos - O;
@@ -786,7 +824,7 @@ ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) c
         }
     }
 
-    for (const auto& pLM : res->mPosLandmarks) {
+    for (const auto& pLM : resExpData->mPosLandmarks) {
         const auto& gatePos = pLM->getPos();
         const auto& corr = gatePos - O;
         const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
@@ -794,4 +832,21 @@ ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) c
     }
 
     return res;
+}
+
+SubNode ExpData::copySubNode2(ExpData& dest, const SubNode& subNode) const
+{
+    switch (subNode.type) {
+        case SubNodeType::GATE:
+            dest.addGate(this->mGates[subNode.index]->clone());
+            return SubNode{SubNodeType::GATE,
+                           static_cast<uint32_t>(dest.mGates.size() - 1)};
+        case SubNodeType::LandMark:
+            dest.addLandmark(this->mPosLandmarks[subNode.index]->clone());
+            return SubNode{SubNodeType::LandMark,
+                           static_cast<uint32_t>(dest.mPosLandmarks.size() - 1)};
+        default:
+            cerr << FILE_AND_LINE << "Unknown SubNode type!" << (int)subNode.type << endl;
+            return SubNode();
+    }
 }

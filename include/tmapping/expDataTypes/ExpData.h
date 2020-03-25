@@ -63,7 +63,13 @@ protected:
 
     std::vector<SubLink> mSubLinks;
 
-    void copy2(ExpData* copy2) const;
+    /**
+     * @brief 将baseclass的信息拷贝到copy2中
+     * @param copy2 拷贝的重点
+     * @param accordingSubLinks 是否根据Sublinks来有限地拷贝
+     * @return 一张映射表, this的SubNode被映射到了那个copy2的SubNode
+     */
+    std::vector<SubNode> copy2(ExpData* copy2, bool accordingSubLinks = false) const;
 
     mutable std::unique_ptr<GeoHash> mGeoHash;
 
@@ -137,7 +143,15 @@ public:
 
     void addSubLink(SubNodeType typeA, size_t indexA, SubNodeType typeB, size_t indexB, bool findDup);
 
-    ExpDataPtr buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) const;
+    /**
+     * @brief 生成一个包含噪声的副本
+     * @param maxOdomErrPerM 每米能产生的最大误差
+     * @param maxDegreeErr 法向量的最大角度误差
+     * @param copyAccordingSubLinks 是否根据this的subNodes来选择性拷贝
+     * @return first:有噪声的副本 second:从this到first的gate映射关系
+     */
+    std::pair<ExpDataPtr, std::vector<SubNode>>
+    buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr, bool copyAccordingSubLinks) const;
 
 private:
     static std::vector<std::pair<SubNode, SubNode>>
@@ -151,6 +165,8 @@ private:
      * @return
      */
     static std::vector<SubNode> vecOfSubNodes(const ExpData& expData);
+
+    SubNode copySubNode2(ExpData& dest, const SubNode& subNode) const;
 };
 
 }
