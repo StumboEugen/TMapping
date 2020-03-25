@@ -23,7 +23,7 @@ struct SubNode
     uint32_t index;
 
 public:
-    SubNode(SubNodeType type, uint32_t index);
+    explicit SubNode(SubNodeType type = SubNodeType::UNSET, uint32_t index = 0);
 
     bool operator==(const SubNode& rhs) const;
 

@@ -63,13 +63,13 @@ protected:
 
     std::vector<SubLink> mSubLinks;
 
-    void copy2(ExpData* copy2);
+    void copy2(ExpData* copy2) const;
 
     mutable std::unique_ptr<GeoHash> mGeoHash;
 
     const GeoHash& getHashTable() const;
 
-    const TopoVec2* getPosOfSubNode(const SubNode& node) const;
+    const TopoVec2& getPosOfSubNode(const SubNode& node) const;
 
 public:
     static ExpDataPtr madeFromJS(const Jsobj& jdata);
@@ -121,7 +121,7 @@ public:
      */
     virtual std::array<double, 4> getOutBounding(double expandValue) const;
 
-    virtual ExpDataPtr clone() = 0;
+    virtual ExpDataPtr clone() const = 0 ;
 
     virtual ExpDataPtr cloneShell() const = 0 ;
 
@@ -137,11 +137,20 @@ public:
 
     void addSubLink(SubNodeType typeA, size_t indexA, SubNodeType typeB, size_t indexB, bool findDup);
 
+    ExpDataPtr buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) const;
+
 private:
     static std::vector<std::pair<SubNode, SubNode>>
     matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsThis);
 
     double getPbtyOfGivenSubNode(const SubNode& node, bool discrimLM = false) const;
+
+    /**
+     * @brief 生成一个所有SubNodes组成的vec
+     * @param expData 对应的expData
+     * @return
+     */
+    static std::vector<SubNode> vecOfSubNodes(const ExpData& expData);
 };
 
 }

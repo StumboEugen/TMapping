@@ -10,7 +10,7 @@ Json::Value tmap::Intersection::toJS() const
     return res;
 }
 
-tmap::ExpDataPtr tmap::Intersection::clone()
+tmap::ExpDataPtr tmap::Intersection::clone() const
 {
     auto i = new Intersection;
     this->copy2(i);

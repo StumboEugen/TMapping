@@ -20,7 +20,7 @@ Json::Value tmap::Corridor::toJS() const
     return res;
 }
 
-tmap::ExpDataPtr tmap::Corridor::clone()
+tmap::ExpDataPtr tmap::Corridor::clone() const
 {
     auto c = new Corridor;
     this->copy2(c);

@@ -5,6 +5,8 @@
 #include <cfloat>
 #include <iostream>
 #include <algorithm>
+#include <random>
+#include <chrono>
 
 #include "ExpData.h"
 #include "../tools/TopoParams.h"
@@ -88,8 +90,8 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
         const auto& thisNode = pair.first;
         const auto& thatNode = pair.second;
         /// 累加后从而认得到匹配点集的中心
-        thisCenter += *this->getPosOfSubNode(thisNode);
-        thatCenter += *that.getPosOfSubNode(thatNode);
+        thisCenter += this->getPosOfSubNode(thisNode);
+        thatCenter += that.getPosOfSubNode(thatNode);
         /// 记录映射关系, 目前表中存储包括gate和landmark的所有映射,而不只是gate
         auto& idMerged = res->gateMapping2mergedExpData[thisNode.toUIndex(nGateThis)];
         if (idMerged != GATEID_NO_MAPPING) {
@@ -405,7 +407,7 @@ std::array<double, 4> ExpData::getOutBounding(double expandValue) const
     return res;
 }
 
-void ExpData::copy2(ExpData* copy2)
+void ExpData::copy2(ExpData* copy2) const
 {
     copy2->mGates.reserve(this->mGates.size());
     for (auto& gate : this->mGates) {
@@ -506,7 +508,7 @@ const GeoHash& ExpData::getHashTable() const
     return *mGeoHash;
 }
 
-const TopoVec2* ExpData::getPosOfSubNode(const SubNode& node) const
+const TopoVec2& ExpData::getPosOfSubNode(const SubNode& node) const
 {
     const TopoVec2* res;
     switch (node.type) {
@@ -520,7 +522,7 @@ const TopoVec2* ExpData::getPosOfSubNode(const SubNode& node) const
             cerr << FILE_AND_LINE << " error SubNode!";
             throw;
     }
-    return res;
+    return *res;
 }
 
 double ExpData::getPbtyOfGivenSubNode(const SubNode& node, bool discrimLM) const
@@ -557,15 +559,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
     const auto& gatesOfShape = shape.getGates();
     const auto& lmsOfShape = shape.getPLMs();
 
-    vector<SubNode> baseCandidates(nPointsShape, {SubNodeType::UNSET, 0});
-    for (int i = 0; i < shape.nGates(); ++i) {
-        baseCandidates[i].type = SubNodeType::GATE;
-        baseCandidates[i].index = i;
-    }
-    for (int i = 0; i < shape.mPosLandmarks.size(); ++i) {
-        baseCandidates[i + shape.nGates()].type = SubNodeType::LandMark;
-        baseCandidates[i + shape.nGates()].index = i;
-    }
+    vector<SubNode> baseCandidates = vecOfSubNodes(shape);
 
     auto comp = [&shape](const SubNode& a, const SubNode&b) {
         return shape.getPbtyOfGivenSubNode(a, true) >
@@ -579,7 +573,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
     for (int nRansac = 0; nRansac < ceil(nPointsShape / 2.0); ++nRansac) {
         /// shape中选取的base的坐标
         const auto& baseOfShape = baseCandidates[nRansac];
-        const TopoVec2* basePosOfShape = shape.getPosOfSubNode(baseOfShape);
+        const TopoVec2 basePosOfShape = shape.getPosOfSubNode(baseOfShape);
 
         /// 开始投票, 投票箱中存储对应base的映射关系
         /// pair<this, that>
@@ -641,7 +635,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
 
         /// 开始投票
         for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
-            if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - *basePosOfShape)) {
+            if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - basePosOfShape)) {
                 if (bins != nullptr) {
                     for (const auto& bin : *bins) {
                         auto& hitVec = hitsOfBase[bin.base.index];
@@ -669,7 +663,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         }
 
         for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
-            if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - *basePosOfShape)) {
+            if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - basePosOfShape)) {
                 if (bins != nullptr) {
                     for (const auto& bin : *bins) {
                         auto& hitVec = hitsOfBase[bin.base.index];
@@ -718,3 +712,86 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
     return vector<std::pair<SubNode, SubNode>>();
 }
 
+vector<SubNode> ExpData::vecOfSubNodes(const ExpData& expData)
+{
+    auto nPointsShape = expData.nGates() + expData.mPosLandmarks.size();
+    vector<SubNode> baseCandidates(nPointsShape);
+    for (int i = 0; i < expData.nGates(); ++i) {
+        baseCandidates[i].type = SubNodeType::GATE;
+        baseCandidates[i].index = i;
+    }
+    for (int i = 0; i < expData.mPosLandmarks.size(); ++i) {
+        baseCandidates[i + expData.nGates()].type = SubNodeType::LandMark;
+        baseCandidates[i + expData.nGates()].index = i;
+    }
+    return baseCandidates;
+}
+
+ExpDataPtr ExpData::buildNoisyCopy(double maxOdomErrPerM, double maxDegreeErr) const {
+    auto res = this->clone();
+    auto subnodes = vecOfSubNodes(*res);
+
+    /// 寻找最长的两点
+    SubNode p0, p1;
+    double maxLen = 0.0;
+    for (const auto& node1: subnodes) {
+        for (const auto& node2: subnodes) {
+            if (node1 == node2) continue;
+            const auto& pn1 = res->getPosOfSubNode(node1);
+            const auto& pn2 = res->getPosOfSubNode(node2);
+            double len = (pn1 - pn2).len();
+            if (len > maxLen) {
+                maxLen = len;
+                p0 = node1;
+                p1 = node2;
+            }
+        }
+    }
+    /// 其中的一个作为原点, 计算得到单位向量
+    TopoVec2 O = res->getPosOfSubNode(p0);
+    TopoVec2 X = (res->getPosOfSubNode(p1) - O).unitize();
+    TopoVec2 Y = X.rotate(90);
+
+    /// 随机得到两个方向上的噪声 ex ey
+    TopoVec2 ex{}, ey{};
+    double errMax = maxOdomErrPerM * maxLen;
+    static default_random_engine engine(
+            std::chrono::system_clock::now().time_since_epoch().count());
+    normal_distribution<> g{0, errMax / 4.5};
+    while (true) {
+        ex.px = g(engine);
+        ex.py = g(engine);
+        ey.px = g(engine);
+        ey.py = g(engine);
+        if (ex.len() + ey.len() > errMax) {
+            continue;
+        }
+        break;
+    }
+
+    for (const auto& pGate : res->getGates()) {
+        const auto& gatePos = pGate->getPos();
+        /// 根据坐标,添加噪声
+        const auto& corr = gatePos - O;
+        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
+        pGate->setPos(gatePos + err);
+
+        while(true) {
+            normal_distribution<> dg{0, maxDegreeErr / 2.0};
+            double derr = dg(engine);
+            if (abs(derr) < maxDegreeErr) {
+                pGate->setNormalVec(pGate->getNormalVec().rotate(derr));
+                break;
+            }
+        }
+    }
+
+    for (const auto& pLM : res->mPosLandmarks) {
+        const auto& gatePos = pLM->getPos();
+        const auto& corr = gatePos - O;
+        const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
+        pLM->setPos(gatePos + err);
+    }
+
+    return res;
+}

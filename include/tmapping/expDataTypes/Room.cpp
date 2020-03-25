@@ -11,7 +11,7 @@ Json::Value tmap::Room::toJS() const
     return res;
 }
 
-tmap::ExpDataPtr tmap::Room::clone()
+tmap::ExpDataPtr tmap::Room::clone() const
 {
     auto sr = new Room;
     this->copy2(sr);
