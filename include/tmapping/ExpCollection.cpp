@@ -42,12 +42,19 @@ void tmap::ExpCollection::setLeftGateOfCurrent(const TopoVec2& gatePos)
 void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                                       tmap::MapTwigCollection& twigMaster)
 {
-    newExp->setSerial(mExperiencesData.size());
-    if (!mExperiencesData.empty()) {
-        newExp->setOdomInfoFromFatherExp(mExperiencesData.back());
+    /// 对Exp的一些标准化处理
+    {
+        newExp->setSerial(mExperiencesData.size());
+        if (!mExperiencesData.empty()) {
+            /// 除了第一个Exp, 都要设置全局里程计信息
+            newExp->setOdomInfoFromFatherExp(mExperiencesData.back());
+        } else {
+            /// 前段哪怕给起点设置了一个enterGate, 我们为了逻辑正确, 也要设置为GATEID_BEGINNING_POINT
+            newExp->___setEnterGate(GATEID_BEGINNING_POINT);
+        }
+        /// 虽然可能前端已经完成了leftGate, 但是为了避免后续的冲突, 我们将leftGate设置为HAVENT LEFT
+        newExp->setLeftGate(GATEID_HAVENT_LEFT);
     }
-    /// 虽然可能前端已经完成了leftGate, 但是为了避免后续的冲突, 我们将leftGate设置为HAVENT LEFT
-    newExp->setLeftGate(GATEID_HAVENT_LEFT);
 
     auto & vecSameType = mClassification[newExp->expData()->type()];
 

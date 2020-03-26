@@ -103,6 +103,8 @@ public:
 
     double getConfidence() const;
 
+    double getCaledGblConfidence() const;
+
     void nodeCountPlus();
 
     void setDieAt(size_t dieAt);
@@ -126,6 +128,8 @@ public:
      * @return this是否由twig2check衍生而来
      */
     bool isDevelopedFrom(MapTwig* twig2check, size_t nGenerations = 1) const;
+
+    size_t getNodeCount() const;
 };
 
 }

@@ -100,6 +100,14 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         }
     }
     mChampionMap = currentChampion->makeMap(this->mExperiences);
+
+    const auto& aliveTwigs = twigCollection.getAliveMaps();
+    cout << "\n\n# of alive maps :" << twigCollection.getAliveMaps().size()
+       << "\n------------------------" << endl;
+    for (int i = 0; i < 10 && i < aliveTwigs.size(); ++i) {
+        cout << "nNodes: " << aliveTwigs[i]->getNodeCount() << "\tpsbly: " <<
+        twigCollection.getScores()[i] << endl;
+    }
 }
 
 tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)

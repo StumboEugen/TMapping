@@ -174,7 +174,7 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
             const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
                     thatGates[newExp->getEnterGate()]->getPos();
             double posDif2 = (iGblPos - jGblPos).len2();
-            double C = (1.0 + 1.0 / this->nMergedExps) * convDistPerMeter * movedDist;
+            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist;
             coe = exp(-0.5 * posDif2 / C);
             break;
         }

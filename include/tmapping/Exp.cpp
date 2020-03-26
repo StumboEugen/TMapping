@@ -118,3 +118,8 @@ const TopoVec2& Exp::getOdomGbPos() const
 {
     return mGlobalPosInOdom;
 }
+
+void Exp::___setEnterGate(GateID enterGate)
+{
+    Exp::mEnterGate = enterGate;
+}

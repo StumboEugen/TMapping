@@ -25,8 +25,8 @@ tmap::MapTwig::MapTwig(size_t bornAt, MapTwigPtr father,
                                                             nSerial(nSerial),
                                                             mConfidence(confidence)
 {
-    if (father) {
-        nTopoNode = father->nTopoNode;
+    if (mFather) {
+        nTopoNode = mFather->nTopoNode;
     } else {
         nTopoNode = 1;
     }
@@ -112,7 +112,7 @@ void tmap::MapTwig::resetLastGlobalConfidenceResult()
 double tmap::MapTwig::calGlobalPoss(double log_nExp)
 {
     if (mLastGlobalResult == -1.0) {
-        mLastGlobalResult = mConfidence * exp( -nTopoNode * log_nExp);
+        mLastGlobalResult = mConfidence * exp( nTopoNode * -log_nExp);
     }
     return mLastGlobalResult;
 }
@@ -281,4 +281,14 @@ bool MapTwig::isDevelopedFrom(MapTwig* twig2check, size_t nGenerations) const
         familyMember = familyMember->mFather.get();
     }
     return false;
+}
+
+size_t MapTwig::getNodeCount() const
+{
+    return nTopoNode;
+}
+
+double MapTwig::getCaledGblConfidence() const
+{
+    return mLastGlobalResult;
 }

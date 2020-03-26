@@ -65,6 +65,8 @@ public:
     double getMovedDist() const;
 
     const TopoVec2& getOdomGbPos() const;
+
+    void ___setEnterGate(GateID enterGate);
 };
 }
 

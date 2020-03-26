@@ -30,14 +30,8 @@ static constexpr GateID GATEID_HAVENT_LEFT = -3;
 static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 static constexpr GateID GATEID_NOT_FOUND = -5;
 
-static constexpr double convEdgePerMeter = 0.02;
-static constexpr double stdDevEdgePerMeter = 0.1 * M_SQRT2;
-static constexpr double stdDevEdgePerMeterOneAx = 0.1;
-static constexpr double convEdgePerMeterOneAx = 0.01;
-/// in RAD
-static constexpr double convNodePerGate = 0.04;
-
-static constexpr double convDistPerMeter = 0.01;
+static constexpr double stdErrPerMeter = 0.1 * M_SQRT2;
+static constexpr double convErrPerMeter = 0.02;
 
 static constexpr double piHalf = 3.1415926 / 2.0;
 static constexpr double pi = 3.1415926;

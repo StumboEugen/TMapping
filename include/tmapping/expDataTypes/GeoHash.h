@@ -7,6 +7,7 @@
 
 #include "SubNode.h"
 #include "../tools/TopoVec2.h"
+#include "../tools/TopoParams.h"
 
 #include <unordered_map>
 #include <vector>
@@ -26,7 +27,7 @@ class GeoHash
     std::unordered_map<int64_t, std::vector<Entrance>> mTable;
 
 public:
-    explicit GeoHash(const ExpData&, double odomErr = 0.1);
+    explicit GeoHash(const ExpData&, double odomErr = stdErrPerMeter * 2.0);
 
     /**
      * @brief 得到哈希表上对应位置的入口
