@@ -908,6 +908,22 @@ void ExpData::addNoise(double maxOdomErrPerM, double maxDegreeErr)
         }
         break;
     }
+    
+    if (auto thisCorridor = dynamic_cast<Corridor*>(this)) {
+        {
+            const auto& pA = thisCorridor->getEndPointA();
+            const auto& corrA = pA - O;
+            const auto& errA = ex * corrA.dotProduct(X) + ey * corrA.dotProduct(Y);
+            thisCorridor->setEndPointA(pA + errA);
+        }
+
+        {
+            const auto& pB = thisCorridor->getEndPointB();
+            const auto& corrB = pB - O;
+            const auto& errB = ex * corrB.dotProduct(X) + ey * corrB.dotProduct(Y);
+            thisCorridor->setEndPointB(pB + errB);
+        }
+    }
 
     for (const auto& pGate : this->getGates()) {
         const auto& gatePos = pGate->getPos();
@@ -916,6 +932,7 @@ void ExpData::addNoise(double maxOdomErrPerM, double maxDegreeErr)
         const auto& err = ex * corr.dotProduct(X) + ey * corr.dotProduct(Y);
         pGate->setPos(gatePos + err);
 
+        /// 添加法向量噪声
         while(true) {
             normal_distribution<> dg{0, maxDegreeErr / 2.0};
             double derr = dg(engine);
