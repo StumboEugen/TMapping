@@ -43,7 +43,11 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                                                       tmap::MapTwigCollection& twigMaster)
 {
     newExp->setSerial(mExperiencesData.size());
-    newExp->setOdomInfoFromFatherExp(mExperiencesData.back());
+    if (!mExperiencesData.empty()) {
+        newExp->setOdomInfoFromFatherExp(mExperiencesData.back());
+    }
+    /// 虽然可能前端已经完成了leftGate, 但是为了避免后续的冲突, 我们将leftGate设置为HAVENT LEFT
+    newExp->setLeftGate(GATEID_HAVENT_LEFT);
 
     auto & vecSameType = mClassification[newExp->expData()->type()];
 

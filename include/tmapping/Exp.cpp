@@ -57,11 +57,12 @@ void Exp::addMergedExpIns(const MergedExpPtr& newMerged)
     mMergedExps.emplace_back(newMerged);
 }
 
-/**
- * @brief 获得Exp的第一个MergedExp, 由于构造时第一个位置是一定被空出来的,所以不会发生SEG
- */
 MergedExpWePtr& Exp::theSingleMergedExp()
 {
+    /// 有时第一个位置还没有建立, 为了保证安全, 直接手动添加位置
+    if (mMergedExps.empty()) {
+        mMergedExps.emplace_back();
+    }
     return mMergedExps.front();
 }
 
@@ -95,11 +96,17 @@ Exp::Exp(const Jsobj& jexp)
 
 void Exp::setOdomInfoFromFatherExp(const ExpPtr& father)
 {
-    const auto& fatherLeavePos = father->expData()->getGates()[father->mLeaveGate]->getPos();
-    const auto& fatherEnterPos = father->expData()->getGates()[father->mEnterGate]->getPos();
-    const auto& PosDiffInFather = fatherLeavePos - fatherEnterPos;
-    this->mGlobalPosInOdom = father->mGlobalPosInOdom + PosDiffInFather;
-    this->mWalkedDisSinceEnter = father->mWalkedDisSinceEnter + PosDiffInFather.len();
+    if (father->serial() == 0) {
+        /// 对于第二个Exp, gblPos是enterGate, 且为0,0
+        this->mGlobalPosInOdom = {0,0};
+        this->mWalkedDisSinceEnter = 0.0;
+    } else {
+        const auto& fatherLeavePos = father->expData()->getGates()[father->mLeaveGate]->getPos();
+        const auto& fatherEnterPos = father->expData()->getGates()[father->mEnterGate]->getPos();
+        const auto& PosDiffInFather = fatherLeavePos - fatherEnterPos;
+        this->mGlobalPosInOdom = father->mGlobalPosInOdom + PosDiffInFather;
+        this->mWalkedDisSinceEnter = father->mWalkedDisSinceEnter + PosDiffInFather.len();
+    }
 }
 
 double Exp::getMovedDist() const

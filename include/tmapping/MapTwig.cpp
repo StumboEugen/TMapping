@@ -168,7 +168,7 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
         GateID leaveGate = GATEID_HAVENT_LEFT;
     };
 
-    auto expSize = mExpUsages.back()->serialOfLastExp();
+    auto expSize = mExpUsages.back()->serialOfLastExp() + 1;
     /// 记录每个Exp对应的MapNode(MergedExp)是哪一个
     vector<MapNodePtr> nodePs(expSize);
     /// 记录每个Exp的出入gate在其对应的MergedExp的实际Gate编号
@@ -180,8 +180,11 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
     /// 从current MapTwig开始遍历, 直到最初的MapTwig
     const MapTwig* currentTwig = this;
     while (currentTwig != nullptr) {
-        for (auto iter = mExpUsages.rbegin(); iter != mExpUsages.rend(); ++iter) {
-            /// ExpUsages也是从后向前遍历
+        /// ExpUsages也是从后向前遍历
+        for (auto iter = currentTwig->mExpUsages.rbegin();
+             iter != currentTwig->mExpUsages.rend();
+             ++iter)
+        {
             auto& mergedExp = *iter;
             size_t currentSerial = mergedExp->serialOfLastExp();
             auto& relatedNodePtr = nodePs[currentSerial];
@@ -192,6 +195,7 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
                 mapNodePtrs.emplace_back(relatedNodePtr);
 
                 size_t nGates = currentMergedRelatedExp->expData()->nGates();
+                /// 一个映射表, vec[i] = j, 则当前的gate_i对应实际MapNode的gate_j
                 vector<GateID> gatesMap2EndMergedExp(nGates);
                 for (int i = 0; i < nGates; ++i) {
                     gatesMap2EndMergedExp[i] = i;

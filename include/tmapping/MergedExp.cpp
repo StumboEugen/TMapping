@@ -11,8 +11,8 @@
 using namespace std;
 using namespace tmap;
 
-MergedExp::MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult)
-        : mFather(std::move(father)),
+MergedExp::MergedExp(const MergedExpPtr& father, ExpPtr newExp, MatchResult matchResult)
+        : mFather(father),
           mRelatedExp(std::move(newExp)),
           nMergedExps(father->nMergedExps + 1),
           mMergedExpData(std::move(matchResult->mergedExpData)),
@@ -159,8 +159,18 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
         if (j != GATEID_NO_MAPPING) {
             const auto& thisGates = this->mMergedExpData->getGates();
             const auto& thatGates = matchResult->mergedExpData->getGates();
+            /// 注意对于第一个Exp, 原点选为leaveGate, gblPos为 0,0
+            TopoVec2 glbPosRefInThis{};
+            if (this->mRelatedExp->getEnterGate() != GATEID_BEGINNING_POINT) {
+                /// 对于正常情况, 全局的0,0就是enterGate
+                glbPosRefInThis = thisGates[this->mRelatedExp->getEnterGate()]->getPos();
+            } else {
+                /// 对于第一个Exp, gbl 对应的是leaveGate
+                glbPosRefInThis = thisGates[this->mRelatedExp->getLeaveGate()]->getPos();
+            }
             const auto& jGblPos = this->mRelatedExp->getOdomGbPos() + thisGates[j]->getPos() -
-                    thisGates[this->mRelatedExp->getEnterGate()]->getPos();
+                                  glbPosRefInThis;
+            /// 对于newExp, gblPos也就是enterGate
             const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
                     thatGates[newExp->getEnterGate()]->getPos();
             double posDif2 = (iGblPos - jGblPos).len2();
@@ -186,7 +196,9 @@ MergedExpPtr MergedExp::singleMergedFromExp(ExpPtr fatherExp)
     if (theFirstStoredInExp) {
         return theFirstStoredInExp;
     } else {
+        auto p = fatherExp.get();
         theFirstStoredInExp.reset(new MergedExp(std::move(fatherExp)));
+        p->theSingleMergedExp() = theFirstStoredInExp;
         return theFirstStoredInExp;
     }
 }

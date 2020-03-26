@@ -57,7 +57,7 @@ class MergedExp : public std::enable_shared_from_this<MergedExp>
 
 private: // constructor
 
-    MergedExp(MergedExpPtr father, ExpPtr newExp, MatchResult matchResult);
+    MergedExp(const MergedExpPtr& father, ExpPtr newExp, MatchResult matchResult);
 
     explicit MergedExp(ExpPtr fatherExp);
 

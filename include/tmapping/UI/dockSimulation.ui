@@ -50,7 +50,7 @@
        <string>accidents can happen</string>
       </property>
       <property name="checked">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -79,7 +79,7 @@
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Conv:(meter)</string>
+            <string>max err/m</string>
            </property>
           </widget>
          </item>
@@ -104,7 +104,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Conv:(degree)</string>
+            <string>max deg</string>
            </property>
           </widget>
          </item>

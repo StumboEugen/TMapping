@@ -604,7 +604,7 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
         srvExp.request.jNewExp = JsonHelper::JS2Str(theExp2Send->toJS());
 
         if (!RSC_newExp.call(srvExp)) {
-            cerr << "ROS service calling failed!" << endl;
+            cerr << "ROS service [newExp] call failed!" << endl;
             return;
         }
 
@@ -613,7 +613,7 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
         gateMovement.request.jGateMove = JsonHelper::JS2Str(gateMove);
 
         if (!RSC_throughGate.call(gateMovement)) {
-            cerr << "ROS service calling failed!" << endl;
+            cerr << "ROS service [gateMove] call failed!" << endl;
         }
     } else {
         cout << "ROS hasn't started, the message will not be sent" << endl;
