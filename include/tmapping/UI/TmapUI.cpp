@@ -228,6 +228,13 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         uiDockRealtime->setupUi(dockRealtime);
         addDockWidget(Qt::LeftDockWidgetArea, dockRealtime);
         dockRealtime->setShown(false);
+
+        connect(uiDockRealtime->btnGetRealTimeMap, SIGNAL(clicked()),
+                this, SLOT(SLOT_GetRealtimeMaps()));
+
+        connect(uiDockRealtime->cbCandidates, SIGNAL(highlighted(int)),
+                this, SLOT(SLOT_DisplayTheRealMap(int)));
+
     }
 }
 
@@ -491,6 +498,7 @@ void tmap::TmapUI::SLOT_InitROS()
 
     RSC_newExp = n.serviceClient<tmapping::NewExp>(TMAP_STD_SERVICE_NAME_NEW_EXP);
     RSC_throughGate = n.serviceClient<tmapping::GateMovement>(TMAP_STD_SERVICE_NAME_GATE_MOVE);
+    RSC_getMaps = n.serviceClient<tmapping::GetMaps>(TMAP_STD_SERVICE_NAME_GET_MAPS);
 }
 
 void tmap::TmapUI::SLOT_SwitchMode(QAction* newMode)
@@ -618,4 +626,33 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
     } else {
         cout << "ROS hasn't started, the message will not be sent" << endl;
     }
+}
+
+void tmap::TmapUI::SLOT_GetRealtimeMaps()
+{
+    if (!checkROS()) {
+        infoView->setText("Please connect to ROS first");
+        return;
+    }
+
+    tmapping::GetMaps infoBridge;
+    infoBridge.request.nMapRequired = uiDockRealtime->sbMapNeeded->text().toUInt();
+
+    if (RSC_getMaps.call(infoBridge)) {
+        realtimeMaps = JsonHelper::Str2JS(infoBridge.response.jMaps);
+
+        gvMain->displayRealMap(realtimeMaps[0]);
+
+        uiDockRealtime->cbCandidates->clear();
+
+        for (int i = 0; i < realtimeMaps.size(); ++i) {
+            uiDockRealtime->cbCandidates->addItem("Map#" + QString::number(i) + " " +
+            QString::number(realtimeMaps[i]["poss"].asDouble()));
+        }
+    }
+}
+
+void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
+{
+    gvMain->displayRealMap(realtimeMaps[index]);
 }

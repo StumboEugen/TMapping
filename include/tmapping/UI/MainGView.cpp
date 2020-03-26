@@ -405,9 +405,11 @@ void tmap::MainGView::loadMap(const std::string& fileName)
     StructedMapImpl map(jMap);
     const auto& nodes = map.getNodes();
     vector<QNodePtr> qNodes(nodes.size());
+
     for (int i = 0; i < nodes.size(); ++i) {
         qNodes[i] = QNode::makeOneFromMergedExp(nodes[i]->getRelatedMergedExp(), mMoveStragety);
     }
+
     /// links的内容需要被更新, 连接对象的指针需要被更改
     for (int i = 0; i < nodes.size(); ++i) {
         for (int j = 0; j < nodes[i]->nLinks(); ++j) {
@@ -624,3 +626,93 @@ void tmap::MainGView::setQNodeMovability(tmap::QNode* node) const
         node->setFlag(QGraphicsItem::ItemIsMovable, false);
     }
 }
+
+void tmap::MainGView::displayRealMap(const Jsobj& jMap)
+{
+    StructedMapImpl map(jMap);
+    const auto& nodes = map.getNodes();
+    vector<QNodePtr> qNodes(nodes.size());
+
+    /// 复制一份QNode
+    for (int i = 0; i < nodes.size(); ++i) {
+        qNodes[i] = QNode::makeOneFromMergedExp(nodes[i]->getRelatedMergedExp(),
+                MoveStragety::ONLY_FIXED_TYPE);
+    }
+
+    /// links的内容需要被更新, 连接对象的指针需要被更改
+    for (int i = 0; i < nodes.size(); ++i) {
+        for (int j = 0; j < nodes[i]->nLinks(); ++j) {
+            qNodes[i]->linkAt(j).at = nodes[i]->linkAt(j).at;
+            const auto& toNode = nodes[i]->linkAt(j).to.lock();
+            if (toNode) {
+                qNodes[i]->linkAt(j).to = qNodes[toNode->getSerial()];
+            }
+        }
+    }
+
+    /// 开始BFS构造地图
+    mNodesInRealMap.clear();
+    bool once = false;
+    for (auto& qNode : qNodes) {
+        /// 为了处理拓扑不相连的情况, 对qNodes中所有成员进行BFS, 理论上其实下面这个if只发生一次
+        if (mNodesInRealMap.find(qNode) == mNodesInRealMap.end()) {
+            if (once) {
+                /// 发生了两次, 说明存在不相连的情况
+                cout << FILE_AND_LINE << " this map doesnt fully connected!" << endl;
+            } else {
+                once = true;
+            }
+            /// BFS使用的队列
+            queue<QNode*> lookupQueue;
+            /// BFS中的元素是已经添加过的QNode
+            lookupQueue.push(qNode.get());
+            qNode->setPos(0., 0.);
+            mScene4RealMap.addItem(qNode.get());
+            mNodesInRealMap.insert(std::move(qNode));
+
+            while (!lookupQueue.empty()) {
+                auto& currentQnode = lookupQueue.front();
+                lookupQueue.pop();
+                /// 查找所有的连接
+                for (int currentGID = 0; currentGID < currentQnode->nLinks(); ++currentGID) {
+                    auto linkedGID = currentQnode->linkedGIDAt(currentGID);
+                    auto linkedQNode = currentQnode->qNodeAt(currentGID);
+                    /// 是否与实际的QNode相连?
+                    if (linkedQNode) {
+                        /// 计算QNode应该放置的位置
+                        auto currentLinkGatePos = currentQnode->mapToScene(UIT::TopoVec2QPt(
+                                currentQnode->expData()->getGates()[currentGID]->getPos()));
+                        auto anotherGatePosInNode = UIT::TopoVec2QPt(
+                                linkedQNode->expData()->getGates()[linkedGID]->getPos());
+                        /// 是否已经被遍历过? (有没有被添加进scene?)
+                        if (linkedQNode->scene()) {
+                            auto anotherGatePosInScene =
+                                    linkedQNode->mapToScene(anotherGatePosInNode);
+                            if (anotherGatePosInScene != currentLinkGatePos) {
+                                /// 另外一个相连的Node已经被遍历过, 但是位置没有匹配, 建立FakeLine
+                                auto fakeLine = make_shared<FakeLine_IMPL>(currentLinkGatePos,
+                                                                           anotherGatePosInScene,
+                                                                           currentQnode,
+                                                                           currentGID);
+                                mScene4RealMap.addItem(fakeLine.get());
+                                currentQnode->fakeLineAt(currentGID) = fakeLine;
+                                linkedQNode->fakeLineAt(linkedGID) = std::move(fakeLine);
+                            }
+                        } else {
+                            /// 没有被遍历过, 则加入scene以及collection
+                            linkedQNode->setPos(currentLinkGatePos - anotherGatePosInNode);
+                            mNodesInRealMap.insert(linkedQNode);
+                            mScene4RealMap.addItem(linkedQNode.get());
+                            lookupQueue.push(linkedQNode.get());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+//    for (auto& node : mNodesInRealMap) {
+//        setQNodeMovability(node.get());
+//    }
+}
+

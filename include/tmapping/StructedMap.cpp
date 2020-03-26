@@ -93,6 +93,16 @@ const vector<MapNodePtr>& StructedMapImpl::getNodes() const
     return mNodes;
 }
 
+double StructedMapImpl::getPsblt() const
+{
+    return mPossibility;
+}
+
+void StructedMapImpl::setPsblt(double psbly)
+{
+    StructedMapImpl::mPossibility = psbly;
+}
+
 ///////////////////////// NEXT IS ABOUT MAPNODE //////////////////////////
 
 size_t MapNode::getSerial() const

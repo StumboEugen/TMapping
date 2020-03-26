@@ -65,6 +65,9 @@ class TmapUI : public QMainWindow
 
     ros::ServiceClient RSC_newExp;
     ros::ServiceClient RSC_throughGate;
+    ros::ServiceClient RSC_getMaps;
+
+    Jsobj realtimeMaps;
 
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
@@ -96,6 +99,8 @@ private Q_SLOTS:
     void SLOT_SwitchMode(QAction*);
     void SLOT_PlaceRobot();
     void SLOT_ROS_ThroughGate(const ExpPtr&);
+    void SLOT_GetRealtimeMaps();
+    void SLOT_DisplayTheRealMap(int);
 
 };
 }

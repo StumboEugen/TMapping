@@ -67,12 +67,6 @@ public:
 
 class StructedMapImpl
 {
-//    struct AgentPos
-//    {
-//        size_t placeNode;
-//        TopoVec2 pos;
-//    };
-
     std::vector<MapNodePtr> mNodes;
 
     MapTwigWePtr mRelatedTwig;
@@ -91,6 +85,10 @@ public:
     Json::Value toJS() const;
 
     const std::vector<MapNodePtr>& getNodes() const;
+
+    double getPsblt() const;
+
+    void setPsblt(double psbly);
 };
 
 }

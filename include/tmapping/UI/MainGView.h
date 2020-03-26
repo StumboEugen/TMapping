@@ -23,6 +23,7 @@ class MainGView : public QGraphicsView
     QGraphicsScene mScene4FakeMap;
     QGraphicsScene mScene4RealMap;
     std::set<QNodePtr> mNodesInFakeMap;
+    std::set<QNodePtr> mNodesInRealMap;
 
     QNodePtr mTheDrawingCorridor;
     FakeLine mTheDrawingFakeLine;
@@ -65,6 +66,8 @@ public:
     void switch2simMode(bool);
 
     bool setRobotInFake(bool directMove);
+
+    void displayRealMap(const Jsobj& jMap);
 
     ~MainGView() override;
 

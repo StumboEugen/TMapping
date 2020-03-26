@@ -124,18 +124,13 @@ tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)
         cerr << FILE_AND_LINE << " You ask maps from an empty twigCollection!" << endl;
         return res;
     }
-    auto iter = aliveMaps.begin();
 
-    if (mChampionMap) {
-        res.append(mChampionMap->toJS());
-        ++iter;
-        ++nPushed;
-    }
+    nTops = min(nTops, aliveMaps.size());
 
-    while (nPushed < nTops && iter != aliveMaps.end()) {
-        res.append(iter->get()->makeMap(this->mExperiences)->toJS());
-        ++iter;
-        ++nPushed;
+    for (int i = 0; i < nTops; ++i) {
+        const auto& structedMap = aliveMaps[i]->makeMap(this->mExperiences);
+        structedMap->setPsblt(this->twigCollection.getScores()[i]);
+        res.append(structedMap->toJS());
     }
 
     return res;
