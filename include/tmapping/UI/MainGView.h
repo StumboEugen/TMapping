@@ -30,6 +30,7 @@ class MainGView : public QGraphicsView
     QRobotPtr mRobot;
 
     bool mEnableFakeNodesMoving = true;
+    bool mEnableRealNodesMoving = true;
     bool mEnableNodeRestriction = false;
     bool mIsDrawingEdge = false;
     bool mAcceptAddingGate2Corridor = false;
@@ -40,7 +41,8 @@ class MainGView : public QGraphicsView
     MoveStragety mMoveStragety = MoveStragety::EVERY_NODE;
 
 private:
-    void setQNodeMovability(QNode* node) const;
+    void setQNodeMovabilityInFakeMap(QNode* node) const;
+    void setQNodeMovabilityInRealMap(QNode* node) const;
 
 protected:
     void wheelEvent(QWheelEvent * event) override ;
@@ -73,6 +75,7 @@ public:
 
 public Q_SLOTS:
     void SLOT_EnableMoving4FakeNodes(bool enableMove);
+    void SLOT_EnableMoving4RealNodes(bool enableMove);
     void SLOT_EnableGridRestriction(bool enableRes);
     void SLOT_StartDrawingEdge(bool enableDrawing);
     void SLOT_AcceptAddingGates2Corridor(bool acceptAdding);

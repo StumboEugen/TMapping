@@ -235,6 +235,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockRealtime->cbCandidates, SIGNAL(highlighted(int)),
                 this, SLOT(SLOT_DisplayTheRealMap(int)));
 
+        connect(uiDockRealtime->cbEnableNodesMoving, SIGNAL(toggled(bool)),
+                gvMain, SLOT(SLOT_EnableMoving4RealNodes(bool)));
     }
 }
 

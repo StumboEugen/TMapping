@@ -47,7 +47,7 @@ void tmap::MainGView::addNode2FakeMapFromExpData(const tmap::ExpDataPtr& usedExp
     auto qNode = QNode::makeOneFromExpData(usedExpData, mMoveStragety);
     mNodesInFakeMap.insert(qNode);
     mScene4FakeMap.addItem(qNode.get());
-    setQNodeMovability(qNode.get());
+    setQNodeMovabilityInFakeMap(qNode.get());
     qNode->setPos(sceneRect().center());
 }
 
@@ -56,7 +56,17 @@ void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
     mEnableFakeNodesMoving = enableMove;
     for (auto& item : mScene4FakeMap.items()) {
         if (auto qNode = dynamic_cast<QNode*>(item)) {
-            setQNodeMovability(qNode);
+            setQNodeMovabilityInFakeMap(qNode);
+        }
+    }
+}
+
+void tmap::MainGView::SLOT_EnableMoving4RealNodes(bool enableMove)
+{
+    mEnableRealNodesMoving = enableMove;
+    for (auto& item : mScene4RealMap.items()) {
+        if (auto qNode = dynamic_cast<QNode*>(item)) {
+            setQNodeMovabilityInRealMap(qNode);
         }
     }
 }
@@ -483,7 +493,7 @@ void tmap::MainGView::loadMap(const std::string& fileName)
     }
 
     for (auto& node : mNodesInFakeMap) {
-        setQNodeMovability(node.get());
+        setQNodeMovabilityInFakeMap(node.get());
     }
 }
 
@@ -590,7 +600,7 @@ void tmap::MainGView::switch2simMode(bool toSim)
     } else {
         for (auto& item : mScene4FakeMap.items()) {
             if (auto qNode = dynamic_cast<QNode*>(item)) {
-                setQNodeMovability(qNode);
+                setQNodeMovabilityInFakeMap(qNode);
             }
         }
 
@@ -612,7 +622,7 @@ bool tmap::MainGView::setRobotInFake(bool directMove)
     return false;
 }
 
-void tmap::MainGView::setQNodeMovability(tmap::QNode* node) const
+void tmap::MainGView::setQNodeMovabilityInFakeMap(tmap::QNode* node) const
 {
     if (mEnableFakeNodesMoving) {
         if (node->expData()->type() != ExpDataType::Corridor) {
@@ -625,6 +635,11 @@ void tmap::MainGView::setQNodeMovability(tmap::QNode* node) const
     } else {
         node->setFlag(QGraphicsItem::ItemIsMovable, false);
     }
+}
+
+void tmap::MainGView::setQNodeMovabilityInRealMap(tmap::QNode* node) const
+{
+    node->setFlag(QGraphicsItem::ItemIsMovable, mEnableRealNodesMoving);
 }
 
 void tmap::MainGView::displayRealMap(const Jsobj& jMap)
@@ -711,8 +726,8 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
         }
     }
 
-//    for (auto& node : mNodesInRealMap) {
-//        setQNodeMovability(node.get());
-//    }
+    for (auto& node : mNodesInRealMap) {
+        setQNodeMovabilityInRealMap(node.get());
+    }
 }
 
