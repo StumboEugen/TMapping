@@ -66,10 +66,10 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         smallWindowLayout->setContentsMargins(5, 0, 5, 0);
 
         infoView = new QTextBrowser(uiMain->centralWidget);
-        infoView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        infoView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         infoView->setBaseSize(221, 221);
         infoView->setText("Welcome!");
-        smallWindowLayout->addWidget(infoView, 0, Qt::AlignTop);
+        smallWindowLayout->addWidget(infoView, 0);
 
         gvVice = new ViceGView(uiMain->centralWidget);
 //    gvVice->setScene(&this->nodeScene);

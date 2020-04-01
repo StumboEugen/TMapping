@@ -30,7 +30,7 @@ void tmap::UIT::drawGate(QPainter* painter, Gate* gate2draw, bool useGatePose, b
         /// 画出路口的虚线
         QPen dotPen{Qt::black, 3};
         dotPen.setStyle(Qt::DotLine);
-        dotPen.setDashOffset(1);
+//        dotPen.setDashOffset(1);
         painter->setPen(dotPen);
         painter->drawLine(halfGatePos, -halfGatePos);
         painter->setPen(oriPen);
