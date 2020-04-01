@@ -53,6 +53,8 @@ protected:
 
     void keyPressEvent(QKeyEvent* event) override;
 
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+
 public:
     explicit MainGView(QWidget *parent = nullptr);
 
@@ -85,6 +87,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void SIG_RobotThroughGate(ExpPtr);
+    void SIG_ShowStrInInfoView(QString);
 };
 }
 

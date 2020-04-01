@@ -380,6 +380,19 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
 
 }
 
+void tmap::MainGView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    QGraphicsView::mouseDoubleClickEvent(event);
+    const auto & clickPosInView = event->pos();
+    const auto & clickPosInScene = mapToScene(clickPosInView);
+    auto item = scene()->itemAt(clickPosInScene);
+
+    if (auto qNode = dynamic_cast<QNode*>(item)) {
+        auto str = JsonHelper::JS2Str(qNode->expData()->toJS(), false);
+        SIG_ShowStrInInfoView(str.data());
+    }
+}
+
 void tmap::MainGView::saveFakeMap(const std::string& mapName)
 {
     vector<MapNodePtr> nodes{mNodesInFakeMap.begin(), mNodesInFakeMap.end()};

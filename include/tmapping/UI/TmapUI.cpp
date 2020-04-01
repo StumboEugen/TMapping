@@ -77,6 +77,8 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         gvVice->setCursor(Qt::CrossCursor);
         gvVice->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
         smallWindowLayout->addWidget(gvVice, 0, Qt::AlignBottom);
+        connect(gvMain, SIGNAL(SIG_ShowStrInInfoView(QString))
+                , infoView, SLOT(setText(QString)));
 
         centerLayout->addLayout(smallWindowLayout);
     }
