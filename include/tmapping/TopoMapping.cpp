@@ -21,6 +21,7 @@ void tmap::TopoMapping::setLeftGate(GateID gateID)
 
 void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 {
+    cout << "\n\n===============================\nSTART arrive new EXP" << endl;
     mExperiences.addNewExpAndAddLoopClosures(newExp, twigCollection);
 
     MergedExpPtr theSingleMergedExp = MergedExp::singleMergedFromExp(newExp);
@@ -60,6 +61,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));
                     } else {
                         /// 一致性不通过, 废弃
+                        cout << "killed by OLD not alike (gened)" << endl;
                         oneAliveTwig->setExpired();
                     }
                 } else {
@@ -76,6 +78,9 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         newMergedExp->addRelatedMapTwig(oneAliveTwig);
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));
                     } else{
+                        cout << "killed by OLD not alike (not gened) gateCor:"
+                            << gateCorrect << " And the poss: " << poss << "the twig poss:"
+                            << oneAliveTwig->getCaledGblConfidence() << endl;
                         oneAliveTwig->setExpired();
                     }
                 }
@@ -90,17 +95,6 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 
     twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);
 
-    auto& currentChampion = twigCollection.getAliveMaps().front();
-    if (mChampionMap) {
-        MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
-        if (relatedTwig) {
-            if (currentChampion->isDevelopedFrom(relatedTwig.get())) {
-                cout << "The champion remains" << endl;
-            }
-        }
-    }
-    mChampionMap = currentChampion->makeMap(this->mExperiences);
-
     const auto& aliveTwigs = twigCollection.getAliveMaps();
     cout << "\n\n# of alive maps :" << twigCollection.getAliveMaps().size()
        << "\n------------------------" << endl;
@@ -108,6 +102,21 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         cout << "nNodes: " << aliveTwigs[i]->getNodeCount() << "\tpsbly: " <<
         twigCollection.getScores()[i] << endl;
     }
+
+    auto& currentChampion = twigCollection.getAliveMaps().front();
+    if (mChampionMap) {
+        MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
+        if (relatedTwig) {
+            if (currentChampion->isDevelopedFrom(relatedTwig.get())) {
+                cout << "[THE CHAMPION STATUS]   remains" << endl;
+            } else {
+                cout << "[THE CHAMPION STATUS]   changed" << endl;
+            }
+        } else {
+            cout << "[THE CHAMPION STATUS]   is killed" << endl;
+        }
+    }
+    mChampionMap = currentChampion->makeMap(this->mExperiences);
 }
 
 tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)

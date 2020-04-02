@@ -613,7 +613,11 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
         }
 
         /// 发送数据
-        srvExp.request.jNewExp = JsonHelper::JS2Str(theExp2Send->toJS());
+        auto str = JsonHelper::JS2Str(theExp2Send->toJS(), false);
+        static int step = 0;
+        cout << "\n=======================\nSTEP " << step++ << "\n" << str << endl;
+        srvExp.request.jNewExp = str;
+        
 
         if (!RSC_newExp.call(srvExp)) {
             cerr << "ROS service [newExp] call failed!" << endl;

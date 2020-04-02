@@ -79,6 +79,10 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     } else {
         pointsMap = matchPairs(that, *this, false);
     }
+    if (pointsMap.empty()) {
+        res->possibility = 0.0;
+        return res;
+    }
 
     /// 开始融合出我们的结果, 首先生成一个没有具体信息的新 ExpData
     res->mergedExpData = that.cloneShell();
@@ -201,6 +205,13 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
             clonedLM->setPos(clonedLM->getPos() + setsDiff);
             res->mergedExpData->addLandmark(std::move(clonedLM));
         }
+    }
+
+    /// 如果是Corridor, 更新一下endPoint
+    if (res->mergedExpData->type() == ExpDataType::Corridor) {
+        auto c = (Corridor*)res->mergedExpData.get();
+        c->setEndGateA(c->getEndGateA());
+        c->setEndGateB(c->getEndGateB());
     }
 
     const size_t& nGateMerged = res->mergedExpData->nGates();

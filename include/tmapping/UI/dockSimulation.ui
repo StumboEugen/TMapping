@@ -72,6 +72,9 @@
          <property name="text">
           <string>pos error</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -96,6 +99,9 @@
         <widget class="QCheckBox" name="cbDirError">
          <property name="text">
           <string>direction error</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

@@ -8,6 +8,7 @@
 #include "MergedExp.h"
 
 #include <algorithm>
+#include <iostream>
 
 using namespace tmap;
 using namespace std;
@@ -43,6 +44,11 @@ void MapTwigCollection::add2NextGeneration(MapTwigPtr&& mapTwig)
 
 size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienceCount)
 {
+    if (mNextGeneration.empty()) {
+        cerr << FILE_AND_LINE << "ALL map out!" << endl;
+        throw;
+    }
+
     if (nSurviver == 0 || nSurviver > mNextGeneration.size()) {
         nSurviver = mNextGeneration.size();
     }

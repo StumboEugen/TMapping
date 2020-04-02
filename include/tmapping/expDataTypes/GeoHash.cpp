@@ -10,8 +10,8 @@ static constexpr double TABLE_RES = 0.25;
 using namespace tmap;
 
 static double __tool_ERR(const TopoVec2& posDiff, double odomErr) {
-    return 0.35;
-//    return posDiff.len() * odomErr;
+//    return 0.35;
+    return posDiff.len() * odomErr;
 }
 
 /**
@@ -87,7 +87,7 @@ void GeoHash::fillEntrances(TopoVec2 midPos, double err,
         const SubNode& base, const SubNode& anotherNode)
 {
     Entrance entrance{base, anotherNode};
-    err = std::max(err, TABLE_RES / 2);
+    err = std::max(err, TABLE_RES * 2);
     double errInRes = err / TABLE_RES;
     double r2 = errInRes * errInRes; //r^2
     double xmid = midPos.px / TABLE_RES;

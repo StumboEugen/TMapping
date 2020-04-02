@@ -33,13 +33,6 @@ static constexpr GateID GATEID_NOT_FOUND = -5;
 static constexpr double stdErrPerMeter = 0.1 * M_SQRT2;
 static constexpr double convErrPerMeter = 0.02;
 
-static constexpr double piHalf = 3.1415926 / 2.0;
-static constexpr double pi = 3.1415926;
-static constexpr double piTwo = 3.1415926 * 2.0;
-
-static constexpr double DEG2RAD = pi / 180;
-static constexpr double RAD2DEG = 180 / pi;
-
 static constexpr char TMAP_STD_FILE_SAVE_FLODER_NAME[] = "tmappingMaps/";
 static constexpr char TMAP_STD_SERVICE_NAME_NEW_EXP[] = "tmapping/srv/newExp";
 static constexpr char TMAP_STD_SERVICE_NAME_GATE_MOVE[] = "tmapping/srv/gateMove";

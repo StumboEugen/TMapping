@@ -19,7 +19,7 @@ class TopoMapping
     MapTwigCollection twigCollection;
     StructedMap mChampionMap;
 
-    size_t mSurviverSetting = 0;
+    size_t mSurviverSetting = 200;
 
 public:
     void setLeftGate(GateID gateID);
