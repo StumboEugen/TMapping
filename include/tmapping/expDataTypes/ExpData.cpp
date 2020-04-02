@@ -907,14 +907,13 @@ void ExpData::addNoise(double maxOdomErrPerM, double maxDegreeErr)
 
     /// 随机得到两个方向上的噪声 ex ey
     TopoVec2 ex{}, ey{};
-    double errMax = maxOdomErrPerM * maxLen;
-    normal_distribution<> g{0, errMax / 4.5};
+    normal_distribution<> g{0, maxOdomErrPerM / 3.5};
     while (true) {
         ex.px = g(engine);
         ex.py = g(engine);
         ey.px = g(engine);
         ey.py = g(engine);
-        if (ex.len() + ey.len() > errMax) {
+        if (ex.len() + ey.len() > maxOdomErrPerM) {
             continue;
         }
         break;

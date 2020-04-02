@@ -264,11 +264,11 @@ MergedExp::GateConflictResult MergedExp::checkGateConflict(GateID gateID)
                 return res;
             }
 
+            relatedFatherGate = father->mGatesMapping2Father[relatedFatherGate];
             father = father->mFather.get();
             if (father == nullptr) {
                 return res;
             }
-            relatedFatherGate = father->mGatesMapping2Father[relatedFatherGate];
         }
     } else {
         return res;
