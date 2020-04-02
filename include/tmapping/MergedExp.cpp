@@ -22,6 +22,9 @@ MergedExp::MergedExp(const MergedExpPtr& father, ExpPtr newExp, MatchResult matc
           mPossDecConf(matchResult->possibility)
 {}
 
+/**
+ * @brief 生成一个节点生长树的根节点,即认为fatherExp是一个全新的节点
+ */
 MergedExp::MergedExp(ExpPtr fatherExp)
         : mFather(nullptr),
           mRelatedExp(std::move(fatherExp)),
@@ -31,7 +34,7 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           /// add GATEID_NO_MAPPING for safety
           mGatesMapping2Father(mMergedExpData->nGates(), GATEID_NO_MAPPING),
           mGatesMappingFromFather(),
-          mPossDecConf(1.0)
+          mPossDecConf(0.98) /// 做一个调整,我们希望压制全新地图的增长,不能使其没有代价
 {}
 
 MergedExp::MergedExp(const Jsobj& jmergedExp)
@@ -174,7 +177,8 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
             const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
                     thatGates[newExp->getEnterGate()]->getPos();
             double posDif2 = (iGblPos - jGblPos).len2();
-            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist;
+            /// 闭环检测不要给太多的惩罚 x2
+            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist * 2.0;
             coe = exp(-0.5 * posDif2 / C);
             break;
         }

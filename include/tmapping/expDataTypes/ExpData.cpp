@@ -120,6 +120,7 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     uint32_t nMatches = 0;
     /// 调整后的方差
     double C0 = convErrPerMeter * (1.0 + 1.0 / selfWeight);
+//    double C0 = convErrPerMeter * 4 * (1.0 + 1.0 / selfWeight); /// 这里把误差允许范围* 2
 
     /// @note 这里为了保证index的一致性,我们从that开始遍历
     /// 首先遍历that的所有gate

@@ -89,7 +89,7 @@
          <item>
           <widget class="QLineEdit" name="lePosError">
            <property name="text">
-            <string>0.1</string>
+            <string>0.15</string>
            </property>
           </widget>
          </item>

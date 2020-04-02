@@ -30,8 +30,8 @@ static constexpr GateID GATEID_HAVENT_LEFT = -3;
 static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 static constexpr GateID GATEID_NOT_FOUND = -5;
 
-static constexpr double stdErrPerMeter = 0.1 * M_SQRT2;
-static constexpr double convErrPerMeter = 0.02;
+static constexpr double stdErrPerMeter = 0.15;
+static constexpr double convErrPerMeter = stdErrPerMeter * stdErrPerMeter;
 
 static constexpr char TMAP_STD_FILE_SAVE_FLODER_NAME[] = "tmappingMaps/";
 static constexpr char TMAP_STD_SERVICE_NAME_NEW_EXP[] = "tmapping/srv/newExp";
@@ -47,8 +47,8 @@ static constexpr char TMAP_STD_SERVICE_NAME_GET_MAPS[] = "tmapping/srv/getMaps";
 //static constexpr char TOPO_STD_SERVICE_NAME_PATHPLANNING[] = "topoSrv/PathPlanning";
 //static constexpr char TOPO_STD_SERVICE_NAME_ASKINGNEXTSTEP[] = "topoSrv/NextPathStep";
 
-static constexpr double TOLLERANCE_1ST_MATCH_EXP = 0.5;
-static constexpr double TOLLERANCE_2ND_MATCH_MERGEDEXP = 0.75;
+/// 第二轮的时候, 任何概率都接受, 哪些很差的, 交给固定数量去干掉
+static constexpr double TOLLERANCE_2ND_MATCH_MERGEDEXP = 0.0;
 
 class MapTwig;
 

@@ -23,6 +23,10 @@ static int64_t CC(int64_t x, int64_t y) {
 
 tmap::GeoHash::GeoHash(const ExpData& oriData, double odomErr)
 {
+    /// 因为表是制作在误差上的,所以需要两倍的容许范围
+    /// 比如误差范围是±1,[-1,1],那么误差有可能是2
+    odomErr *= 2.0;
+
     const auto& gates = oriData.getGates();
     const auto& lms = oriData.getPLMs();
 
