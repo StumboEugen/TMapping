@@ -115,9 +115,6 @@ void tmap::Gate::mergeBasicInfo(const Gate* A, const Gate* B,
                                 const tmap::TopoVec2& BPos, double weightA)
 {
     this->mPos = (A->mPos * weightA + BPos) / (weightA + 1);
-    double ad = A->mNormalVec.tan();
-    double bd = B->mNormalVec.tan();
-    double td = (ad * weightA + bd) / (weightA + 1);
-    this->mNormalVec = A->mNormalVec.rotate(td - ad);
+    this->mNormalVec = ((A->mNormalVec * weightA + B->mNormalVec) / (weightA + 1)).unitize();
     this->possibility = (A->possibility * weightA + B->possibility) / (weightA + 1);
 }
