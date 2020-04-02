@@ -30,7 +30,7 @@ static constexpr GateID GATEID_HAVENT_LEFT = -3;
 static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 static constexpr GateID GATEID_NOT_FOUND = -5;
 
-static constexpr double stdErrPerMeter = 0.15;
+static constexpr double stdErrPerMeter = 0.3;
 static constexpr double convErrPerMeter = stdErrPerMeter * stdErrPerMeter;
 
 static constexpr char TMAP_STD_FILE_SAVE_FLODER_NAME[] = "tmappingMaps/";

@@ -624,8 +624,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         /// 开始投票, 投票箱中存储对应base的映射关系
         /// pair<this, that>
         /// 对应int的patternBase下的匹配结果
-        vector<vector<pair<SubNode, SubNode>>> hitsOfBase(nPointsPat);
-        /// TODO 发生歧义匹配时应该怎么办? 1->2 3->2
+        vector<vector<pair<SubNode, SubNode>>> votesOfBase(nPointsPat);
 
         size_t nValidBase = 0;
 
@@ -636,14 +635,14 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
             for (int j = 0; j < pattern.nGates(); ++j) {
                 if (baseGate->alike(pattern.mGates[j])) {
                     /// 合适的base所对应的pair添加base的匹配
-                    hitsOfBase[j].reserve(nPointsPat);
+                    votesOfBase[j].reserve(nPointsPat);
                     nValidBase++;
                     if (shapeIsThis) {
-                        hitsOfBase[j].emplace_back(make_pair(
+                        votesOfBase[j].emplace_back(make_pair(
                                 SubNode(SubNodeType::GATE, i),
                                 SubNode(SubNodeType::GATE, j)));
                     } else {
-                        hitsOfBase[j].emplace_back(make_pair(
+                        votesOfBase[j].emplace_back(make_pair(
                                 SubNode(SubNodeType::GATE, j),
                                 SubNode(SubNodeType::GATE, i)));
                     }
@@ -656,14 +655,14 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
             for (int j = 0; j < pattern.mPosLandmarks.size(); ++j) {
                 if (baseLM->alike(pattern.mPosLandmarks[j])) {
                     /// 合适的base所对应的pair添加base的匹配
-                    hitsOfBase[j].reserve(nPointsPat);
+                    votesOfBase[j].reserve(nPointsPat);
                     nValidBase++;
                     if (shapeIsThis) {
-                        hitsOfBase[j].emplace_back(make_pair(
+                        votesOfBase[j].emplace_back(make_pair(
                                 SubNode(SubNodeType::LandMark, i),
                                 SubNode(SubNodeType::LandMark, j)));
                     } else {
-                        hitsOfBase[j].emplace_back(make_pair(
+                        votesOfBase[j].emplace_back(make_pair(
                                 SubNode(SubNodeType::LandMark, j),
                                 SubNode(SubNodeType::LandMark, i)));
                     }
@@ -681,26 +680,38 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
 
         /// 开始投票
         for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
-            if (auto bins = table.lookUpEntersAtPos(gatesOfShape[idShapeGate]->getPos() - basePosOfShape)) {
-                if (bins != nullptr) {
-                    for (const auto& bin : *bins) {
-                        auto& hitVec = hitsOfBase[bin.base.index];
-                        /// 如果为空,表明base本身就不匹配, 不使用
-                        if (!hitVec.empty() &&
-                            bin.node.type == SubNodeType::GATE) {
-                            auto idPatGate = bin.node.index;
-                            const auto& shapesGate = gatesOfShape[idShapeGate];
-                            const auto& patternsGate = pattern.getGates()[idPatGate];
-                            if (shapesGate->alike(patternsGate)) {
-                                if (shapeIsThis) {
-                                    hitVec.emplace_back(
-                                            SubNode(SubNodeType::GATE, idShapeGate),
-                                            SubNode(SubNodeType::GATE, idPatGate));
-                                } else {
-                                    hitVec.emplace_back(
-                                            SubNode(SubNodeType::GATE, idPatGate),
-                                            SubNode(SubNodeType::GATE, idShapeGate));
+            auto shapeGatePosInBase = gatesOfShape[idShapeGate]->getPos() - basePosOfShape;
+            if (auto bins = table.lookUpEntersAtPos(shapeGatePosInBase)) {
+                for (const auto& bin : *bins) {
+                    /// 找到对应base的投票箱
+                    auto& vecVote = votesOfBase[bin.base.index];
+                    /// 如果为空,表明base本身就不匹配, 不使用
+                    if (!vecVote.empty() &&
+                        bin.node.type == SubNodeType::GATE) {
+                        auto idPatGate = bin.node.index;
+                        const auto& shapesGate = gatesOfShape[idShapeGate];
+                        const auto& patternsGate = pattern.getGates()[idPatGate];
+                        if (shapesGate->alike(patternsGate)) {
+                            auto& lastVote = vecVote.back();
+                            if (__glibc_unlikely(lastVote.first.index == idShapeGate)) {
+                                /// 如果上一个投票的first也是idShapeGate, 说明idShape在同一个base下
+                                /// 命中了两个不同的Gate, 我们要的是一对一关系, 因此通过检查距离, 确定
+                                /// 应该用哪个
+                                const auto& basePosOfPat = pattern.getPosOfSubNode(bin.base);
+                                const auto& oldPatGatePos = 
+                                        pattern.getPosOfSubNode(lastVote.second);
+                                const auto& newPatGatePos = pattern.mGates[idPatGate]->getPos();
+                                auto corrOld = oldPatGatePos - basePosOfPat;
+                                auto corrNew = newPatGatePos - basePosOfPat;
+                                if ((shapeGatePosInBase - corrOld).len2() >
+                                    (shapeGatePosInBase - corrNew).len2()) {
+                                    /// 说明新的这个命中距离更近一些, 更改为当前的idPatGate
+                                    lastVote.second.index = idPatGate;
                                 }
+                            } else {
+                                vecVote.emplace_back(
+                                        SubNode(SubNodeType::GATE, idShapeGate),
+                                        SubNode(SubNodeType::GATE, idPatGate));
                             }
                         }
                     }
@@ -709,25 +720,33 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         }
 
         for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
-            if (auto bins = table.lookUpEntersAtPos(lmsOfShape[idShapeLM]->getPos() - basePosOfShape)) {
-                if (bins != nullptr) {
-                    for (const auto& bin : *bins) {
-                        auto& hitVec = hitsOfBase[bin.base.index];
-                        if (!hitVec.empty() &&
-                            bin.node.type == SubNodeType::LandMark) {
-                            auto idPatLM = bin.node.index;
-                            const auto& currentLM = lmsOfShape[idShapeLM];
-                            const auto& targetLM = pattern.getPLMs()[idPatLM];
-                            if (currentLM->alike(targetLM)) {
-                                if (shapeIsThis) {
-                                    hitVec.emplace_back(
-                                            SubNode(SubNodeType::LandMark, idShapeLM),
-                                            SubNode(SubNodeType::LandMark, idPatLM));
-                                } else {
-                                    hitVec.emplace_back(
-                                            SubNode(SubNodeType::LandMark, idPatLM),
-                                            SubNode(SubNodeType::LandMark, idShapeLM));
+            auto shapeLMPosInBase = lmsOfShape[idShapeLM]->getPos() - basePosOfShape;
+            if (auto bins = table.lookUpEntersAtPos(shapeLMPosInBase)) {
+                for (const auto& bin : *bins) {
+                    auto& vecVote = votesOfBase[bin.base.index];
+                    if (!vecVote.empty() &&
+                        bin.node.type == SubNodeType::LandMark) {
+                        auto idPatLM = bin.node.index;
+                        const auto& currentLM = lmsOfShape[idShapeLM];
+                        const auto& targetLM = pattern.getPLMs()[idPatLM];
+                        if (currentLM->alike(targetLM)) {
+                            auto& lastVote = vecVote.back();
+                            if (__glibc_unlikely(lastVote.first.index == idShapeLM)) {
+                                const auto& basePosOfPat = pattern.getPosOfSubNode(bin.base);
+                                const auto& oldPatLMPOS =
+                                        pattern.getPosOfSubNode(lastVote.second);
+                                const auto& newPatLMPOS =
+                                        pattern.mPosLandmarks[idPatLM]->getPos();
+                                auto corrOld = oldPatLMPOS - basePosOfPat;
+                                auto corrNew = newPatLMPOS - basePosOfPat;
+                                if ((shapeLMPosInBase - corrOld).len2() >
+                                    (shapeLMPosInBase - corrNew).len2()) {
+                                    lastVote.second.index = idPatLM;
                                 }
+                            } else {
+                                vecVote.emplace_back(
+                                        SubNode(SubNodeType::LandMark, idShapeLM),
+                                        SubNode(SubNodeType::LandMark, idPatLM));
                             }
                         }
                     }
@@ -739,7 +758,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         vector<pair<SubNode, SubNode>>* theBestPairs = nullptr;
         {
             size_t nCountMax = 0;
-            for (auto& vecPairs : hitsOfBase) {
+            for (auto& vecPairs : votesOfBase) {
                 if (vecPairs.size() > nCountMax) {
                     theBestPairs = &vecPairs;
                     nCountMax = vecPairs.size();
@@ -751,6 +770,11 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
             /// 如果压根没有pairs, 或者有一半的点都没有匹配, 则换一个点试试
             continue;
         } else {
+            if (!shapeIsThis) {
+                for (auto& pair : *theBestPairs) {
+                    std::swap(pair.first.index, pair.second.index);
+                }
+            }
             return std::move(*theBestPairs);
         }
     }
