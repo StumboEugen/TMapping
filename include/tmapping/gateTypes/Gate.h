@@ -44,7 +44,7 @@ public:
 
     double getPossibility() const;
 
-    void setPossibility(double possibility);
+    void setPossibility(double poss);
 
     virtual Json::Value toJS() const;
 

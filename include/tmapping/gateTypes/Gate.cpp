@@ -26,9 +26,11 @@ const tmap::TopoVec2& tmap::Gate::getNormalVec() const
     return mNormalVec;
 }
 
-void tmap::Gate::setPossibility(double possibility)
+void tmap::Gate::setPossibility(double poss)
 {
-    Gate::possibility = possibility;
+    poss = max(0.0, poss);
+    poss = min(1.0, poss);
+    Gate::possibility = poss;
 }
 
 double tmap::Gate::getPossibility() const

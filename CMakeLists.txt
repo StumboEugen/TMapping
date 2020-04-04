@@ -223,4 +223,10 @@ add_dependencies(UI ${PROJECT_NAME}_gencpp)
 target_link_libraries(main ${catkin_LIBRARIES} ${QT_LIBRARIES})
 target_link_libraries(UI ${catkin_LIBRARIES} ${QT_LIBRARIES})
 
-#target_link_libraries(main topoLayer)
+add_executable(converter_LocalSSH
+    src/converters/Converter_LocalSSH.cpp
+    src/converters/LocalSSH.cpp
+    ${TopoFILES}
+    ${JsonFILES})
+add_dependencies(converter_LocalSSH ${PROJECT_NAME}_gencpp)
+target_link_libraries(converter_LocalSSH ${catkin_LIBRARIES} ${QT_LIBRARIES})

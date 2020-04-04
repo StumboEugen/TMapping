@@ -193,6 +193,8 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
             clonedGate->setPossibility(posblt / 2.0);
             clonedGate->setPos(clonedGate->getPos() + setsDiff);
             res->mergedExpData->addGate(std::move(clonedGate));
+            res->gateMapping2mergedExpData[i] = res->mergedExpData->nGates() - 1;
+            res->gateMapping2old[res->mergedExpData->nGates() - 1] = i;
         }
     }
 
@@ -218,11 +220,11 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     const size_t& nGateMerged = res->mergedExpData->nGates();
     res->displacement = -setsDiff;
 
-    /// 融合节点到老观测的映射表中nGateThat以后的部分必然没有映射关系,
-    /// 这里原本的数据有landemark的映射关系
-    for (int i = nGateThat; i < nGateMerged; ++i) {
-        res->gateMapping2old[i] = GATEID_NO_MAPPING;
-    }
+//    /// 融合节点到老观测的映射表中nGateThat以后的部分必然没有映射关系,
+//    /// 这里原本的数据有landemark的映射关系
+//    for (int i = nGateThat; i < nGateMerged; ++i) {
+//        res->gateMapping2old[i] = GATEID_NO_MAPPING;
+//    }
 
     { /// 从新观测到老的映射表, 从nGateMerged开始erase
         const auto& b = res->gateMapping2old.begin();
@@ -400,7 +402,7 @@ std::array<double, 4> ExpData::getOutBounding(double expandValue) const
         cerr << FILE_AND_LINE << "You try to get the outbounding of a 0 gates ExpData!" << endl;
         return {0., 0., 0., 0.};
     }
-    std::array<double, 4> res{DBL_MIN, DBL_MAX, DBL_MAX, DBL_MIN};
+    std::array<double, 4> res{-DBL_MAX, DBL_MAX, DBL_MAX, -DBL_MAX};
     for (const auto& gate : mGates) {
         auto& pos = gate->getPos();
         res[0] = max(res[0], pos.py);
@@ -637,15 +639,9 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                     /// 合适的base所对应的pair添加base的匹配
                     votesOfBase[j].reserve(nPointsPat);
                     nValidBase++;
-                    if (shapeIsThis) {
-                        votesOfBase[j].emplace_back(make_pair(
-                                SubNode(SubNodeType::GATE, i),
-                                SubNode(SubNodeType::GATE, j)));
-                    } else {
-                        votesOfBase[j].emplace_back(make_pair(
-                                SubNode(SubNodeType::GATE, j),
-                                SubNode(SubNodeType::GATE, i)));
-                    }
+                    votesOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::GATE, i),
+                            SubNode(SubNodeType::GATE, j)));
                 }
             }
         }
@@ -657,15 +653,9 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                     /// 合适的base所对应的pair添加base的匹配
                     votesOfBase[j].reserve(nPointsPat);
                     nValidBase++;
-                    if (shapeIsThis) {
-                        votesOfBase[j].emplace_back(make_pair(
-                                SubNode(SubNodeType::LandMark, i),
-                                SubNode(SubNodeType::LandMark, j)));
-                    } else {
-                        votesOfBase[j].emplace_back(make_pair(
-                                SubNode(SubNodeType::LandMark, j),
-                                SubNode(SubNodeType::LandMark, i)));
-                    }
+                    votesOfBase[j].emplace_back(make_pair(
+                            SubNode(SubNodeType::LandMark, i),
+                            SubNode(SubNodeType::LandMark, j)));
                 }
             }
         } else {

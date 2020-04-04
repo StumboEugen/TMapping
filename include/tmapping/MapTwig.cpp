@@ -194,7 +194,7 @@ StructedMap MapTwig::makeMap(const ExpCollection& exps)
                 const auto& currentMergedRelatedExp = mergedExp->getTheLastExp();
                 mapNodePtrs.emplace_back(relatedNodePtr);
 
-                size_t nGates = currentMergedRelatedExp->expData()->nGates();
+                size_t nGates = mergedExp->getMergedExpData()->nGates();
                 /// 一个映射表, vec[i] = j, 则当前的gate_i对应实际MapNode的gate_j
                 vector<GateID> gatesMap2EndMergedExp(nGates);
                 for (int i = 0; i < nGates; ++i) {
