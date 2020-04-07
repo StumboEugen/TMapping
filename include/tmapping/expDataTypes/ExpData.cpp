@@ -790,7 +790,7 @@ vector<SubNode> ExpData::vecOfSubNodes(const ExpData& expData)
 std::pair<ExpDataPtr, std::vector<SubNode>>
 ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
                            const std::vector<SubNode>& whiteList,
-                           double carelessPercentage, size_t nErasedNode) const {
+                           double carefulPercentage, size_t nErasedNode) const {
     /// @note 这是个工具函数, 所以完全没考虑效率问题
     static default_random_engine engine(
             std::chrono::system_clock::now().time_since_epoch().count());
@@ -802,7 +802,7 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
 
     /// 看看本次是否需要随机忘记一些节点
     uniform_real_distribution<> r(0.0, 1.0);
-    if (r(engine) >= carelessPercentage) {
+    if (r(engine) >= carefulPercentage) {
         /// 是的
         const auto& copy = res.first;
         const auto& nodesMap2Copy = res.second;
@@ -828,11 +828,15 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
             }
         }
 
-        /// 把这些白名单消掉
-        for (int i = 0; i < nodesOfCopy.size(); ++i) {
-            if (nodesOfCopy[i].type == SubNodeType::UNSET) {
-                nodesOfCopy.erase(nodesOfCopy.begin() + i);
+        /// 把这些白名单从可能被杀掉的node候选里消掉
+        {
+            vector<SubNode> temp;
+            for (const auto& subNode: nodesOfCopy) {
+                if (subNode.type != SubNodeType::UNSET) {
+                    temp.emplace_back(subNode);
+                }
             }
+            nodesOfCopy = std::move(temp);
         }
 
         /// 主要不要让要"忘记"的节点数量多于可以忘掉的数量

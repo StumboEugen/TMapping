@@ -591,12 +591,16 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
                 theExp2Send = exp;
             } else {
                 /// 有一定概率发生遗忘, 目前的设置是0.8的概率忘记一个点
-                uint32_t leftGate = exp->getLeaveGate();
+                GateID leftGate = exp->getLeaveGate();
+                GateID enterGate = exp->getEnterGate();
+                if (enterGate < 0) {
+                    enterGate = leftGate;
+                }
                 const auto& res = exp->expData()->buildShrinkedCopy(
                         false,
                         {
-                                {SubNodeType::GATE,0},
-                                {SubNodeType::GATE,leftGate}
+                                {SubNodeType::GATE,static_cast<uint32_t>(enterGate)},
+                                {SubNodeType::GATE,static_cast<uint32_t>(leftGate)}
                         },
                         0.8,
                         1);

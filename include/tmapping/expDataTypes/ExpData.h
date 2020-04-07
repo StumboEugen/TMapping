@@ -148,13 +148,13 @@ public:
     /**
      * @brief 生成一个被缩小的副本
      * @param copyAccordingSubLinks 是否根据this的subNodes来选择性拷贝
-     * @param carelessPercentage
+     * @param carefulPercentage
      * @return first:被缩小的副本 second:从this到first的gate映射关系
      */
     std::pair<ExpDataPtr, std::vector<SubNode>>
     buildShrinkedCopy(bool copyAccordingSubLinks,
                       const std::vector<SubNode>& whiteList = {},
-                      double carelessPercentage = 1.0,
+                      double carefulPercentage = 1.0,
                       size_t nErasedNode = 1) const;
 
     /**
