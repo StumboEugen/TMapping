@@ -130,6 +130,12 @@ public:
     bool isDevelopedFrom(MapTwig* twig2check, size_t nGenerations = 1) const;
 
     size_t getNodeCount() const;
+
+    /**
+     * @brief 得到一个MapTwig的父子链条, front为最新,back为最老
+     * @param endSerial 终点endSerial
+     */
+    std::vector<MapTwig*> getChain2Father(size_t endSerial);
 };
 
 }

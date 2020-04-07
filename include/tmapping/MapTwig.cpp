@@ -125,19 +125,13 @@ void MapTwig::setTheSimilarMergedExpForNextTime(const ExpPtr& targetExp, GateID 
     status = MapTwigStatus::MOVE2OLD;
 
     /// 构建从this到targetExp对应的MapTwig的链条
-    vector<MapTwig*> chainToFather;
-    chainToFather.reserve(this->mExpUsages.back()->serialOfLastExp());
-    MapTwig* current = this;
-    std::size_t targetSerial = targetExp->serial();
-    while (current->borndAt > targetSerial) {
-        chainToFather.push_back(current);
-        current = current->mFather.get();
-    }
-    chainToFather.push_back(current);
-    /// 构建完毕
-
+    auto targetSerial = targetExp->serial();
+    vector<MapTwig*> chainToFather = getChain2Father(targetSerial);
+    auto oldestFather = chainToFather.back();
+    
     /// 从过去往现在查找, 找到对应的Exp最新的MergedExp, 并记录下来
-    auto theSimilarMergedExp = current->mExpUsages.at(targetSerial - current->borndAt);
+    auto theSimilarMergedExp = oldestFather->mExpUsages.at(
+            targetSerial - oldestFather->borndAt);
     for (auto iter = chainToFather.rbegin(); iter != chainToFather.rend(); ++iter) {
         for (const auto& mergedExp : (*iter)->mExpUsages) {
             if (mergedExp->isChildOf(theSimilarMergedExp.get())) {
@@ -294,4 +288,17 @@ size_t MapTwig::getNodeCount() const
 double MapTwig::getCaledGblConfidence() const
 {
     return mLastGlobalResult;
+}
+
+std::vector<MapTwig*> MapTwig::getChain2Father(size_t endSerial)
+{
+    std::vector<MapTwig*> res;
+    res.reserve(this->mExpUsages.back()->serialOfLastExp());
+    MapTwig* current = this;
+    while (current->borndAt > endSerial) {
+        res.push_back(current);
+        current = current->mFather.get();
+    }
+    res.push_back(current);
+    return res;
 }
