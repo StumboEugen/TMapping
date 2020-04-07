@@ -75,6 +75,10 @@ class StructedMapImpl
 
     double mPossibility;
 
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    std::vector<double> mPossHistory;
+#endif
+
 public:
     StructedMapImpl(std::vector<MapNodePtr> nodes, const MapTwigPtr& twigUsed, double poss);
 

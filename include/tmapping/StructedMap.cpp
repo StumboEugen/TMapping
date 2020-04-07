@@ -4,6 +4,7 @@
 
 #include "StructedMap.h"
 #include "MergedExp.h"
+#include "MapTwig.h"
 
 #include <utility>
 #include <iostream>
@@ -18,6 +19,9 @@ tmap::StructedMapImpl::StructedMapImpl(std::vector<MapNodePtr> nodes,
         mRelatedTwig(twigUsed),
         mAgentAt(nodes.size() - 1),
         mPossibility(poss)
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+       ,mPossHistory(twigUsed->getPossHistory())
+#endif
 {
     for (size_t i = 0; i < mNodes.size(); ++i) {
         mNodes[i]->setSerial(i);
@@ -51,6 +55,14 @@ Json::Value tmap::StructedMapImpl::toJS() const
         }
         res["nodes"].append(std::move(jnode));
     }
+
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    if (auto twig = this->mRelatedTwig.lock()) {
+        for (const auto& poss : mPossHistory) {
+            res["possHistory"].append(poss);
+        }
+    }
+#endif
     return res;
 }
 
@@ -86,6 +98,13 @@ StructedMapImpl::StructedMapImpl(const Json::Value& jmap)
             link.at = jlink["@"].asInt();
         }
     }
+
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    mPossHistory.reserve(jmap["possHistory"].size());
+    for (const auto& jPoss : jmap["possHistory"]) {
+        mPossHistory.push_back(jPoss.asDouble());
+    }
+#endif
 }
 
 const vector<MapNodePtr>& StructedMapImpl::getNodes() const

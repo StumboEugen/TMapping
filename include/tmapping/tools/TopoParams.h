@@ -16,6 +16,7 @@
 
 #define FILE_AND_LINE __FILE__ << ':' << __LINE__
 
+#define TMAPPING_CONFIG_RECORD_POSS
 
 namespace tmap
 {

@@ -79,8 +79,12 @@ size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienc
         sum += poss;
         mPossScores.push_back(poss);
     }
-    for (auto& score : mPossScores) {
-        score /= sum;
+
+    for (int i = 0; i < mPossScores.size(); ++i) {
+        mPossScores[i] /= sum;
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+        mAliveMaps[i]->addPoss(mPossScores[i]);
+#endif
     }
 
     return nSurviver;

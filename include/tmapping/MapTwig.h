@@ -55,6 +55,27 @@ class MapTwig : public std::enable_shared_from_this<MapTwig>
     /// 上次计算得到的快速概率
     double mLastGlobalResult = -1.0;
 
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    std::vector<double> mPosses;
+
+public:
+    void addPoss(double poss) {
+        mPosses.push_back(poss);
+    }
+
+    std::vector<double> getPossHistory(){
+        std::vector<double> history;
+        history.reserve(borndAt + mExpUsages.size());
+        const auto& chain2origin = this->getChain2Father(0);
+        for(auto it = chain2origin.rbegin() ; it != chain2origin.rend(); ++it) {
+            for (const auto& poss : (**it).mPosses) {
+                history.push_back(poss);
+            }
+        }
+        return history;
+    }
+#endif
+
 private: //constructor
 
     MapTwig(size_t bornAt, MapTwigPtr father, size_t nSerial, double confidence);
