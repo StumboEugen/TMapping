@@ -7,6 +7,7 @@
 
 #include <QWheelEvent>
 #include <QStyleOptionGraphicsItem>
+#include <chrono>
 
 #include "MainGView.h"
 #include "tmapping/MergedExp.h"
@@ -741,6 +742,37 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
 
     for (auto& node : mNodesInRealMap) {
         setQNodeMovabilityInRealMap(node.get());
+    }
+}
+
+void tmap::MainGView::randomMove(int mSteps)
+{
+    static default_random_engine engine(
+            std::chrono::system_clock::now().time_since_epoch().count());
+    if (mAtSim && mRobot) {
+        for (int i = 0; i < mSteps; ++i) {
+
+            const auto& expData = mRobot->atNode()->expData();
+            uniform_int_distribution<int> u(0, expData->nGates() - 1);
+
+            GateID pickedGate;
+
+            if (expData->nGates() != 1) {
+                do {
+                    pickedGate = u(engine);
+                }
+                while (pickedGate == mRobot->enterGate()); /// 我们不希望原路返回
+            } else {
+                /// 当然,如果只有一个gate, 没得选
+                pickedGate = mRobot->enterGate();
+            }
+
+            auto oldExp = mRobot->moveThroughGate(pickedGate);
+            Q_EMIT SIG_RobotThroughGate(oldExp);
+            mRobot->atNode()->setSelected(true);
+        }
+    } else {
+        cout << "[Warnning] you havn't set the robot!" << endl;
     }
 }
 

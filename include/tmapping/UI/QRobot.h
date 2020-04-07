@@ -37,6 +37,8 @@ public:
      */
     bool try2move(QPointF scenePos);
 
+    ExpPtr moveThroughGate(GateID gateId);
+
     /**
      * @brief 让机器人直接通过当前的gate进入下一个Exp
      * @return 如果成功, 返回上一个Exp的信息, 失败的话返回nullptr
@@ -44,6 +46,8 @@ public:
     ExpPtr try2ThroughGate();
 
     const QNodePtr& atNode() const;
+
+    GateID enterGate() const;
 
 };
 

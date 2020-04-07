@@ -73,6 +73,8 @@ public:
 
     void displayRealMap(const Jsobj& jMap);
 
+    void randomMove(int mSteps);
+
     ~MainGView() override;
 
 public Q_SLOTS:

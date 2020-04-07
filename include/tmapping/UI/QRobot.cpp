@@ -123,3 +123,15 @@ const QNodePtr& QRobot::atNode() const
 {
     return currentAtNode;
 }
+
+ExpPtr QRobot::moveThroughGate(GateID gateId)
+{
+    atLM.type = SubNodeType::GATE;
+    atLM.index = gateId;
+    return try2ThroughGate();
+}
+
+GateID QRobot::enterGate() const
+{
+    return currentExp->getEnterGate();
+}

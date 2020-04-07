@@ -105,7 +105,20 @@ void Exp::setOdomInfoFromFatherExp(const ExpPtr& father)
         const auto& fatherEnterPos = father->expData()->getGates()[father->mEnterGate]->getPos();
         const auto& PosDiffInFather = fatherLeavePos - fatherEnterPos;
         this->mGlobalPosInOdom = father->mGlobalPosInOdom + PosDiffInFather;
-        this->mWalkedDisSinceEnter = father->mWalkedDisSinceEnter + PosDiffInFather.len();
+
+        /// 我们认为机器人肯定是到了节点的中心部位再返回的
+        const auto& outBound = father->expData()->getOutBounding(0.0);
+        TopoVec2 midPos{outBound[2] + outBound[3], outBound[0] + outBound[1]};
+        midPos /= 2.0;
+
+        if (father->expData()->nGates() == 1 && midPos ==fatherLeavePos) {
+            /// 如果这个节点只有一个Gate而且没有其他LM, 那么为了避免walkDist = 0 导致错误,
+            /// 我们强行让midPos += 1
+            midPos += {1.0, 0.0};
+        }
+        this->mWalkedDisSinceEnter = father->mWalkedDisSinceEnter +
+                (fatherLeavePos - midPos).len() +
+                (fatherEnterPos - midPos).len();
     }
 }
 

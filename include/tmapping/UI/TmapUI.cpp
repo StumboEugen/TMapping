@@ -224,6 +224,13 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
                 uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
 
+        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+                uiDockSimulation->btnRandomMove, SLOT(setEnabled(bool)));
+        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+                uiDockSimulation->sbMoveSteps, SLOT(setEnabled(bool)));
+
+        connect(uiDockSimulation->btnRandomMove, SIGNAL(clicked()),
+                this, SLOT(SLOT_RandomMove()));
     }
 
     {
@@ -663,4 +670,9 @@ void tmap::TmapUI::SLOT_GetRealtimeMaps()
 void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
 {
     gvMain->displayRealMap(realtimeMaps[index]);
+}
+
+void tmap::TmapUI::SLOT_RandomMove()
+{
+    gvMain->randomMove(uiDockSimulation->sbMoveSteps->value());
 }

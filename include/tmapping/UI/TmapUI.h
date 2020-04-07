@@ -101,6 +101,7 @@ private Q_SLOTS:
     void SLOT_ROS_ThroughGate(const ExpPtr&);
     void SLOT_GetRealtimeMaps();
     void SLOT_DisplayTheRealMap(int);
+    void SLOT_RandomMove();
 
 };
 }

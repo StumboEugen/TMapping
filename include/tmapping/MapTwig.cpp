@@ -114,6 +114,9 @@ double tmap::MapTwig::calGlobalPoss(double log_nExp)
     if (mLastGlobalResult == -1.0) {
         mLastGlobalResult = mConfidence * exp( nTopoNode * -log_nExp);
     }
+    if (isnan(mLastGlobalResult)) {
+        cerr << FILE_AND_LINE << "Poss is NAN!" << endl;
+    }
     return mLastGlobalResult;
 }
 
