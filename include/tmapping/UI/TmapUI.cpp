@@ -246,6 +246,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockRealtime->cbEnableNodesMoving, SIGNAL(toggled(bool)),
                 gvMain, SLOT(SLOT_EnableMoving4RealNodes(bool)));
+
+        connect(uiDockRealtime->btnShowPossHistory, SIGNAL(clicked()),
+                this, SLOT(SLOT_ShowPossHistroy()));
     }
 }
 
@@ -675,4 +678,9 @@ void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
 void tmap::TmapUI::SLOT_RandomMove()
 {
     gvMain->randomMove(uiDockSimulation->sbMoveSteps->value());
+}
+
+void tmap::TmapUI::SLOT_ShowPossHistroy()
+{
+    infoView->setText(gvMain->currentPossHistoryStr().data());
 }

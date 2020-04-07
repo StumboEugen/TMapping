@@ -46,6 +46,13 @@
      <widget class="QComboBox" name="cbCandidates"/>
     </item>
     <item>
+     <widget class="QPushButton" name="btnShowPossHistory">
+      <property name="text">
+       <string>show the poss history</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="Line" name="line">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>

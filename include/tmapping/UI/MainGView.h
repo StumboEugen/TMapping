@@ -40,6 +40,8 @@ class MainGView : public QGraphicsView
 
     MoveStragety mMoveStragety = MoveStragety::EVERY_NODE;
 
+    StructedMap currentDisplayedRealTimeMap;
+
 private:
     void setQNodeMovabilityInFakeMap(QNode* node) const;
     void setQNodeMovabilityInRealMap(QNode* node) const;
@@ -74,6 +76,8 @@ public:
     void displayRealMap(const Jsobj& jMap);
 
     void randomMove(int mSteps);
+
+    std::string currentPossHistoryStr();
 
     ~MainGView() override;
 

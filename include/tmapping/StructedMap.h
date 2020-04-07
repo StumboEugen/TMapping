@@ -77,6 +77,12 @@ class StructedMapImpl
 
 #ifdef TMAPPING_CONFIG_RECORD_POSS
     std::vector<double> mPossHistory;
+public:
+    const std::vector<double>& getPossHistory() const
+    {
+        return mPossHistory;
+    }
+
 #endif
 
 public:

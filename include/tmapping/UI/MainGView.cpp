@@ -658,8 +658,8 @@ void tmap::MainGView::setQNodeMovabilityInRealMap(tmap::QNode* node) const
 
 void tmap::MainGView::displayRealMap(const Jsobj& jMap)
 {
-    StructedMapImpl map(jMap);
-    const auto& nodes = map.getNodes();
+    currentDisplayedRealTimeMap = make_shared<StructedMapImpl>(jMap);
+    const auto& nodes = currentDisplayedRealTimeMap->getNodes();
     vector<QNodePtr> qNodes(nodes.size());
 
     /// 复制一份QNode
@@ -774,5 +774,15 @@ void tmap::MainGView::randomMove(int mSteps)
     } else {
         cout << "[Warnning] you havn't set the robot!" << endl;
     }
+}
+
+std::string tmap::MainGView::currentPossHistoryStr()
+{
+    const auto& possHistory = currentDisplayedRealTimeMap->getPossHistory();
+    stringstream ss;
+    for (const auto& poss: possHistory) {
+        ss << poss << endl;
+    }
+    return ss.str();
 }
 
