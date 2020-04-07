@@ -165,6 +165,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QCheckBox" name="cbMoveUntilCover">
+      <property name="text">
+       <string>move until coverage</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="endSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>

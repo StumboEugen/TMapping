@@ -75,7 +75,7 @@ public:
 
     void displayRealMap(const Jsobj& jMap);
 
-    void randomMove(int mSteps);
+    void randomMove(int mSteps, bool untilCover);
 
     std::string currentPossHistoryStr();
 
