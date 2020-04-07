@@ -854,7 +854,7 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
         for (int i = 0; i < nErasedNode; ++i) {
             uniform_int_distribution<> p(0,nodesOfCopy.size());
             int luckyNumber = p(engine);
-            const auto& luckBoy = nodesOfCopy[luckyNumber];
+            const auto luckBoy = nodesOfCopy[luckyNumber];
             bool startMinus = false;
             for (auto& item: res.second) {
                 if (!startMinus && item == luckBoy) {

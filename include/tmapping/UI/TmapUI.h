@@ -69,6 +69,11 @@ class TmapUI : public QMainWindow
 
     Jsobj realtimeMaps;
 
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    std::vector<double> mChampionPoss;
+    std::vector<double> mRunnerUpPoss;
+#endif
+
 private: // methods
     void addBuiltExpData(const ExpDataPtr& expData);
     static QString getExpDataLabel(const ExpDataPtr& expData);

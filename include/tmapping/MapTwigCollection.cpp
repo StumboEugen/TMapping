@@ -87,6 +87,14 @@ size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienc
 #endif
     }
 
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    mChampionsPoss.push_back(mPossScores[0]);
+    if (mPossScores.size() >= 2) {
+        mRunnerUpsPoss.push_back(mPossScores[1]);
+    } else {
+        mRunnerUpsPoss.push_back(0.0);
+    }
+#endif
     return nSurviver;
 }
 

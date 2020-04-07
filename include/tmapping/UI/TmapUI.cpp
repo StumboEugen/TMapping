@@ -666,20 +666,31 @@ void tmap::TmapUI::SLOT_GetRealtimeMaps()
     if (RSC_getMaps.call(infoBridge)) {
         realtimeMaps = JsonHelper::Str2JS(infoBridge.response.jMaps);
 
-        gvMain->displayRealMap(realtimeMaps[0]);
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+        mChampionPoss.clear();
+        mRunnerUpPoss.clear();
+        for (const auto& jPoss : realtimeMaps["championsPoss"]) {
+            mChampionPoss.push_back(jPoss.asDouble());
+        }
+        for (const auto& jPoss : realtimeMaps["runnerUpsPoss"]) {
+            mRunnerUpPoss.push_back(jPoss.asDouble());
+        }
+#endif
+
+        gvMain->displayRealMap(realtimeMaps["maps"][0]);
 
         uiDockRealtime->cbCandidates->clear();
 
-        for (int i = 0; i < realtimeMaps.size(); ++i) {
+        for (int i = 0; i < realtimeMaps["maps"].size(); ++i) {
             uiDockRealtime->cbCandidates->addItem("Map#" + QString::number(i) + " " +
-            QString::number(realtimeMaps[i]["poss"].asDouble()));
+            QString::number(realtimeMaps["maps"][i]["poss"].asDouble()));
         }
     }
 }
 
 void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
 {
-    gvMain->displayRealMap(realtimeMaps[index]);
+    gvMain->displayRealMap(realtimeMaps["maps"][index]);
 }
 
 void tmap::TmapUI::SLOT_RandomMove()
@@ -691,4 +702,19 @@ void tmap::TmapUI::SLOT_RandomMove()
 void tmap::TmapUI::SLOT_ShowPossHistroy()
 {
     infoView->setText(gvMain->currentPossHistoryStr().data());
+
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    /// 和原来的方式不统一, 但这里属于debug开发内容, 不打算仔细处理
+    auto currentIndex = uiDockRealtime->cbCandidates->currentIndex();
+    auto theDisplayingMap = StructedMapImpl(realtimeMaps["maps"][currentIndex]);
+    const auto& possHistory = theDisplayingMap.getPossHistory();
+    for (int i = 0; i < possHistory.size(); ++i) {
+        double possMain = possHistory[i];
+        double possAnother = mRunnerUpPoss[i];
+        if (possMain != mChampionPoss[i]) {
+            possAnother = mChampionPoss[i];
+        }
+        cout << possMain << '\t' << possAnother << endl;
+    }
+#endif
 }

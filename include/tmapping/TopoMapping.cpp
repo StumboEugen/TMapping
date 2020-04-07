@@ -139,8 +139,17 @@ tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)
     for (int i = 0; i < nTops; ++i) {
         const auto& structedMap = aliveMaps[i]->makeMap(this->mExperiences);
         structedMap->setPsblt(this->twigCollection.getScores()[i]);
-        res.append(structedMap->toJS());
+        res["maps"].append(structedMap->toJS());
     }
+
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    for (const auto& poss : twigCollection.getChampionsPoss()) {
+        res["championsPoss"].append(poss);
+    }
+    for (const auto& poss : twigCollection.getRunnerUpsPoss()) {
+        res["runnerUpsPoss"].append(poss);
+    }
+#endif
 
     return res;
 }

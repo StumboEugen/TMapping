@@ -25,6 +25,23 @@ class MapTwigCollection
     /// 各个aliveMaps的对应分数
     std::vector<double> mPossScores;
 
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    std::vector<double> mChampionsPoss;
+    std::vector<double> mRunnerUpsPoss;
+
+public:
+    const std::vector<double>& getChampionsPoss() const
+    {
+        return mChampionsPoss;
+    }
+
+    const std::vector<double>& getRunnerUpsPoss() const
+    {
+        return mRunnerUpsPoss;
+    }
+
+#endif
+
 public:
     std::vector<MapTwigPtr>& getAliveMaps();
 
