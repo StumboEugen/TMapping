@@ -599,13 +599,14 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
                 if (enterGate < 0) {
                     enterGate = leftGate;
                 }
+                double careless = uiDockSimulation->sbCarelessPercentage->value() / 100.0;
                 const auto& res = exp->expData()->buildShrinkedCopy(
                         false,
                         {
                                 {SubNodeType::GATE,static_cast<uint32_t>(enterGate)},
                                 {SubNodeType::GATE,static_cast<uint32_t>(leftGate)}
                         },
-                        0.8,
+                        1 - careless,
                         1);
                 theExp2Send.reset(new Exp(res.first, res.second[exp->getEnterGate()].index));
                 theExp2Send->setLeftGate(res.second[exp->getLeaveGate()].index);

@@ -852,7 +852,7 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
 
         /// 随机选一些幸运儿,然后忘掉并删掉
         for (int i = 0; i < nErasedNode; ++i) {
-            uniform_int_distribution<> p(0,nodesOfCopy.size());
+            uniform_int_distribution<> p(0,nodesOfCopy.size() - 1);
             int luckyNumber = p(engine);
             const auto luckBoy = nodesOfCopy[luckyNumber];
             bool startMinus = false;
