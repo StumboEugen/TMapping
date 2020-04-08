@@ -15,7 +15,9 @@ tmap::TmapRosNode::TmapRosNode() :
         srvGateMovement(n.advertiseService(TMAP_STD_SERVICE_NAME_GATE_MOVE,
                                            &TmapRosNode::cbSrvGateMovement, this)),
         srvGetmaps(n.advertiseService(TMAP_STD_SERVICE_NAME_GET_MAPS,
-                                      &TmapRosNode::cbSrvGetMaps, this))
+                                      &TmapRosNode::cbSrvGetMaps, this)),
+        srvSetSurviver(n.advertiseService(TMAP_STD_SERVICE_NAME_SET_SURVIVERS,
+                                      &TmapRosNode::cbSrvSetSuriviers, this))
 {
 
 }
@@ -54,6 +56,13 @@ TmapRosNode::cbSrvGetMaps(tmapping::GetMapsRequest& req,
                           tmapping::GetMapsResponse& res)
 {
     res.jMaps = JsonHelper::JS2Str(mTmappingCore.getTopMaps(req.nMapRequired));
+    return true;
+}
+
+bool TmapRosNode::cbSrvSetSuriviers(tmapping::SetSurviverMapsNumRequest& req,
+                                    tmapping::SetSurviverMapsNumResponse& res)
+{
+    mTmappingCore.setNSurviverMaps(req.nMaps);
     return true;
 }
 

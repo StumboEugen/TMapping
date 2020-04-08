@@ -93,7 +93,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         theSingleMergedExp->addRelatedMapTwig(adam);
     }
 
-    twigCollection.nextgCompleteAdding(mSurviverSetting, newExp->serial() + 1);
+    twigCollection.nextgCompleteAdding(nSurviverMaps, newExp->serial() + 1);
 
     const auto& aliveTwigs = twigCollection.getAliveMaps();
     cout << "\n\n# of alive maps :" << twigCollection.getAliveMaps().size()
@@ -152,4 +152,9 @@ tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)
 #endif
 
     return res;
+}
+
+void tmap::TopoMapping::setNSurviverMaps(size_t nMaps)
+{
+    TopoMapping::nSurviverMaps = nMaps;
 }

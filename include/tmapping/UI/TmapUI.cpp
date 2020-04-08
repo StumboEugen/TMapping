@@ -20,6 +20,7 @@
 #include <tmapping/GateMovement.h>
 #include <tmapping/GetMaps.h>
 #include <tmapping/Exp.h>
+#include <devel/include/tmapping/SetSurviverMapsNum.h>
 
 using namespace std;
 
@@ -252,6 +253,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockRealtime->btnShowPossHistory, SIGNAL(clicked()),
                 this, SLOT(SLOT_ShowPossHistroy()));
+
+        connect(uiDockRealtime->sbSurvivorMaps, SIGNAL(valueChanged(int)),
+                this, SLOT(SLOT_SetMapSurvivers(int)));
     }
 }
 
@@ -718,4 +722,22 @@ void tmap::TmapUI::SLOT_ShowPossHistroy()
         cout << possMain << '\t' << possAnother << endl;
     }
 #endif
+}
+
+void tmap::TmapUI::SLOT_SetMapSurvivers(int value)
+{
+    if (checkROS()) {
+        ros::NodeHandle n;
+        auto RSC_setSurvivor = n.serviceClient<tmapping::SetSurviverMapsNum>
+                (TMAP_STD_SERVICE_NAME_SET_SURVIVERS);
+        tmapping::SetSurviverMapsNum s;
+        s.request.nMaps = value;
+        if (RSC_setSurvivor.call(s)) {
+            cout << "set survivor num success !" << endl;
+        } else {
+            cout << "service[set survivors num] call failure!" << endl;
+        }
+    } else {
+        infoView->setText("Connect ROS First!");
+    }
 }

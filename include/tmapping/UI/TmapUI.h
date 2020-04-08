@@ -108,6 +108,7 @@ private Q_SLOTS:
     void SLOT_DisplayTheRealMap(int);
     void SLOT_RandomMove();
     void SLOT_ShowPossHistroy();
+    void SLOT_SetMapSurvivers(int);
 
 };
 }

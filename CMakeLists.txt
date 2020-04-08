@@ -75,6 +75,7 @@ add_service_files(
     NewExp.srv
     GateMovement.srv
     GetMaps.srv
+    SetSurviverMapsNum.srv
 )
 
 ## Generate actions in the 'action' folder

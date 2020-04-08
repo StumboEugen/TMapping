@@ -38,6 +38,7 @@ static constexpr char TMAP_STD_FILE_SAVE_FLODER_NAME[] = "tmappingMaps/";
 static constexpr char TMAP_STD_SERVICE_NAME_NEW_EXP[] = "tmapping/srv/newExp";
 static constexpr char TMAP_STD_SERVICE_NAME_GATE_MOVE[] = "tmapping/srv/gateMove";
 static constexpr char TMAP_STD_SERVICE_NAME_GET_MAPS[] = "tmapping/srv/getMaps";
+static constexpr char TMAP_STD_SERVICE_NAME_SET_SURVIVERS[] = "tmapping/srv/setSurvivers";
 
 
 //static constexpr char TOPO_STD_TOPIC_NAME_NODEINFO[] = "topo/ArriveAtNewNode";

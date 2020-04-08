@@ -19,7 +19,8 @@ class TopoMapping
     MapTwigCollection twigCollection;
     StructedMap mChampionMap;
 
-    size_t mSurviverSetting = 200;
+    /// 如果为0, 表示完全不限制地图生长
+    size_t nSurviverMaps = 200;
 
 public:
     void setLeftGate(GateID gateID);
@@ -27,6 +28,8 @@ public:
     void arriveNewExp(const ExpPtr& newExp);
 
     Jsobj getTopMaps(size_t nTops);
+
+    void setNSurviverMaps(size_t nMaps);
 };
 }
 

@@ -11,6 +11,7 @@
 #include <tmapping/NewExp.h>
 #include <tmapping/GateMovement.h>
 #include <tmapping/GetMaps.h>
+#include <tmapping/SetSurviverMapsNum.h>
 
 
 namespace tmap
@@ -22,6 +23,7 @@ class TmapRosNode
     ros::ServiceServer srvNewExp;
     ros::ServiceServer srvGateMovement;
     ros::ServiceServer srvGetmaps;
+    ros::ServiceServer srvSetSurviver;
     TopoMapping mTmappingCore;
 
 private:
@@ -31,6 +33,8 @@ private:
             tmapping::GateMovementResponse& res);
     bool cbSrvGetMaps(tmapping::GetMapsRequest& req,
                       tmapping::GetMapsResponse& res);
+    bool cbSrvSetSuriviers(tmapping::SetSurviverMapsNumRequest& req,
+                           tmapping::SetSurviverMapsNumResponse& res);
 
 public:
     TmapRosNode();
