@@ -752,7 +752,10 @@ void tmap::MainGView::randomMove(int mSteps, bool untilCover)
             while (true) {
                 emitRobotRandomMove();
                 if (mScene4FakeMap.selectedItems().size() >= mNodesInFakeMap.size()) {
-                    break;
+                    /// 在完全覆盖后,会继续移动,直到用尽额外步数,或者冠军地图持续15轮成立
+                    if (nChampionSucceedSteps > 15 || mSteps-- == 0) {
+                        break;
+                    }
                 }
             }
         } else {
@@ -803,5 +806,10 @@ void tmap::MainGView::emitRobotRandomMove()
 
     auto oldExp = mRobot->moveThroughGate(pickedGate);
     Q_EMIT SIG_RobotThroughGate(oldExp);
+}
+
+void tmap::MainGView::setChampionSucceedSteps(size_t steps)
+{
+    MainGView::nChampionSucceedSteps = steps;
 }
 

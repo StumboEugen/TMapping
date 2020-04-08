@@ -126,3 +126,8 @@ const tmap::ExpPtr& tmap::ExpCollection::getExpAt(size_t serial) const
 {
     return mExperiencesData[serial];
 }
+
+size_t tmap::ExpCollection::nExps() const
+{
+    return mExperiencesData.size();
+}

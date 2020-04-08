@@ -42,6 +42,8 @@ class MainGView : public QGraphicsView
 
     StructedMap currentDisplayedRealTimeMap;
 
+    size_t nChampionSucceedSteps = 0;
+
 private:
     void setQNodeMovabilityInFakeMap(QNode* node) const;
     void setQNodeMovabilityInRealMap(QNode* node) const;
@@ -79,6 +81,8 @@ public:
     void randomMove(int mSteps, bool untilCover);
 
     std::string currentPossHistoryStr();
+
+    void setChampionSucceedSteps(size_t steps);
 
     ~MainGView() override;
 

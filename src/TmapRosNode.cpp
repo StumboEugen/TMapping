@@ -35,6 +35,7 @@ bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
     std::chrono::duration<double> diff(endTime - startTime);
     temp = diff.count();
     cout << "\nTIME newExp: " << diff.count() << endl;
+    res.jChampionStatus = JsonHelper::JS2Str(mTmappingCore.getChampionDefendedCount());
     return true;
 }
 

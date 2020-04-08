@@ -96,7 +96,8 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     twigCollection.nextgCompleteAdding(nSurviverMaps, newExp->serial() + 1);
 
     const auto& aliveTwigs = twigCollection.getAliveMaps();
-    cout << "\n\n# of alive maps :" << twigCollection.getAliveMaps().size()
+    cout << "\n\nSteps:" << mExperiences.nExps()
+       << "\nnumber of alive maps :" << twigCollection.getAliveMaps().size()
        << "\n------------------------" << endl;
     for (int i = 0; i < 10 && i < aliveTwigs.size(); ++i) {
         cout << "nNodes: " << aliveTwigs[i]->getNodeCount() << "\tpsbly: " <<
@@ -104,11 +105,15 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     }
 
     auto& currentChampion = twigCollection.getAliveMaps().front();
+    bool championBiggerThan95 = false;
     if (mChampionMap) {
         MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
         if (relatedTwig) {
             if (currentChampion->isDevelopedFrom(relatedTwig.get())) {
                 cout << "[THE CHAMPION STATUS]   remains" << endl;
+                if (twigCollection.getScores()[0] > 0.95) {
+                    championBiggerThan95 = true;
+                }
             } else {
                 cout << "[THE CHAMPION STATUS]   changed" << endl;
             }
@@ -116,6 +121,12 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
             cout << "[THE CHAMPION STATUS]   is killed" << endl;
         }
     }
+    if (championBiggerThan95) {
+        nChampionDefend++;
+    } else {
+        nChampionDefend = 0;
+    }
+
     mChampionMap = currentChampion->makeMap(this->mExperiences);
 }
 
@@ -157,4 +168,9 @@ tmap::Jsobj tmap::TopoMapping::getTopMaps(size_t nTops)
 void tmap::TopoMapping::setNSurviverMaps(size_t nMaps)
 {
     TopoMapping::nSurviverMaps = nMaps;
+}
+
+size_t tmap::TopoMapping::getChampionDefendedCount() const
+{
+    return nChampionDefend;
 }

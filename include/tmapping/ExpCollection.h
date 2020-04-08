@@ -40,6 +40,8 @@ public:
                                      tmap::MapTwigCollection& twigMaster);
 
     const ExpPtr& getExpAt(size_t serial) const;
+
+    size_t nExps() const;
 };
 
 }

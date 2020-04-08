@@ -646,6 +646,9 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
             return;
         }
 
+        gvMain->setChampionSucceedSteps(
+                JsonHelper::Str2JS(srvExp.response.jChampionStatus).asUInt64());
+
         tmapping::GateMovement gateMovement;
         Jsobj gateMove = theExp2Send->getLeaveGate();
         gateMovement.request.jGateMove = JsonHelper::JS2Str(gateMove);
