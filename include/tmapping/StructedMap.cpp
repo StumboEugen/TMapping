@@ -19,10 +19,12 @@ tmap::StructedMapImpl::StructedMapImpl(std::vector<MapNodePtr> nodes,
         mRelatedTwig(twigUsed),
         mAgentAt(nodes.size() - 1),
         mPossibility(poss)
-#ifdef TMAPPING_CONFIG_RECORD_POSS
-       ,mPossHistory(twigUsed->getPossHistory())
-#endif
 {
+#ifdef TMAPPING_CONFIG_RECORD_POSS
+    if (twigUsed) {
+        mPossHistory = twigUsed->getPossHistory();
+    }
+#endif
     for (size_t i = 0; i < mNodes.size(); ++i) {
         mNodes[i]->setSerial(i);
     }

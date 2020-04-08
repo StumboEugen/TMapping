@@ -45,6 +45,7 @@ class MainGView : public QGraphicsView
 private:
     void setQNodeMovabilityInFakeMap(QNode* node) const;
     void setQNodeMovabilityInRealMap(QNode* node) const;
+    void emitRobotRandomMove();
 
 protected:
     void wheelEvent(QWheelEvent * event) override ;

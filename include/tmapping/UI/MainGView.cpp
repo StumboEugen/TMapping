@@ -747,53 +747,17 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
 
 void tmap::MainGView::randomMove(int mSteps, bool untilCover)
 {
-    static default_random_engine engine(
-            std::chrono::system_clock::now().time_since_epoch().count());
     if (mAtSim && mRobot) {
         if (untilCover) {
             while (true) {
-                const auto& expData = mRobot->atNode()->expData();
-                uniform_int_distribution<int> u(0, expData->nGates() - 1);
-
-                GateID pickedGate;
-
-                if (expData->nGates() != 1) {
-                    do {
-                        pickedGate = u(engine);
-                    } while (pickedGate == mRobot->enterGate()); /// 我们不希望原路返回
-                } else {
-                    /// 当然,如果只有一个gate, 没得选
-                    pickedGate = mRobot->enterGate();
-                }
-                mRobot->atNode()->setSelected(true);
-
-                auto oldExp = mRobot->moveThroughGate(pickedGate);
-                Q_EMIT SIG_RobotThroughGate(oldExp);
-
+                emitRobotRandomMove();
                 if (mScene4FakeMap.selectedItems().size() >= mNodesInFakeMap.size()) {
                     break;
                 }
             }
         } else {
             for (int i = 0; i < mSteps; ++i) {
-
-                const auto& expData = mRobot->atNode()->expData();
-                uniform_int_distribution<int> u(0, expData->nGates() - 1);
-
-                GateID pickedGate;
-
-                if (expData->nGates() != 1) {
-                    do {
-                        pickedGate = u(engine);
-                    }
-                    while (pickedGate == mRobot->enterGate());
-                } else {
-                    pickedGate = mRobot->enterGate();
-                }
-                mRobot->atNode()->setSelected(true);
-
-                auto oldExp = mRobot->moveThroughGate(pickedGate);
-                Q_EMIT SIG_RobotThroughGate(oldExp);
+                emitRobotRandomMove();
             }
         }
     } else {
@@ -809,5 +773,35 @@ std::string tmap::MainGView::currentPossHistoryStr()
         ss << poss << endl;
     }
     return ss.str();
+}
+
+void tmap::MainGView::emitRobotRandomMove()
+{
+    static default_random_engine engine(
+            std::chrono::system_clock::now().time_since_epoch().count());
+
+    const auto& expData = mRobot->atNode()->expData();
+
+    vector<GateID> options;
+    for (int i = 0; i < expData->nGates(); ++i) {
+        if (i != mRobot->enterGate() && mRobot->atNode()->qNodeAt(i)) {
+            /// 我们不希望原路返回, 同时要的确通向一个gate
+            options.push_back(i);
+        }
+    }
+
+    GateID pickedGate;
+    if (options.empty()) {
+        /// 没有选项,那就只能原路返回
+        pickedGate = mRobot->enterGate();
+    } else {
+        uniform_int_distribution<int> u(0, options.size() - 1);
+        pickedGate = options[u(engine)];
+    }
+
+    mRobot->atNode()->setSelected(true);
+
+    auto oldExp = mRobot->moveThroughGate(pickedGate);
+    Q_EMIT SIG_RobotThroughGate(oldExp);
 }
 
