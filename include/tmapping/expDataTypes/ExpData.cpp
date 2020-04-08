@@ -842,7 +842,8 @@ ExpData::buildShrinkedCopy(bool copyAccordingSubLinks,
         /// 主要不要让要"忘记"的节点数量多于可以忘掉的数量
         if (nErasedNode >= nodesOfCopy.size()) {
             nErasedNode = nodesOfCopy.size();
-            cout << FILE_AND_LINE << " you erase almost all points in expData!" << endl;
+            /// 这是有可能发生的,我们不想让建图过程显得太啰嗦
+//            cout << FILE_AND_LINE << " you erase almost all points in expData!" << endl;
         }
 
         /// 警告一下SubLinks我们无法处理

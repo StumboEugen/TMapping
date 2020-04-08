@@ -409,6 +409,14 @@ void tmap::MainGView::saveFakeMap(const std::string& mapName)
     }
 }
 
+void tmap::MainGView::saveRealMap(const std::string& mapName)
+{
+    int res = JsonHelper::saveJson(
+            currentDisplayedRealTimeMap->toJS(),
+            mapName,
+            false);
+}
+
 tmap::MainGView::~MainGView()
 {
     /// QNode是智能指针管理的, 不要交给scene校徽
@@ -753,8 +761,12 @@ void tmap::MainGView::randomMove(int mSteps, bool untilCover)
                 emitRobotRandomMove();
                 if (mScene4FakeMap.selectedItems().size() >= mNodesInFakeMap.size()) {
                     /// 在完全覆盖后,会继续移动,直到用尽额外步数,或者冠军地图持续15轮成立
-                    if (nChampionSucceedSteps > 15 || mSteps-- == 0) {
-                        break;
+                    if (mSteps >= 0) {
+                        mSteps--;
+                    } else {
+                        if (nChampionSucceedSteps > 15) {
+                            break;
+                        }
                     }
                 }
             }
@@ -811,5 +823,11 @@ void tmap::MainGView::emitRobotRandomMove()
 void tmap::MainGView::setChampionSucceedSteps(size_t steps)
 {
     MainGView::nChampionSucceedSteps = steps;
+}
+
+bool tmap::MainGView::isTheRealTimeMapSimiliar()
+{
+    return
+    mScene4FakeMap.selectedItems().size() == currentDisplayedRealTimeMap->getNodes().size();
 }
 

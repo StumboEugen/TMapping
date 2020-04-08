@@ -21,7 +21,10 @@ void tmap::TopoMapping::setLeftGate(GateID gateID)
 
 void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 {
-    cout << "\n\n===============================\nSTART arrive new EXP" << endl;
+#if TMAPPING_CONFIG_LOG_VERBOSE
+    cout << "\n\n===============================\nSTART arrive new EXP" << endl
+#endif
+            ;
     mExperiences.addNewExpAndAddLoopClosures(newExp, twigCollection);
 
     MergedExpPtr theSingleMergedExp = MergedExp::singleMergedFromExp(newExp);
@@ -61,7 +64,9 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));
                     } else {
                         /// 一致性不通过, 废弃
+#if TMAPPING_CONFIG_LOG_VERBOSE
                         cout << "killed by OLD not alike (gened)" << endl;
+#endif
                         oneAliveTwig->setExpired();
                     }
                 } else {
@@ -78,9 +83,11 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                         newMergedExp->addRelatedMapTwig(oneAliveTwig);
                         twigCollection.add2NextGeneration(std::move(oneAliveTwig));
                     } else{
+#if TMAPPING_CONFIG_LOG_VERBOSE
                         cout << "killed by OLD not alike (not gened) gateCor:"
                             << gateCorrect << " And the poss: " << poss << "the twig poss:"
                             << oneAliveTwig->getCaledGblConfidence() << endl;
+#endif
                         oneAliveTwig->setExpired();
                     }
                 }
@@ -99,10 +106,12 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
     cout << "\n\nSteps:" << mExperiences.nExps()
        << "\nnumber of alive maps :" << twigCollection.getAliveMaps().size()
        << "\n------------------------" << endl;
+#if TMAPPING_CONFIG_LOG_VERBOSE
     for (int i = 0; i < 10 && i < aliveTwigs.size(); ++i) {
         cout << "nNodes: " << aliveTwigs[i]->getNodeCount() << "\tpsbly: " <<
         twigCollection.getScores()[i] << endl;
     }
+#endif
 
     auto& currentChampion = twigCollection.getAliveMaps().front();
     bool championBiggerThan95 = false;
@@ -110,15 +119,22 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
         MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
         if (relatedTwig) {
             if (currentChampion->isDevelopedFrom(relatedTwig.get())) {
-                cout << "[THE CHAMPION STATUS]   remains" << endl;
+#if TMAPPING_CONFIG_LOG_VERBOSE
+                cout << "[THE CHAMPION STATUS]   remains" << endl
+#endif
+                        ;
                 if (twigCollection.getScores()[0] > 0.95) {
                     championBiggerThan95 = true;
                 }
             } else {
+#if TMAPPING_CONFIG_LOG_VERBOSE
                 cout << "[THE CHAMPION STATUS]   changed" << endl;
+#endif
             }
         } else {
+#if TMAPPING_CONFIG_LOG_VERBOSE
             cout << "[THE CHAMPION STATUS]   is killed" << endl;
+#endif
         }
     }
     if (championBiggerThan95) {

@@ -12,6 +12,7 @@
 #include <tmapping/GateMovement.h>
 #include <tmapping/GetMaps.h>
 #include <tmapping/SetSurviverMapsNum.h>
+#include <std_srvs/Empty.h>
 
 
 namespace tmap
@@ -24,7 +25,8 @@ class TmapRosNode
     ros::ServiceServer srvGateMovement;
     ros::ServiceServer srvGetmaps;
     ros::ServiceServer srvSetSurviver;
-    TopoMapping mTmappingCore;
+    ros::ServiceServer srvReset;
+    std::unique_ptr<TopoMapping> mTmappingCore;
 
 private:
     bool cbSrvNewExp(tmapping::NewExpRequest& req,
@@ -35,6 +37,8 @@ private:
                       tmapping::GetMapsResponse& res);
     bool cbSrvSetSuriviers(tmapping::SetSurviverMapsNumRequest& req,
                            tmapping::SetSurviverMapsNumResponse& res);
+    bool cbSrvReset(std_srvs::EmptyRequest& req,
+                   std_srvs::EmptyResponse& res);
 
 public:
     TmapRosNode();

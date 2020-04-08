@@ -69,6 +69,8 @@ public:
 
     void saveFakeMap(const std::string& mapName);
 
+    void saveRealMap(const std::string& mapName);
+
     void loadMap(const std::string& fileName);
 
     void switch2realMode(bool);
@@ -83,6 +85,8 @@ public:
     std::string currentPossHistoryStr();
 
     void setChampionSucceedSteps(size_t steps);
+
+    bool isTheRealTimeMapSimiliar();
 
     ~MainGView() override;
 

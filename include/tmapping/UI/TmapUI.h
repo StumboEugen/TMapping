@@ -109,6 +109,7 @@ private Q_SLOTS:
     void SLOT_RandomMove();
     void SLOT_ShowPossHistroy();
     void SLOT_SetMapSurvivers(int);
+    void SLOT_StartMassiveTrials();
 
 };
 }

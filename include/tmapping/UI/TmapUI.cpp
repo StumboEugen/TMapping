@@ -20,7 +20,8 @@
 #include <tmapping/GateMovement.h>
 #include <tmapping/GetMaps.h>
 #include <tmapping/Exp.h>
-#include <devel/include/tmapping/SetSurviverMapsNum.h>
+#include <tmapping/SetSurviverMapsNum.h>
+#include <std_srvs/Empty.h>
 
 using namespace std;
 
@@ -235,6 +236,9 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockSimulation->cbMoveUntilCover, SIGNAL(toggled(bool)),
                 uiDockSimulation->sbMoveSteps, SLOT(setDisabled(bool)));
+
+        connect(uiDockSimulation->btnStartMassiveTrail, SIGNAL(clicked()),
+                this, SLOT(SLOT_StartMassiveTrials()));
     }
 
     {
@@ -636,8 +640,10 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 
         /// 发送数据
         auto str = JsonHelper::JS2Str(theExp2Send->toJS(), false);
+#if TMAPPING_CONFIG_LOG_VERBOSE
         static int step = 0;
         cout << "\n=======================\nSTEP " << step++ << "\n" << str << endl;
+#endif
         srvExp.request.jNewExp = str;
         
 
@@ -742,5 +748,36 @@ void tmap::TmapUI::SLOT_SetMapSurvivers(int value)
         }
     } else {
         infoView->setText("Connect ROS First!");
+    }
+}
+
+void tmap::TmapUI::SLOT_StartMassiveTrials()
+{
+    uiDockSimulation->cbMoveUntilCover->setChecked(true);
+    uiDockSimulation->sbMoveSteps->setValue(15);
+
+    ros::NodeHandle n;
+    auto RSC_reset = n.serviceClient<std_srvs::Empty>
+            (TMAP_STD_SERVICE_NAME_RESET);
+
+    for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
+        std_srvs::Empty e;
+        RSC_reset.call(e);
+        gvMain->scene()->clearSelection();
+
+        SLOT_RandomMove();
+
+        SLOT_GetRealtimeMaps();
+
+        if (gvMain->isTheRealTimeMapSimiliar()) {
+            cout << "BUILT SUCCESS " << i << endl;
+        } else {
+            cerr << "BUILT FAILURE " << i << endl;
+#if TMAPPING_CONFIG_DEBUG_MODE
+            break;
+#else
+            gvMain->saveRealMap(to_string(i) + "F");
+#endif
+        }
     }
 }
