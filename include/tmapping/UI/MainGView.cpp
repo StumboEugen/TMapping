@@ -708,7 +708,7 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
             mNodesInRealMap.insert(std::move(qNode));
 
             while (!lookupQueue.empty()) {
-                auto& currentQnode = lookupQueue.front();
+                auto currentQnode = lookupQueue.front();
                 lookupQueue.pop();
                 /// 查找所有的连接
                 for (int currentGID = 0; currentGID < currentQnode->nLinks(); ++currentGID) {
