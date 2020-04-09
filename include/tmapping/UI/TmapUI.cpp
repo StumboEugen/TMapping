@@ -223,19 +223,19 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
                 uiDockSimulation->cbAccidents, SLOT(setDisabled(bool)));
 
-        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
-                uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
+//        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+//                uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
 
         connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
                 uiDockSimulation->btnRandomMove, SLOT(setEnabled(bool)));
-        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
-                uiDockSimulation->sbMoveSteps, SLOT(setEnabled(bool)));
+//        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+//                uiDockSimulation->sbMoveSteps, SLOT(setEnabled(bool)));
 
         connect(uiDockSimulation->btnRandomMove, SIGNAL(clicked()),
                 this, SLOT(SLOT_RandomMove()));
 
-        connect(uiDockSimulation->cbMoveUntilCover, SIGNAL(toggled(bool)),
-                uiDockSimulation->sbMoveSteps, SLOT(setDisabled(bool)));
+//        connect(uiDockSimulation->cbMoveUntilCover, SIGNAL(toggled(bool)),
+//                uiDockSimulation->sbMoveSteps, SLOT(setDisabled(bool)));
 
         connect(uiDockSimulation->btnStartMassiveTrail, SIGNAL(clicked()),
                 this, SLOT(SLOT_StartMassiveTrials()));
@@ -640,6 +640,7 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 
         /// 发送数据
         auto str = JsonHelper::JS2Str(theExp2Send->toJS(), false);
+        stepsMoved++;
 #if TMAPPING_CONFIG_LOG_VERBOSE
         static int step = 0;
         cout << "\n=======================\nSTEP " << step++ << "\n" << str << endl;
@@ -754,30 +755,55 @@ void tmap::TmapUI::SLOT_SetMapSurvivers(int value)
 void tmap::TmapUI::SLOT_StartMassiveTrials()
 {
     uiDockSimulation->cbMoveUntilCover->setChecked(true);
-    uiDockSimulation->sbMoveSteps->setValue(15);
+//    uiDockSimulation->sbMoveSteps->setValue(50);
 
     ros::NodeHandle n;
     auto RSC_reset = n.serviceClient<std_srvs::Empty>
             (TMAP_STD_SERVICE_NAME_RESET);
+
+    int nFail = 0;
+    int nSuccess = 0;
+    int nTotalSteps = 0;
+
+    vector<int> successSteps;
+    successSteps.reserve(uiDockSimulation->sbTrials->value());
 
     for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
         std_srvs::Empty e;
         RSC_reset.call(e);
         gvMain->scene()->clearSelection();
 
+        stepsMoved = 0;
         SLOT_RandomMove();
 
         SLOT_GetRealtimeMaps();
 
         if (gvMain->isTheRealTimeMapSimiliar()) {
             cout << "BUILT SUCCESS " << i << endl;
+            nSuccess++;
+            successSteps.push_back(stepsMoved);
+            nTotalSteps += stepsMoved;
         } else {
             cerr << "BUILT FAILURE " << i << endl;
+            nFail++;
 #if TMAPPING_CONFIG_DEBUG_MODE
             break;
 #else
-            gvMain->saveRealMap(to_string(i) + "F");
+            gvMain->saveRealMap("F" + to_string(i));
 #endif
         }
     }
+
+    double aveStep = nTotalSteps / (double)nSuccess;
+    double stdErr = 0.0;
+    for (int nStep : successSteps) {
+        double dif = nStep - aveStep;
+        stdErr += dif * dif;
+    }
+    stdErr /= nSuccess;
+    stdErr = sqrt(stdErr);
+
+    cout << "Test complete, failure: " << nFail << "\t success: " << nSuccess << endl;
+    cout << "Ave success steps taken: " << aveStep << "\tStdErr: " << stdErr << endl;
+
 }

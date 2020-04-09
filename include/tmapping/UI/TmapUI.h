@@ -69,6 +69,8 @@ class TmapUI : public QMainWindow
 
     Jsobj realtimeMaps;
 
+    int stepsMoved = 0;
+
 #ifdef TMAPPING_CONFIG_RECORD_POSS
     std::vector<double> mChampionPoss;
     std::vector<double> mRunnerUpPoss;

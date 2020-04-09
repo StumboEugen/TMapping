@@ -178,7 +178,7 @@ MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
                     thatGates[newExp->getEnterGate()]->getPos();
             double posDif2 = (iGblPos - jGblPos).len2();
             /// 闭环检测不要给太多的惩罚 x2
-            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist * 5;
+            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist * 1.5;
             coe = exp(-0.5 * posDif2 / C);
             break;
         }

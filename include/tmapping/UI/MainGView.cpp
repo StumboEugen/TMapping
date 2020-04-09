@@ -728,9 +728,9 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
                             if (anotherGatePosInScene != currentLinkGatePos) {
                                 /// 另外一个相连的Node已经被遍历过, 但是位置没有匹配, 建立FakeLine
                                 auto fakeLine = make_shared<FakeLine_IMPL>(currentLinkGatePos,
-                                                                           anotherGatePosInScene,
-                                                                           currentQnode,
-                                                                           currentGID);
+                                        anotherGatePosInScene,
+                                        currentQnode,
+                                        currentGID);
                                 mScene4RealMap.addItem(fakeLine.get());
                                 currentQnode->fakeLineAt(currentGID) = fakeLine;
                                 linkedQNode->fakeLineAt(linkedGID) = std::move(fakeLine);
@@ -755,17 +755,21 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
 
 void tmap::MainGView::randomMove(int mSteps, bool untilCover)
 {
+    int nMoreSteps = 10;
     if (mAtSim && mRobot) {
         if (untilCover) {
             while (true) {
                 emitRobotRandomMove();
                 if (mScene4FakeMap.selectedItems().size() >= mNodesInFakeMap.size()) {
-                    /// 在完全覆盖后,会继续移动,直到用尽额外步数,或者冠军地图持续15轮成立
-                    if (mSteps >= 0) {
-                        mSteps--;
+                    /// 在完全覆盖后,会继续移动5步
+                    if (nMoreSteps > 0) {
+                        nMoreSteps--;
                     } else {
-                        if (nChampionSucceedSteps > 15) {
+                        /// 冠军地图是否已经保留超过15轮, 或者额外步数mSteps已经用尽
+                        if (nChampionSucceedSteps > 15 || mSteps < 0) {
                             break;
+                        } else {
+                            mSteps--;
                         }
                     }
                 }

@@ -114,7 +114,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 #endif
 
     auto& currentChampion = twigCollection.getAliveMaps().front();
-    bool championBiggerThan95 = false;
+    bool championBiggerThan90 = false;
     if (mChampionMap) {
         MapTwigPtr relatedTwig = mChampionMap->relatedTwig().lock();
         if (relatedTwig) {
@@ -123,8 +123,8 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
                 cout << "[THE CHAMPION STATUS]   remains" << endl
 #endif
                         ;
-                if (twigCollection.getScores()[0] > 0.95) {
-                    championBiggerThan95 = true;
+                if (twigCollection.getScores()[0] > 0.90) {
+                    championBiggerThan90 = true;
                 }
             } else {
 #if TMAPPING_CONFIG_LOG_VERBOSE
@@ -137,7 +137,7 @@ void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 #endif
         }
     }
-    if (championBiggerThan95) {
+    if (championBiggerThan90) {
         nChampionDefend++;
     } else {
         nChampionDefend = 0;
