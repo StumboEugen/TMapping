@@ -150,37 +150,40 @@ vector<tmap::MapTwigPtr> tmap::MergedExp::findTwigsUsingThis()
     return res;
 }
 
-MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult)
+MergedExpPtr MergedExp::bornOne(ExpPtr newExp, MatchResult matchResult, bool firstClosure)
 {
     /// 计算回环可能性系数
-    double coe = 0.0;
-    double movedDist = newExp->getMovedDist() - this->mRelatedExp->getMovedDist();
-    const auto& maps = matchResult->gateMapping2old;
-    /// 找到两个节点之间存在的映射关系, 用于将全局里程计信息放到一个坐标系中
-    for (int i = 0; i < maps.size(); ++i) {
-        const auto& j = maps[i]; 
-        if (j != GATEID_NO_MAPPING) {
-            const auto& thisGates = this->mMergedExpData->getGates();
-            const auto& thatGates = matchResult->mergedExpData->getGates();
-            /// 注意对于第一个Exp, 原点选为leaveGate, gblPos为 0,0
-            TopoVec2 glbPosRefInThis{};
-            if (this->mRelatedExp->getEnterGate() != GATEID_BEGINNING_POINT) {
-                /// 对于正常情况, 全局的0,0就是enterGate
-                glbPosRefInThis = thisGates[this->mRelatedExp->getEnterGate()]->getPos();
-            } else {
-                /// 对于第一个Exp, gbl 对应的是leaveGate
-                glbPosRefInThis = thisGates[this->mRelatedExp->getLeaveGate()]->getPos();
+    double coe = 1.0;
+//    if (false) {
+    if (firstClosure) {
+        double movedDist = newExp->getMovedDist() - this->mRelatedExp->getMovedDist();
+        const auto& maps = matchResult->gateMapping2old;
+        /// 找到两个节点之间存在的映射关系, 用于将全局里程计信息放到一个坐标系中
+        for (int i = 0; i < maps.size(); ++i) {
+            const auto& j = maps[i];
+            if (j != GATEID_NO_MAPPING) {
+                const auto& thisGates = this->mMergedExpData->getGates();
+                const auto& thatGates = matchResult->mergedExpData->getGates();
+                /// 注意对于第一个Exp, 原点选为leaveGate, gblPos为 0,0
+                TopoVec2 glbPosRefInThis{};
+                if (this->mRelatedExp->getEnterGate() != GATEID_BEGINNING_POINT) {
+                    /// 对于正常情况, 全局的0,0就是enterGate
+                    glbPosRefInThis = thisGates[this->mRelatedExp->getEnterGate()]->getPos();
+                } else {
+                    /// 对于第一个Exp, gbl 对应的是leaveGate
+                    glbPosRefInThis = thisGates[this->mRelatedExp->getLeaveGate()]->getPos();
+                }
+                const auto& jGblPos =
+                        this->mRelatedExp->getOdomGbPos() +
+                        thisGates[j]->getPos() -glbPosRefInThis;
+                /// 对于newExp, gblPos也就是enterGate
+                const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
+                                      thatGates[newExp->getEnterGate()]->getPos();
+                double posDif2 = (iGblPos - jGblPos).len2();
+                double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist;
+                coe = exp(-0.5 * posDif2 / C);
+                break;
             }
-            const auto& jGblPos = this->mRelatedExp->getOdomGbPos() + thisGates[j]->getPos() -
-                                  glbPosRefInThis;
-            /// 对于newExp, gblPos也就是enterGate
-            const auto& iGblPos = newExp->getOdomGbPos() + thatGates[i]->getPos() -
-                    thatGates[newExp->getEnterGate()]->getPos();
-            double posDif2 = (iGblPos - jGblPos).len2();
-            /// 闭环检测不要给太多的惩罚 x2
-            double C = (1.0 + 1.0 / this->nMergedExps) * convErrPerMeter * movedDist * 1.5;
-            coe = exp(-0.5 * posDif2 / C);
-            break;
         }
     }
 

@@ -77,7 +77,7 @@ public:
      * @param matchResult 上次匹配的结果, 包含有融合后的ExpData信息以及gate对应关系
      * @return 新的MergedExp
      */
-    MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult);
+    MergedExpPtr bornOne(ExpPtr newExp, MatchResult matchResult, bool firstClosure);
 
     /**
      * @brief 从一个ExpData生成独立的single MergedExp.

@@ -46,7 +46,7 @@ size_t MapTwigCollection::nextgCompleteAdding(size_t nSurviver, size_t experienc
 {
     if (mNextGeneration.empty()) {
         cerr << FILE_AND_LINE << "ALL map out!" << endl;
-        throw;
+        return 0;
     }
 
     if (nSurviver == 0 || nSurviver > mNextGeneration.size()) {

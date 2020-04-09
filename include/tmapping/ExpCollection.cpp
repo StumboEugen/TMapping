@@ -87,7 +87,7 @@ void tmap::ExpCollection::addNewExpAndAddLoopClosures(tmap::ExpPtr newExp,
                         if (!closureTwigs.empty())
                         {
                             auto newMergedExp = mergedExp->bornOne(
-                                    newExp, std::move(currentMatchResult));
+                                    newExp, std::move(currentMatchResult), true);
                             newMergedExp->reserveTwigs(closureTwigs.size() + 1);
                             /// 为每个使用mergedExp的Twig构造形成实质闭环的Twig后代
                             for (auto& twig2born : closureTwigs)
