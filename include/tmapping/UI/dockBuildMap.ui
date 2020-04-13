@@ -35,7 +35,7 @@
       <item>
        <widget class="QLineEdit" name="mapName">
         <property name="text">
-         <string>8g</string>
+         <string>33</string>
         </property>
        </widget>
       </item>

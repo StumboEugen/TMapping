@@ -220,11 +220,11 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
                 uiDockSimulation->cbNoDetailMoving, SLOT(setDisabled(bool)));
 
-        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
-                uiDockSimulation->cbAccidents, SLOT(setDisabled(bool)));
+//        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
+//                uiDockSimulation->cbAccidents, SLOT(setDisabled(bool)));
 
-//        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
-//                uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
+        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
+                uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
 
         connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
                 uiDockSimulation->btnRandomMove, SLOT(setEnabled(bool)));
@@ -239,6 +239,12 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
         connect(uiDockSimulation->btnStartMassiveTrail, SIGNAL(clicked()),
                 this, SLOT(SLOT_StartMassiveTrials()));
+
+        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
+                uiDockSimulation->btnStartMassiveTrail, SLOT(setEnabled(bool)));
+        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
+                uiDockSimulation->btnRandomMove, SLOT(setEnabled(bool)));
+
     }
 
     {
@@ -723,6 +729,7 @@ void tmap::TmapUI::SLOT_ShowPossHistroy()
     auto currentIndex = uiDockRealtime->cbCandidates->currentIndex();
     auto theDisplayingMap = StructedMapImpl(realtimeMaps["maps"][currentIndex]);
     const auto& possHistory = theDisplayingMap.getPossHistory();
+    cout << "current VS the best err" << endl;
     for (int i = 0; i < possHistory.size(); ++i) {
         double possMain = possHistory[i];
         double possAnother = mRunnerUpPoss[i];
@@ -756,54 +763,70 @@ void tmap::TmapUI::SLOT_StartMassiveTrials()
 {
     uiDockSimulation->cbMoveUntilCover->setChecked(true);
 //    uiDockSimulation->sbMoveSteps->setValue(50);
+    uiDockRealtime->sbMapNeeded->setValue(1);
 
     ros::NodeHandle n;
+    double wucha = 0.2;
     auto RSC_reset = n.serviceClient<std_srvs::Empty>
             (TMAP_STD_SERVICE_NAME_RESET);
 
-    int nFail = 0;
-    int nSuccess = 0;
-    int nTotalSteps = 0;
+    for (int careless = 75; careless <= 100; careless += 25) {
+        uiDockSimulation->sbCarelessPercentage->setValue(careless);
+        for (; wucha <= 0.4;) {
+            int nFail = 0;
+            int nSuccess = 0;
+            int nTotalSteps = 0;
 
-    vector<int> successSteps;
-    successSteps.reserve(uiDockSimulation->sbTrials->value());
+            vector<int> successSteps;
+            auto nTrials = uiDockSimulation->sbTrials->value();
+            successSteps.reserve(nTrials);
 
-    for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
-        std_srvs::Empty e;
-        RSC_reset.call(e);
-        gvMain->scene()->clearSelection();
+            uiDockSimulation->lePosError->setText(to_string(wucha).data());
+            for (int i = 0; i < nTrials; ++i) {
+                std_srvs::Empty e;
+                RSC_reset.call(e);
+                gvMain->scene()->clearSelection();
 
-        stepsMoved = 0;
-        SLOT_RandomMove();
+                stepsMoved = 0;
+                SLOT_RandomMove();
 
-        SLOT_GetRealtimeMaps();
+                SLOT_GetRealtimeMaps();
 
-        if (gvMain->isTheRealTimeMapSimiliar()) {
-            cout << "BUILT SUCCESS " << i << endl;
-            nSuccess++;
-            successSteps.push_back(stepsMoved);
-            nTotalSteps += stepsMoved;
-        } else {
-            cerr << "BUILT FAILURE " << i << endl;
-            nFail++;
+                if (gvMain->isTheRealTimeMapSimiliar()) {
+                    cout << "=";
+                    nSuccess++;
+                    successSteps.push_back(stepsMoved);
+                    nTotalSteps += stepsMoved;
+                } else {
+                    cout << "[" << i << "]";
+                    nFail++;
 #if TMAPPING_CONFIG_DEBUG_MODE
-            break;
+                    break;
 #else
-            gvMain->saveRealMap("F" + to_string(i));
+                    gvMain->saveRealMap("F" + to_string(i));
 #endif
+                }
+                flush(cout);
+            }
+
+            double aveStep = nTotalSteps / (double) nSuccess;
+            double stdErr = 0.0;
+            for (int nStep : successSteps) {
+                double dif = nStep - aveStep;
+                stdErr += dif * dif;
+            }
+            stdErr /= nSuccess;
+            stdErr = sqrt(stdErr);
+
+            cout << "\nSETTING err: " << wucha << "\t careless: " << careless << endl;
+            cout << "Test complete, failure: " << nFail
+                 << "\t success: " << nSuccess
+                 << "\t %: " << nSuccess / (double) nTrials << endl;
+            cout << "Ave success steps taken: " << aveStep << "\tStdErr: " << stdErr << endl;
+
+            wucha += 0.1;
         }
+        wucha = 0.1;
     }
-
-    double aveStep = nTotalSteps / (double)nSuccess;
-    double stdErr = 0.0;
-    for (int nStep : successSteps) {
-        double dif = nStep - aveStep;
-        stdErr += dif * dif;
-    }
-    stdErr /= nSuccess;
-    stdErr = sqrt(stdErr);
-
-    cout << "Test complete, failure: " << nFail << "\t success: " << nSuccess << endl;
-    cout << "Ave success steps taken: " << aveStep << "\tStdErr: " << stdErr << endl;
 
 }
