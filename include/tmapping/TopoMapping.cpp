@@ -22,9 +22,8 @@ void tmap::TopoMapping::setLeftGate(GateID gateID)
 void tmap::TopoMapping::arriveNewExp(const tmap::ExpPtr& newExp)
 {
 #if TMAPPING_CONFIG_LOG_VERBOSE
-    cout << "\n\n===============================\nSTART arrive new EXP" << endl
+    cout << "\n\n===============================\nSTART arrive new EXP" << endl;
 #endif
-            ;
     mExperiences.addNewExpAndAddLoopClosures(newExp, twigCollection);
 
     MergedExpPtr theSingleMergedExp = MergedExp::singleMergedFromExp(newExp);

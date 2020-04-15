@@ -18,7 +18,7 @@
 
 #define TMAPPING_CONFIG_RECORD_POSS
 #define TMAPPING_CONFIG_LOG_VERBOSE false
-#define TMAPPING_CONFIG_LOG_TIME false
+#define TMAPPING_CONFIG_LOG_TIME true
 #define TMAPPING_CONFIG_DEBUG_MODE false
 
 namespace tmap

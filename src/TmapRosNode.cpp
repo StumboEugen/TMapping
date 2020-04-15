@@ -30,15 +30,22 @@ static double temp;
 bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
                               tmapping::NewExpResponse& res)
 {
+#if TMAPPING_CONFIG_LOG_TIME
     auto startTime = std::chrono::system_clock::now();
+    static bool once = false;
+    if (!once) {
+        once = true;
+        cout << "nMap\t newExpTime \t gateTime \t All" << endl;
+    }
+#endif
     const auto& newExp = make_shared<Exp>(JsonHelper::Str2JS(req.jNewExp));
     mTmappingCore->arriveNewExp(newExp);
 #if TMAPPING_CONFIG_LOG_TIME
-    cout << "i get it " << newExp->expData()->typeStr() << endl;
     auto endTime = std::chrono::system_clock::now();
     std::chrono::duration<double> diff(endTime - startTime);
     temp = diff.count();
-    cout << "\nTIME newExp: " << diff.count() << endl;
+//    cout << "\nTIME newExp: " << diff.count() << endl;
+    cout << diff.count() << '\t';
 #endif
     res.jChampionStatus = JsonHelper::JS2Str(mTmappingCore->getChampionDefendedCount());
     return true;
@@ -53,8 +60,7 @@ bool TmapRosNode::cbSrvGateMovement(tmapping::GateMovementRequest& req,
 #if TMAPPING_CONFIG_LOG_TIME
     auto endTime = std::chrono::system_clock::now();
     std::chrono::duration<double> diff(endTime - startTime);
-    cout << "\nTIME gateMove: " << diff.count() << endl;
-    cout << "TIME ALL: " << diff.count() + temp << endl;
+    cout << diff.count() << '\t' << diff.count() + temp << endl;
 #endif
     return true;
 }
