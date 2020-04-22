@@ -23,6 +23,8 @@
 #include <tmapping/SetSurviverMapsNum.h>
 #include <std_srvs/Empty.h>
 
+#include <QKeyEvent>
+
 using namespace std;
 
 Q_DECLARE_METATYPE(tmap::ExpDataType);
@@ -841,4 +843,28 @@ void tmap::TmapUI::SLOT_StartMassiveTrials()
 //        wucha = 0.1;
 //    }
 
+}
+
+void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
+{
+    QWidget::keyPressEvent(event);
+
+    switch (event->key()) {
+        case Qt::Key_J: {
+            uiDockMapBuilder->btnEditJson->click();
+            break;
+        }
+        case Qt::Key_C: {
+            uiDockMapBuilder->btnConnectGates->click();
+            break;
+        }
+        case Qt::Key_F: {
+            uiDockSimulation->btnRandomMove->click();
+            break;
+        }
+        case Qt::Key_G: {
+            uiDockRealtime->btnGetRealTimeMap->click();
+            break;
+        }
+    }
 }

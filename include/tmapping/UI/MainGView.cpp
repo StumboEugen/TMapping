@@ -83,7 +83,7 @@ void tmap::MainGView::restrictQNode(tmap::QNode* qNode)
         qNode->scene() == &mScene4FakeMap &&
         qNode->expData()->type() != ExpDataType::Corridor) {
         auto pos = qNode->pos();
-        auto roundedP = UIT::QPt2TopoVec(pos).round2();
+        auto roundedP = UIT::QPt2TopoVec(pos).round2(0.5);
         qNode->setPos(UIT::TopoVec2QPt(roundedP));
         qNode->notifyNeighbours2Move();
     }
@@ -352,7 +352,8 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
             }
         }
     }
-    else if (mAcceptAddingGate2Corridor && mTheDrawingCorridor) {
+
+    if (mAcceptAddingGate2Corridor && mTheDrawingCorridor) {
         /// Corridor上画Gate的模式
         const auto& clickPosInQNode = mTheDrawingCorridor->mapFromScene(clickPosInScene);
         auto clickedCorridor = dynamic_cast<Corridor*>(mTheDrawingCorridor->expData().get());
@@ -374,6 +375,7 @@ void tmap::MainGView::mouseReleaseEvent(QMouseEvent* event)
         } else {
             clickedCorridor->addGate(std::move(theAddedGate));
             mTheDrawingCorridor->addNewDanglingLink();
+            cout << FILE_AND_LINE << " Added a gate" << endl;
         }
         mTheDrawingCorridor->notifySizeChange();
         mTheDrawingCorridor.reset();
@@ -535,20 +537,29 @@ void tmap::MainGView::keyPressEvent(QKeyEvent* event)
     switch (event->key()) {
         case Qt::Key_D:
             if (auto fakeLine = dynamic_cast<FakeLine_IMPL*>(scene()->selectedItems().first())){
-                auto socket = fakeLine->oriNode();
-                auto socketGID = fakeLine->fromGate();
-                auto plug = socket->qNodeAt(socketGID).get();
-                auto plugGID = socket->linkedGIDAt(socketGID);
-                if (event->modifiers() & Qt::CTRL) {
-                    std::swap(socket, plug);
-                    std::swap(socketGID, plugGID);
+                if (event->modifiers() & Qt::ShiftModifier) {
+                    fakeLine->oriNode()->breakLinkAt(fakeLine->fromGate());
+                } else {
+                    auto socket = fakeLine->oriNode();
+                    auto socketGID = fakeLine->fromGate();
+                    auto plug = socket->qNodeAt(socketGID).get();
+                    auto plugGID = socket->linkedGIDAt(socketGID);
+                    if (event->modifiers() & Qt::CTRL) {
+                        std::swap(socket, plug);
+                        std::swap(socketGID, plugGID);
+                    }
+                    auto socketPos = socket->gateQPos(socketGID);
+                    auto plugPos = plug->gateQPos(socket->linkedGIDAt(socketGID), false);
+                    plug->setPos(socketPos - plugPos);
+                    plug->notifyNeighbours2Move();
+                    socket->fakeLineAt(socketGID).reset();
+                    plug->fakeLineAt(plugGID).reset();
                 }
-                auto socketPos = socket->gateQPos(socketGID);
-                auto plugPos = plug->gateQPos(socket->linkedGIDAt(socketGID), false);
-                plug->setPos(socketPos - plugPos);
-                plug->notifyNeighbours2Move();
-                socket->fakeLineAt(socketGID).reset();
-                plug->fakeLineAt(plugGID).reset();
+            } else if (auto qnode = dynamic_cast<QNode*>(scene()->selectedItems().first())) {
+                if (event->modifiers() & Qt::ShiftModifier) {
+                    qnode->breakLinks();
+                }
+                return;
             }
         case Qt::Key_Delete:
             SLOT_RemoveSelectedNodes();
@@ -573,6 +584,15 @@ void tmap::MainGView::keyPressEvent(QKeyEvent* event)
             }
         }
             break;
+        case Qt::Key_V: {
+            if (scene() == &mScene4FakeMap) {
+                for (auto item : mScene4FakeMap.selectedItems()) {
+                    if (auto qNode = dynamic_cast<QNode*>(item)) {
+                        addNode2FakeMapFromExpData(qNode->expData()->clone());
+                    }
+                }
+            }
+        }
         default:
             break;
     }

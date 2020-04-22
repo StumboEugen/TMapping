@@ -175,7 +175,8 @@ pair<TopoVec2, TopoVec2> tmap::Corridor::calPosAmdNvFromPointC(const tmap::TopoV
     auto AB = this->getEndPointB() - this->getEndPointA();
     auto AC = C - this->getEndPointA();
     auto nAB = AB.unitize();
-    auto projectP = nAB * nAB.dotProduct(AC) + this->getEndPointA();
+    double disAC = nAB.dotProduct(AC);
+    auto projectP = nAB * round(disAC / 0.5) * 0.5 + this->getEndPointA();
     bool isLeftSide = AB.crossProduct(AC) > 0.;
     auto nv = nAB.rotate(isLeftSide ? 90 : -90);
     projectP += nv * halfWidth();
@@ -184,5 +185,5 @@ pair<TopoVec2, TopoVec2> tmap::Corridor::calPosAmdNvFromPointC(const tmap::TopoV
 
 double Corridor::halfWidth() const
 {
-    return 0.35;
+    return 0.5;
 }

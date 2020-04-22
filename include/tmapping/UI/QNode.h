@@ -71,6 +71,8 @@ protected:
 public:
     void breakLinks();
 
+    void breakLinkAt(int index);
+
     void notifyNeighbours2Move();
 
     static QNodePtr makeOneFromExpData(const ExpDataPtr& relatedExpData, MoveStragety ms);

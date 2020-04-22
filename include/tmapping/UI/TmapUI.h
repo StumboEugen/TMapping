@@ -82,6 +82,9 @@ private: // methods
     void startEdittingNodes(bool start);
     static bool checkROS();
 
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
+
 public:
 
     explicit TmapUI(QWidget* parent = nullptr);

@@ -331,16 +331,34 @@ tmap::QNodePtr tmap::QNode::thisQnodePtr()
 void tmap::QNode::breakLinks()
 {
     for (int i = 0; i < nLinks(); ++i) {
-        auto& link = linkAt(i);
-        auto linkedQNode = qNodeAt(i);
-        if (linkedQNode) {
-            linkedQNode->linkAt(link.at).to.reset();
-            linkedQNode->linkAt(link.at).at = GATEID_NO_MAPPING;
-            linkedQNode->fakeLineAt(link.at).reset();
-            this->fakeLineAt(i).reset();
-        }
+        breakLinkAt(i);
+//        auto& link = linkAt(i);
+//        auto linkedQNode = qNodeAt(i);
+//        if (linkedQNode) {
+//            linkedQNode->linkAt(link.at).to.reset();
+//            linkedQNode->linkAt(link.at).at = GATEID_NO_MAPPING;
+//            linkedQNode->fakeLineAt(link.at).reset();
+//            this->fakeLineAt(i).reset();
+//        }
     }
 }
+
+void tmap::QNode::breakLinkAt(int i)
+{
+    auto& link = linkAt(i);
+    auto linkedQNode = qNodeAt(i);
+    if (linkedQNode) {
+        linkedQNode->linkAt(link.at).to.reset();
+        linkedQNode->linkAt(link.at).at = GATEID_NO_MAPPING;
+        linkedQNode->fakeLineAt(link.at).reset();
+        this->fakeLineAt(i).reset();
+
+        link.to.reset();
+        link.at = GATEID_NO_MAPPING;
+        fakeLineAt(i).reset();
+    }
+}
+
 
 tmap::QNodePtr tmap::QNode::qNodeAt(size_t index)
 {

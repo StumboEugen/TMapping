@@ -34,7 +34,7 @@ MergedExp::MergedExp(ExpPtr fatherExp)
           /// add GATEID_NO_MAPPING for safety
           mGatesMapping2Father(mMergedExpData->nGates(), GATEID_NO_MAPPING),
           mGatesMappingFromFather(),
-          mPossDecConf(0.98) /// 做一个调整,我们希望压制全新地图的增长,不能使其没有代价
+          mPossDecConf(0.95) /// 做一个调整,我们希望压制全新地图的增长,不能使其没有代价
 {}
 
 MergedExp::MergedExp(const Jsobj& jmergedExp)
