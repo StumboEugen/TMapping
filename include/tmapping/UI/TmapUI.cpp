@@ -764,85 +764,76 @@ void tmap::TmapUI::SLOT_SetMapSurvivers(int value)
 void tmap::TmapUI::SLOT_StartMassiveTrials()
 {
     uiDockSimulation->cbMoveUntilCover->setChecked(true);
-//    uiDockSimulation->sbMoveSteps->setValue(50);
+    uiDockSimulation->sbMoveSteps->setValue(50);
     uiDockRealtime->sbMapNeeded->setValue(1);
+    uiDockSimulation->sbCarelessPercentage->setValue(25);
 
     ros::NodeHandle n;
-    double wucha = 0.2;
     auto RSC_reset = n.serviceClient<std_srvs::Empty>
             (TMAP_STD_SERVICE_NAME_RESET);
 
-    for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
+//    double wucha = 0.2;
+//
+//    for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
+//        std_srvs::Empty e;
+//        RSC_reset.call(e);
+//        gvMain->scene()->clearSelection();
+//
+//        SLOT_RandomMove();
+//        SLOT_GetRealtimeMaps();
+//        if (gvMain->isTheRealTimeMapSimiliar()) {
+//            return;
+//        }
+//    }
+
+    int nFail = 0;
+    int nSuccess = 0;
+    int nTotalSteps = 0;
+
+    vector<int> successSteps;
+    auto nTrials = uiDockSimulation->sbTrials->value();
+    successSteps.reserve(nTrials);
+
+    for (int i = 0; i < nTrials; ++i) {
         std_srvs::Empty e;
         RSC_reset.call(e);
         gvMain->scene()->clearSelection();
 
+        stepsMoved = 0;
         SLOT_RandomMove();
+
         SLOT_GetRealtimeMaps();
+
         if (gvMain->isTheRealTimeMapSimiliar()) {
-            return;
+            cout << "=";
+            nSuccess++;
+            successSteps.push_back(stepsMoved);
+            nTotalSteps += stepsMoved;
+        } else {
+            cout << "[" << i << "]";
+            nFail++;
+#if TMAPPING_CONFIG_DEBUG_MODE
+            break;
+#else
+            gvMain->saveRealMap("F" + to_string(i));
+#endif
         }
+        flush(cout);
     }
 
-//    for (int careless = 75; careless <= 100; careless += 25) {
-//        uiDockSimulation->sbCarelessPercentage->setValue(careless);
-//        for (; wucha <= 0.4;) {
-//            int nFail = 0;
-//            int nSuccess = 0;
-//            int nTotalSteps = 0;
-//
-//            vector<int> successSteps;
-//            auto nTrials = uiDockSimulation->sbTrials->value();
-//            successSteps.reserve(nTrials);
-//
-//            uiDockSimulation->lePosError->setText(to_string(wucha).data());
-//            for (int i = 0; i < nTrials; ++i) {
-//                std_srvs::Empty e;
-//                RSC_reset.call(e);
-//                gvMain->scene()->clearSelection();
-//
-//                stepsMoved = 0;
-//                SLOT_RandomMove();
-//
-//                SLOT_GetRealtimeMaps();
-//
-//                if (gvMain->isTheRealTimeMapSimiliar()) {
-//                    cout << "=";
-//                    nSuccess++;
-//                    successSteps.push_back(stepsMoved);
-//                    nTotalSteps += stepsMoved;
-//                } else {
-//                    cout << "[" << i << "]";
-//                    nFail++;
-//#if TMAPPING_CONFIG_DEBUG_MODE
-//                    break;
-//#else
-//                    gvMain->saveRealMap("F" + to_string(i));
-//#endif
-//                }
-//                flush(cout);
-//            }
-//
-//            double aveStep = nTotalSteps / (double) nSuccess;
-//            double stdErr = 0.0;
-//            for (int nStep : successSteps) {
-//                double dif = nStep - aveStep;
-//                stdErr += dif * dif;
-//            }
-//            stdErr /= nSuccess;
-//            stdErr = sqrt(stdErr);
-//
-//            cout << "\nSETTING err: " << wucha << "\t careless: " << careless << endl;
-//            cout << "Test complete, failure: " << nFail
-//                 << "\t success: " << nSuccess
-//                 << "\t %: " << nSuccess / (double) nTrials << endl;
-//            cout << "Ave success steps taken: " << aveStep << "\tStdErr: " << stdErr << endl;
-//
-//            wucha += 0.1;
-//        }
-//        wucha = 0.1;
-//    }
+    double aveStep = nTotalSteps / (double) nSuccess;
+    double stdErr = 0.0;
+    for (int nStep : successSteps) {
+        double dif = nStep - aveStep;
+        stdErr += dif * dif;
+    }
+    stdErr /= nSuccess;
+    stdErr = sqrt(stdErr);
 
+    cout << "Test complete, failure: " << nFail
+         << "\t success: " << nSuccess
+         << "\t %: " << nSuccess / (double) nTrials << endl;
+    cout << "Ave success steps taken: " << aveStep << "\tStdErr: " << stdErr << endl;
 }
 
 void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
