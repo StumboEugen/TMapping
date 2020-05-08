@@ -24,6 +24,11 @@
 #include <std_srvs/Empty.h>
 
 #include <QKeyEvent>
+#include <QImage>
+
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -670,7 +675,11 @@ void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 
         if (!RSC_throughGate.call(gateMovement)) {
             cerr << "ROS service [gateMove] call failed!" << endl;
+            return;
         }
+
+        sentNodes["exp"].append(theExp2Send->toJS());
+        sentNodes["gateMove"].append(gateMove);
     } else {
         cout << "ROS hasn't started, the message will not be sent" << endl;
     }
@@ -718,6 +727,7 @@ void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
 
 void tmap::TmapUI::SLOT_RandomMove()
 {
+    sentNodes.clear();
     gvMain->randomMove(uiDockSimulation->sbMoveSteps->value(),
             uiDockSimulation->cbMoveUntilCover->isChecked());
 }
@@ -857,5 +867,75 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
             uiDockRealtime->btnGetRealTimeMap->click();
             break;
         }
+        case Qt::Key_R: {
+            ros::NodeHandle n;
+            auto RSC_reset = n.serviceClient<std_srvs::Empty>
+                    (TMAP_STD_SERVICE_NAME_RESET);
+            std_srvs::Empty e;
+            RSC_reset.call(e);
+
+            for (int i = 0; i < sentNodes["exp"].size(); ++i) {
+
+                tmapping::NewExp srvExp;
+                srvExp.request.jNewExp = JsonHelper::JS2Str(sentNodes["exp"][i]);
+                if (!RSC_newExp.call(srvExp)) {
+                    cerr << "ROS service [newExp] call failed!" << endl;
+                    return;
+                }
+
+                tmapping::GateMovement gateMovement;
+                gateMovement.request.jGateMove = JsonHelper::JS2Str(sentNodes["gateMove"][i]);
+
+                if (!RSC_throughGate.call(gateMovement)) {
+                    cerr << "ROS service [gateMove] call failed!" << endl;
+                    return;
+                }
+            }
+            break;
+        }
+        case Qt::Key_T: {
+            saveScenePic(gvMain->scene(), "test");
+        }
     }
+}
+
+void tmap::TmapUI::saveScenePic(QGraphicsScene* scene, std::string fileName, const std::string& folder)
+{
+    const auto& outBound = scene->itemsBoundingRect();
+    bool isWider = outBound.width() > outBound.height();
+    double maxLen = max(outBound.width(), outBound.height());
+    QImage img(maxLen, maxLen, QImage::Format_RGB32);
+    img.fill(Qt::white);
+    QPainter painter(&img);
+    QRectF targetRect(0, 0, outBound.width(), outBound.height());
+    if (isWider) {
+        targetRect.translate(0, (outBound.width() - outBound.height()) / 2);
+    } else {
+        targetRect.translate((outBound.height() - outBound.width()) / 2, 0);
+    }
+    gvMain->scene()->render(&painter, targetRect, outBound);
+
+    img = img.scaled(1000, 1000, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    uid_t uid;
+    struct passwd* pwd;
+    uid = getuid();
+    pwd = getpwuid(uid);
+    chdir(pwd->pw_dir);
+    mkdir(tmap::TMAP_STD_FILE_SAVE_FLODER_NAME, 0b111111111);
+    chdir(tmap::TMAP_STD_FILE_SAVE_FLODER_NAME);
+
+    if (!folder.empty()) {
+        mkdir(folder.data(), 0b111111111);
+        chdir(folder.data());
+    }
+
+    fileName += ".png";
+
+    if (img.save(fileName.data(), nullptr, 100)) {
+        cout << "save img " << fileName << " success!" << endl;
+    } else {
+        cerr << "save img " << fileName << " FAIL!" << endl;
+    }
+    painter.end();
 }

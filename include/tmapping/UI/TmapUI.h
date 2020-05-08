@@ -68,6 +68,7 @@ class TmapUI : public QMainWindow
     ros::ServiceClient RSC_getMaps;
 
     Jsobj realtimeMaps;
+    Jsobj sentNodes;
 
     int stepsMoved = 0;
 
@@ -81,6 +82,10 @@ private: // methods
     static QString getExpDataLabel(const ExpDataPtr& expData);
     void startEdittingNodes(bool start);
     static bool checkROS();
+
+    void saveScenePic(QGraphicsScene* scene,
+            std::string fileName,
+            const std::string& folder = "");
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
