@@ -775,7 +775,7 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
 
 void tmap::MainGView::randomMove(int mSteps, bool untilCover)
 {
-    int nMoreSteps = 10;
+    int nMoreSteps = 25;
     if (mAtSim && mRobot) {
         if (untilCover) {
             while (true) {

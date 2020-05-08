@@ -112,6 +112,10 @@ void tmap::MapTwig::resetLastGlobalConfidenceResult()
 double tmap::MapTwig::calGlobalPoss(double log_nExp)
 {
     if (mLastGlobalResult == -1.0) {
+//        if (exp(log_nExp) >= 40) {
+//            double temp = pow(nTopoNode, -0.75);
+//            mConfidence *= temp;
+//        }
         mLastGlobalResult = mConfidence * exp( nTopoNode * -log_nExp);
     }
     if (isnan(mLastGlobalResult)) {

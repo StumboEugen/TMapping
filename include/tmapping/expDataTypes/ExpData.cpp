@@ -627,6 +627,8 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         /// pair<this, that>
         /// 对应int的patternBase下的匹配结果
         vector<vector<pair<SubNode, SubNode>>> votesOfBase(nPointsPat);
+        vector<vector<bool>> patternMappedOfDiffPatternBase(
+                nPointsPat, vector<bool>(nPointsPat, false));
 
         size_t nValidBase = 0;
 
@@ -642,6 +644,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                     votesOfBase[j].emplace_back(make_pair(
                             SubNode(SubNodeType::GATE, i),
                             SubNode(SubNodeType::GATE, j)));
+                    patternMappedOfDiffPatternBase[j][j] = true;
                 }
             }
         }
@@ -656,6 +659,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                     votesOfBase[j].emplace_back(make_pair(
                             SubNode(SubNodeType::LandMark, i),
                             SubNode(SubNodeType::LandMark, j)));
+                    patternMappedOfDiffPatternBase[j][j] = true;
                 }
             }
         } else {
@@ -670,14 +674,21 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
 
         /// 开始投票
         for (int idShapeGate = 0; idShapeGate < gatesOfShape.size(); ++idShapeGate) {
+            if (idShapeGate == baseOfShape.toUIndex(shape.nGates())) {
+                continue;
+            }
             auto shapeGatePosInBase = gatesOfShape[idShapeGate]->getPos() - basePosOfShape;
             if (auto bins = table.lookUpEntersAtPos(shapeGatePosInBase)) {
                 for (const auto& bin : *bins) {
                     /// 找到对应base的投票箱
                     auto& vecVote = votesOfBase[bin.base.index];
+                    auto& patternMap = patternMappedOfDiffPatternBase[bin.base.index];
                     /// 如果为空,表明base本身就不匹配, 不使用
                     if (!vecVote.empty() &&
                         bin.node.type == SubNodeType::GATE) {
+                        if (!patternMap[bin.base.index]) {
+                            throw;
+                        }
                         auto idPatGate = bin.node.index;
                         const auto& shapesGate = gatesOfShape[idShapeGate];
                         const auto& patternsGate = pattern.getGates()[idPatGate];
@@ -695,10 +706,20 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                                 auto corrNew = newPatGatePos - basePosOfPat;
                                 if ((shapeGatePosInBase - corrOld).len2() >
                                     (shapeGatePosInBase - corrNew).len2()) {
+                                    if (patternMap[idPatGate]) {
+                                        /// 防止idPatGate的多重映射
+                                        continue;
+                                    }
+                                    patternMap[idPatGate] = true;
                                     /// 说明新的这个命中距离更近一些, 更改为当前的idPatGate
                                     lastVote.second.index = idPatGate;
                                 }
                             } else {
+                                if (patternMap[idPatGate]) {
+                                    /// 防止idPatGate的多重映射
+                                    continue;
+                                }
+                                patternMap[idPatGate] = true;
                                 vecVote.emplace_back(
                                         SubNode(SubNodeType::GATE, idShapeGate),
                                         SubNode(SubNodeType::GATE, idPatGate));
@@ -710,6 +731,9 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
         }
 
         for (int idShapeLM = 0; idShapeLM < lmsOfShape.size(); ++idShapeLM) {
+            if (idShapeLM == baseOfShape.index && baseOfShape.type == SubNodeType::LandMark) {
+                continue;
+            }
             auto shapeLMPosInBase = lmsOfShape[idShapeLM]->getPos() - basePosOfShape;
             if (auto bins = table.lookUpEntersAtPos(shapeLMPosInBase)) {
                 for (const auto& bin : *bins) {
@@ -721,6 +745,7 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                         const auto& targetLM = pattern.getPLMs()[idPatLM];
                         if (currentLM->alike(targetLM)) {
                             auto& lastVote = vecVote.back();
+                            auto& patternMap = patternMappedOfDiffPatternBase[bin.base.index];
                             if (__glibc_unlikely(lastVote.first.index == idShapeLM)) {
                                 const auto& basePosOfPat = pattern.getPosOfSubNode(bin.base);
                                 const auto& oldPatLMPOS =
@@ -732,8 +757,18 @@ ExpData::matchPairs(const ExpData& shape, const ExpData& pattern, bool shapeIsTh
                                 if ((shapeLMPosInBase - corrOld).len2() >
                                     (shapeLMPosInBase - corrNew).len2()) {
                                     lastVote.second.index = idPatLM;
+                                    if (patternMap[idPatLM]) {
+                                        /// 防止idPatGate的多重映射
+                                        continue;
+                                    }
+                                    patternMap[idPatLM] = true;
                                 }
                             } else {
+                                if (patternMap[idPatLM]) {
+                                    /// 防止idPatGate的多重映射
+                                    continue;
+                                }
+                                patternMap[idPatLM] = true;
                                 vecVote.emplace_back(
                                         SubNode(SubNodeType::LandMark, idShapeLM),
                                         SubNode(SubNodeType::LandMark, idPatLM));
