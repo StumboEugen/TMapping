@@ -157,6 +157,8 @@ public:
      * @param endSerial 终点endSerial
      */
     std::vector<MapTwig*> getChain2Father(size_t endSerial);
+
+    Jsobj structedMapHistory(const ExpCollection& exps);
 };
 
 }

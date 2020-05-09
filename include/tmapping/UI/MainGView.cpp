@@ -725,7 +725,7 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
             lookupQueue.push(qNode.get());
             qNode->setPos(0., 0.);
             mScene4RealMap.addItem(qNode.get());
-            mNodesInRealMap.insert(std::move(qNode));
+            mNodesInRealMap.insert(qNode);
 
             while (!lookupQueue.empty()) {
                 auto currentQnode = lookupQueue.front();
@@ -768,6 +768,11 @@ void tmap::MainGView::displayRealMap(const Jsobj& jMap)
         }
     }
 
+    if (!qNodes.empty()) {
+        /// 如果一切正常的话,这个0号就是机器人的位置
+        qNodes[0]->setSelected(true);
+    }
+
     for (auto& node : mNodesInRealMap) {
         setQNodeMovabilityInRealMap(node.get());
     }
@@ -778,9 +783,15 @@ void tmap::MainGView::randomMove(int mSteps, bool untilCover)
     int nMoreSteps = 25;
     if (mAtSim && mRobot) {
         if (untilCover) {
+
+            nPassedNodes = 0;
+            for (auto& node : mNodesInFakeMap) {
+                node->setPassed(false);
+            }
+
             while (true) {
                 emitRobotRandomMove();
-                if (mScene4FakeMap.selectedItems().size() >= mNodesInFakeMap.size()) {
+                if (nPassedNodes >= mNodesInFakeMap.size()) {
                     /// 在完全覆盖后,会继续移动5步
                     if (nMoreSteps > 0) {
                         nMoreSteps--;
@@ -838,6 +849,12 @@ void tmap::MainGView::emitRobotRandomMove()
         pickedGate = options[u(engine)];
     }
 
+    if (!mRobot->atNode()->isPassed()) {
+        mRobot->atNode()->setPassed(true);
+        nPassedNodes ++;
+    }
+
+    mRobot->atNode()->scene()->clearSelection();
     mRobot->atNode()->setSelected(true);
 
     auto oldExp = mRobot->moveThroughGate(pickedGate);
@@ -852,6 +869,16 @@ void tmap::MainGView::setChampionSucceedSteps(size_t steps)
 bool tmap::MainGView::isTheRealTimeMapSimiliar()
 {
     return
-    mScene4FakeMap.selectedItems().size() == currentDisplayedRealTimeMap->getNodes().size();
+    mNodesInFakeMap.size() == currentDisplayedRealTimeMap->getNodes().size();
+}
+
+QGraphicsScene* tmap::MainGView::getScene4FakeMap()
+{
+    return &mScene4FakeMap;
+}
+
+QGraphicsScene* tmap::MainGView::getScene4RealMap()
+{
+    return &mScene4RealMap;
 }
 

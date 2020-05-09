@@ -44,6 +44,11 @@ class MainGView : public QGraphicsView
 
     size_t nChampionSucceedSteps = 0;
 
+    size_t nPassedNodes = 0;
+
+public:
+    size_t nMovedSteps = 0;
+
 private:
     void setQNodeMovabilityInFakeMap(QNode* node) const;
     void setQNodeMovabilityInRealMap(QNode* node) const;
@@ -89,6 +94,10 @@ public:
     bool isTheRealTimeMapSimiliar();
 
     ~MainGView() override;
+
+    QGraphicsScene* getScene4FakeMap();
+
+    QGraphicsScene* getScene4RealMap();
 
 public Q_SLOTS:
     void SLOT_EnableMoving4FakeNodes(bool enableMove);

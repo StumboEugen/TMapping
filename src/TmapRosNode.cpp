@@ -20,6 +20,8 @@ tmap::TmapRosNode::TmapRosNode() :
                                       &TmapRosNode::cbSrvSetSuriviers, this)),
         srvReset(n.advertiseService(TMAP_STD_SERVICE_NAME_RESET,
                                       &TmapRosNode::cbSrvReset, this)),
+        srvChHis(n.advertiseService(TMAP_STD_SERVICE_GET_CHAMPION_HISTORY,
+                                      &TmapRosNode::cbSrvGetEvoOfChampion, this)),
         mTmappingCore(new TopoMapping)
 {
 
@@ -83,6 +85,13 @@ bool TmapRosNode::cbSrvSetSuriviers(tmapping::SetSurviverMapsNumRequest& req,
 bool TmapRosNode::cbSrvReset(std_srvs::EmptyRequest& req, std_srvs::EmptyResponse& res)
 {
     mTmappingCore.reset(new TopoMapping);
+    return true;
+}
+
+bool
+TmapRosNode::cbSrvGetEvoOfChampion(tmapping::GetMapsRequest& req, tmapping::GetMapsResponse& res)
+{
+    res.jMaps = JsonHelper::JS2Str(mTmappingCore->getChampionHistory());
     return true;
 }
 

@@ -190,3 +190,8 @@ size_t tmap::TopoMapping::getChampionDefendedCount() const
 {
     return nChampionDefend;
 }
+
+tmap::Jsobj tmap::TopoMapping::getChampionHistory()
+{
+    return twigCollection.getAliveMaps().front()->structedMapHistory(mExperiences);
+}

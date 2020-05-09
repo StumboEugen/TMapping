@@ -306,3 +306,26 @@ std::vector<MapTwig*> MapTwig::getChain2Father(size_t endSerial)
     res.push_back(current);
     return res;
 }
+
+Jsobj MapTwig::structedMapHistory(const ExpCollection& exps)
+{
+    Jsobj res;
+    MapTwig* currentTwig = this;
+
+    while (true) {
+        auto backUp = currentTwig->mExpUsages;
+        while (!currentTwig->mExpUsages.empty()) {
+            res.append(currentTwig->makeMap(exps)->toJS());
+            currentTwig->mExpUsages.pop_back();
+        }
+        currentTwig->mExpUsages = std::move(backUp);
+
+        if (currentTwig->mFather) {
+            currentTwig = currentTwig->mFather.get();
+        } else {
+            break;
+        }
+    }
+
+    return res;
+}

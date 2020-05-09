@@ -12,6 +12,7 @@
 #include <QActionGroup>
 #include <QGraphicsScene>
 #include <QDockWidget>
+#include <QImage>
 
 #include "tmapping/expDataTypes/ExpData.h"
 #include "tmapping/tools/TopoParams.h"
@@ -72,6 +73,8 @@ class TmapUI : public QMainWindow
 
     int stepsMoved = 0;
 
+    std::vector<std::unique_ptr<QImage>> routeImgs;
+
 #ifdef TMAPPING_CONFIG_RECORD_POSS
     std::vector<double> mChampionPoss;
     std::vector<double> mRunnerUpPoss;
@@ -84,8 +87,12 @@ private: // methods
     static bool checkROS();
 
     void saveScenePic(QGraphicsScene* scene,
-            std::string fileName,
-            const std::string& folder = "");
+                      std::string fileName,
+                      std::string folder = "");
+
+    std::unique_ptr<QImage> turnScene2Image(QGraphicsScene* scene);
+
+    void saveImg(const std::unique_ptr<QImage>& img, std::string fileName, std::string folder = "");
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;

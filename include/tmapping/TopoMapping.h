@@ -34,6 +34,8 @@ public:
     void setNSurviverMaps(size_t nMaps);
 
     size_t getChampionDefendedCount() const;
+
+    Jsobj getChampionHistory();
 };
 }
 

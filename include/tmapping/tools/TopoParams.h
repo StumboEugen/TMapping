@@ -43,6 +43,7 @@ static constexpr char TMAP_STD_SERVICE_NAME_GATE_MOVE[] = "tmapping/srv/gateMove
 static constexpr char TMAP_STD_SERVICE_NAME_GET_MAPS[] = "tmapping/srv/getMaps";
 static constexpr char TMAP_STD_SERVICE_NAME_SET_SURVIVERS[] = "tmapping/srv/setSurvivers";
 static constexpr char TMAP_STD_SERVICE_NAME_RESET[] = "tmapping/srv/reset";
+static constexpr char TMAP_STD_SERVICE_GET_CHAMPION_HISTORY[] = "tmapping/srv/championHistory";
 
 /// 第二轮的时候, 任何概率都接受, 哪些很差的, 交给固定数量去干掉
 static constexpr double TOLLERANCE_2ND_MATCH_MERGEDEXP = 0.0;

@@ -55,6 +55,7 @@ class QNode : public QGraphicsItem, public MapNode
     std::vector<bool> mDrawGate;
     GateID mHighLightGate = -1;
     MoveStragety mMoveStragety;
+    bool passed = false;
 
 private:
     explicit QNode(MergedExpPtr mergedExp);
@@ -105,6 +106,10 @@ public:
     void mouseHoverAt(const QPointF& at);
 
     void setMoveStragety(MoveStragety moveStragety);
+
+    bool isPassed() const;
+
+    void setPassed(bool pass = true);
 };
 }
 

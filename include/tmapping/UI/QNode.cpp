@@ -44,6 +44,13 @@ QRectF tmap::QNode::boundingRect() const
 void
 tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
+
+    if (isSelected()) {
+        setZValue(-4);
+    } else {
+        setZValue(0);
+    }
+
     const auto& centerPoint = boundingRect().center();
     QPointF halfDia{UIT::QMeter(0.2), UIT::QMeter(0.2)};
     QRectF middleHalfSq{centerPoint + halfDia, centerPoint - halfDia};
@@ -60,6 +67,10 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
             painter->drawRect(QRectF{tl,br});
+            if (isSelected()) {
+                painter->setPen(QPen{Qt::green, 5});
+                painter->drawRect(QRectF{tl,br});
+            }
             painter->setPen(oriPen);
 
             painter->setBrush(isSelected() ? Qt::green : Qt::yellow);
@@ -126,6 +137,11 @@ tmap::QNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
             auto tl = UIT::TopoVec2QPt({bRect[2], bRect[0]});
             auto br = UIT::TopoVec2QPt({bRect[3], bRect[1]});
             painter->drawRect(QRectF{tl,br});
+            if (isSelected()) {
+                painter->setPen(QPen{Qt::green, 5});
+                painter->drawRect(QRectF{tl,br});
+            }
+            painter->setPen(oriPen);
             painter->setBrush(isSelected() ? Qt::green : Qt::yellow);
             painter->drawRect(middleHalfSq);
             painter->setPen(oriPen);
@@ -478,6 +494,16 @@ void tmap::QNode::removeConnection(size_t gid)
         linkThis.to.reset();
         linkThis.at = GATEID_NO_MAPPING;
     }
+}
+
+bool tmap::QNode::isPassed() const
+{
+    return passed;
+}
+
+void tmap::QNode::setPassed(bool pass)
+{
+    passed = pass;
 }
 
 ////////////////// NEXT TO FAKE LINE

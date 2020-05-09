@@ -605,6 +605,8 @@ void tmap::TmapUI::SLOT_PlaceRobot()
 
 void tmap::TmapUI::SLOT_ROS_ThroughGate(const ExpPtr& exp)
 {
+    routeImgs.emplace_back(turnScene2Image(gvMain->getScene4FakeMap()));
+
     if (checkROS()) {
         tmapping::NewExp srvExp;
         ExpPtr theExp2Send;
@@ -728,6 +730,7 @@ void tmap::TmapUI::SLOT_DisplayTheRealMap(int index)
 void tmap::TmapUI::SLOT_RandomMove()
 {
     sentNodes.clear();
+    routeImgs.clear();
     gvMain->randomMove(uiDockSimulation->sbMoveSteps->value(),
             uiDockSimulation->cbMoveUntilCover->isChecked());
 }
@@ -807,7 +810,6 @@ void tmap::TmapUI::SLOT_StartMassiveTrials()
     for (int i = 0; i < nTrials; ++i) {
         std_srvs::Empty e;
         RSC_reset.call(e);
-        gvMain->scene()->clearSelection();
 
         stepsMoved = 0;
         SLOT_RandomMove();
@@ -868,11 +870,25 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
             break;
         }
         case Qt::Key_R: {
+
+            SLOT_GetRealtimeMaps();
+
+            /// 确定对应k时刻的错误冠军是第一名地图还是第二名地图
+            auto currentIndex = uiDockRealtime->cbCandidates->currentIndex();
+            auto theDisplayingMap = StructedMapImpl(realtimeMaps["maps"][currentIndex]);
+            const auto& possHistory = theDisplayingMap.getPossHistory();
+            vector<bool> isChampionAtK(possHistory.size());
+            for (int i = 0; i < possHistory.size(); ++i) {
+                isChampionAtK[i] = possHistory[i] == mChampionPoss[i];
+            }
+
             ros::NodeHandle n;
             auto RSC_reset = n.serviceClient<std_srvs::Empty>
                     (TMAP_STD_SERVICE_NAME_RESET);
             std_srvs::Empty e;
             RSC_reset.call(e);
+
+            uiDockRealtime->sbMapNeeded->setValue(2);
 
             for (int i = 0; i < sentNodes["exp"].size(); ++i) {
 
@@ -885,38 +901,94 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
                 tmapping::GateMovement gateMovement;
                 gateMovement.request.jGateMove = JsonHelper::JS2Str(sentNodes["gateMove"][i]);
-
                 if (!RSC_throughGate.call(gateMovement)) {
                     cerr << "ROS service [gateMove] call failed!" << endl;
                     return;
                 }
+
+                SLOT_GetRealtimeMaps();
+                if (isChampionAtK[i]) {
+                    SLOT_DisplayTheRealMap(1);
+                } else {
+                    SLOT_DisplayTheRealMap(0);
+                }
+
+                stringstream ss;
+                ss << setw(4) << setfill('0') << i;
+                saveImg(turnScene2Image(gvMain->getScene4RealMap()), "WRONG_" + ss.str(),
+                        uiDockMapBuilder->mapName->text().toStdString());
+                saveImg(routeImgs[i], "REALMOVE_" + ss.str(),
+                        uiDockMapBuilder->mapName->text().toStdString());
             }
+
+            ros::ServiceClient RSC_championHisLooker = n.serviceClient<tmapping::GetMaps>
+                    (TMAP_STD_SERVICE_GET_CHAMPION_HISTORY);
+            tmapping::GetMaps championHistoryMsg;
+            if (RSC_championHisLooker.call(championHistoryMsg)) {
+                Jsobj jMaps = JsonHelper::Str2JS(championHistoryMsg.response.jMaps);
+                for (int i = 0; i < jMaps.size(); i++) {
+                    gvMain->displayRealMap(jMaps[i]);
+                    stringstream ss;
+                    ss << setw(4) << setfill('0') << jMaps.size() - i - 1;
+                    saveImg(turnScene2Image(gvMain->getScene4RealMap()),
+                            "RIGHT_" + ss.str(),
+                            uiDockMapBuilder->mapName->text().toStdString());
+                }
+            }
+
             break;
         }
         case Qt::Key_T: {
-            saveScenePic(gvMain->scene(), "test");
+            saveImg(turnScene2Image(gvMain->scene()), "test");
         }
     }
 }
 
-void tmap::TmapUI::saveScenePic(QGraphicsScene* scene, std::string fileName, const std::string& folder)
+void tmap::TmapUI::saveScenePic(QGraphicsScene* scene, std::string fileName, std::string folder)
 {
     const auto& outBound = scene->itemsBoundingRect();
-    bool isWider = outBound.width() > outBound.height();
-    double maxLen = max(outBound.width(), outBound.height());
+    int maxLen = max(outBound.width(), outBound.height());
+    if (maxLen < 1000) {
+        maxLen = 1000;
+    }
     QImage img(maxLen, maxLen, QImage::Format_RGB32);
     img.fill(Qt::white);
     QPainter painter(&img);
     QRectF targetRect(0, 0, outBound.width(), outBound.height());
-    if (isWider) {
-        targetRect.translate(0, (outBound.width() - outBound.height()) / 2);
-    } else {
-        targetRect.translate((outBound.height() - outBound.width()) / 2, 0);
-    }
+    targetRect.moveCenter({maxLen / 2.0, maxLen / 2.0});
     gvMain->scene()->render(&painter, targetRect, outBound);
+    painter.end();
 
-    img = img.scaled(1000, 1000, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    if (img.width() > 1000) {
+        img = img.scaled(1000, 1000, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
 
+
+}
+
+std::unique_ptr<QImage> tmap::TmapUI::turnScene2Image(QGraphicsScene* scene)
+{
+    const auto& outBound = scene->itemsBoundingRect();
+    int maxLen = max(outBound.width(), outBound.height());
+    if (maxLen < 1000) {
+        maxLen = 1000;
+    }
+    unique_ptr<QImage> img(new QImage(maxLen, maxLen, QImage::Format_RGB32));
+    img->fill(Qt::white);
+    QPainter painter(img.get());
+    QRectF targetRect(0, 0, outBound.width(), outBound.height());
+    targetRect.moveCenter({maxLen / 2.0, maxLen / 2.0});
+    gvMain->scene()->render(&painter, targetRect, outBound);
+    painter.end();
+
+    if (img->width() > 1000) {
+        *img = img->scaled(1000, 1000, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+    return img;
+}
+
+void tmap::TmapUI::saveImg(const unique_ptr<QImage>& img, std::string fileName, std::string folder)
+{
     uid_t uid;
     struct passwd* pwd;
     uid = getuid();
@@ -926,16 +998,22 @@ void tmap::TmapUI::saveScenePic(QGraphicsScene* scene, std::string fileName, con
     chdir(tmap::TMAP_STD_FILE_SAVE_FLODER_NAME);
 
     if (!folder.empty()) {
+        struct tm * timeStructP;
+        time_t timeLong;
+        timeLong = time(nullptr);
+        timeStructP = localtime(&timeLong);
+        char tmp[64];
+        strftime(tmp, sizeof(tmp), "_%Y%m%d_%H%M", timeStructP);
+        folder += tmp;
         mkdir(folder.data(), 0b111111111);
         chdir(folder.data());
     }
 
     fileName += ".png";
 
-    if (img.save(fileName.data(), nullptr, 100)) {
+    if (img->save(fileName.data(), nullptr, 100)) {
         cout << "save img " << fileName << " success!" << endl;
     } else {
         cerr << "save img " << fileName << " FAIL!" << endl;
     }
-    painter.end();
 }
