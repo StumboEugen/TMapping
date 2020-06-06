@@ -27,6 +27,7 @@ class TmapRosNode
     ros::ServiceServer srvSetSurviver;
     ros::ServiceServer srvReset;
     ros::ServiceServer srvChHis;
+    ros::ServiceServer srvSaveChampion;
     std::unique_ptr<TopoMapping> mTmappingCore;
 
 private:
@@ -42,6 +43,8 @@ private:
                    std_srvs::EmptyResponse& res);
     bool cbSrvGetEvoOfChampion(tmapping::GetMapsRequest& req,
                                tmapping::GetMapsResponse& res);
+    bool cbSrvSaveChampion(std_srvs::EmptyRequest& req,
+                           std_srvs::EmptyResponse& res);
 
 public:
     TmapRosNode();

@@ -34,6 +34,8 @@ static constexpr GateID GATEID_HAVENT_LEFT = -3;
 static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 static constexpr GateID GATEID_NOT_FOUND = -5;
 
+static constexpr double maxErrForGeoHash = 0.4;
+static constexpr size_t maxMapNumberPerStep = 200;
 static constexpr double stdErrPerMeter = 0.1;
 static constexpr double convErrPerMeter = stdErrPerMeter * stdErrPerMeter;
 
@@ -44,6 +46,7 @@ static constexpr char TMAP_STD_SERVICE_NAME_GET_MAPS[] = "tmapping/srv/getMaps";
 static constexpr char TMAP_STD_SERVICE_NAME_SET_SURVIVERS[] = "tmapping/srv/setSurvivers";
 static constexpr char TMAP_STD_SERVICE_NAME_RESET[] = "tmapping/srv/reset";
 static constexpr char TMAP_STD_SERVICE_GET_CHAMPION_HISTORY[] = "tmapping/srv/championHistory";
+static constexpr char TMAP_STD_SERVICE_SAVE_CHAMPION[] = "tmapping/srv/saveChampionMap";
 
 /// 第二轮的时候, 任何概率都接受, 哪些很差的, 交给固定数量去干掉
 static constexpr double TOLLERANCE_2ND_MATCH_MERGEDEXP = 0.0;

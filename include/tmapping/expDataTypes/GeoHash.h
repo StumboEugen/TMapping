@@ -27,7 +27,7 @@ class GeoHash
     std::unordered_map<int64_t, std::vector<Entrance>> mTable;
 
 public:
-    explicit GeoHash(const ExpData&, double odomErr = 0.4);
+    explicit GeoHash(const ExpData&, double odomErr = maxErrForGeoHash);
 
     /**
      * @brief 得到哈希表上对应位置的入口

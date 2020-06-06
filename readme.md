@@ -1,10 +1,64 @@
-开始
-===
-
+#安装
+#### 将代码拷贝至catkin_ws的src文件夹下
+    $ git clone https://gitee.com/stumbo/Tmapping.git
 #### git clone 后首先进行编译
     $ catkin_make --pkg tmapping 
-#### 编译完成后, 打开图形界面
+如果编译报错提示找不到qt之类的可以尝试以下命令
+
+    $ sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer
+    $ sudo apt-get install ros-$ROS_DISTRO-qt-*
+#### 编译完成后, 打开建图核心
+    $ rosrun tmapping main
+#### 打开图形界面
     $ rosrun tmapping UI
+
+# 快速开始
+## 简单模拟
+#### 打开建图核心以及UI
+    $ rosrun tmapping main
+    $ rosrun tmapping UI
+#### 把demo地图放到指定位置
+将文件夹`demoMaps`里的基本地图文件放在`/home/${USER}/tmappingMaps`中
+#### 读取地图并放置机器人
+左侧点击 `Load` 读取 demoMap, 切换至 `Simulation mode`, 点击`Connect to ROS
+`, 点击图中的一个节点(会绿色高亮). 点击左上角 `Place Robot at node`.
+#### 移动机器人
+随后按住 `ctrl`, 鼠标右键点击路口, 便开始向核心发建图信息
+#### 查看建图结果
+切换至 `realtime mode`, 点击 `get maps`, 选择对应排名查看要观察的结果
+
+*可以打开另外一个UI, 一边模拟一边看建图结果, UI支持多连接 (ros::init_options::AnonymousName)*
+
+## 实际数据
+#### 打开建图核心以及转换器
+    $ rosrun tmapping main
+    $ rosrun tmapping converter_LocalSSH
+
+#### 然后在 `/features_in_last_map` topic下发布你的信息
+在`LocalSSH`的构造函数更改topic名字
+
+#### 保存建图结果
+##### 方法1: 调用核心的service
+    $ rosservice call /tmapping/srv/saveChampionMap
+目前只能保存第一名的地图(但改起来也很容易)
+
+会保存在 `/home/${USER}/tmappingMaps` 下, 名为`currentChampion_YYYYMMDD_HHmm`
+    
+##### 方法2: 从UI选择要保存的地图
+启动UI
+
+    $ rosrun tmapping UI
+顶部切换至 `realtime mode`, 点击 `Connect to ROS`, 再点击左侧的 `get maps`, 选择你要保存的地图, 最后 `ctrl+S`
+
+会保存在 `/home/${USER}/tmappingMaps` 下, 名为`result#_YYYYMMDD_HHmm`
+
+#### 可视化和自动化处理
+保存Qt已绘制的图像可以至`TmapUI.cpp` 中搜索 `case Qt::Key_T:`. 
+想要自动化请自行搭建实时的保存机制 :-)  可以参考 `case Qt::Key_R:`
+
+#### 查看建图结果
+
+#图形界面介绍
 UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶部的按钮进行切换
 ## 建图模式
 打开后首先进入的是建图模式, 左侧的Map Builder工具栏负责构建拓扑地图, 右侧的Exp Builder负责生成拓扑节点.
@@ -77,6 +131,8 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 
 按住`ctrl`的同时使用`滚轮`可以缩放, 如果地图过大, 单击界面顶部的`enable Drag`按钮则可拖动界面.
 
+双击节点可以查看节点的原始`Json`信息
+
 ## 模拟模式
 
 在roscore已经在运行的情况下, 单击 `Connect to ROS`可以和roscore建立联系(此操作不可逆)
@@ -107,6 +163,8 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 
 可以实时获取建图核心的建图结果
 
+### RealTime 工具栏
+
 单击 `get maps` 从建图核心获得当前概率最高的n张地图, 地图假设以及其概率会显示在下拉菜单中, 选择后查看具体构型
 
 单击 `show the poss history` 可以查看当前显示地图的概率变化历史, 
@@ -125,10 +183,24 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 |选中节点 + `shift+D`|删除节点的所有 `FakeLine`|
 |选中虚线 + `D`|删除`FakeLine`|
 |选中虚线 + `shift+D`|删除`FakeLine`, 但反方向移动节点|
+|`ctrl+S`|实时模式下保存地图|
 |`V`|复制选中的节点并添加|
 |`J`|编辑选中节点的原始`Json`数据|
-|`C`|开启连接模式|
-|`F`|随机移动|
-|`G`|获取当前的实时地图|
+|`C`|建图模式下开启连接模式|
+|`F`|开始机器人的随机移动|
+|`G`|实时模式下获取当前的已建地图|
 |`R`|绘制上一次随机移动过程的图像|
 |`M`|融合两个节点数据|
+|`T`|保存当前主界面的图像为 test.png|
+
+# Converter
+一个简单的从Feature到Exp信息的转换节点, 在 `src/converters/Converter_LocalSSH.cpp` 中
+转换的callback在 `LocalSSH::cbFeatures()` 中.
+
+# 参数
+
+主要3个参数需要调整, 都在 `include/tmapping/tools/TopoParams.h` 中
+* `stdErrPerMeter` 算法预估的里程计标准差, 默认为0.1, 即每走一米产生噪声的标准差是多少
+* `maxErrForGeoHash` 哈希表所预估的最大里程计误差, 默认为0.4, 再增加会降低算法效率, 而且可能会产生错误匹配映射
+* `maxMapNumberPerStep` 每一步保存的最多地图构型数量, 增加后会增加建图成功率, 但会消耗计算时间, 
+且为了达到肉眼可见的效果需要大幅增加并且需要大量的探索

@@ -22,6 +22,8 @@ tmap::TmapRosNode::TmapRosNode() :
                                       &TmapRosNode::cbSrvReset, this)),
         srvChHis(n.advertiseService(TMAP_STD_SERVICE_GET_CHAMPION_HISTORY,
                                       &TmapRosNode::cbSrvGetEvoOfChampion, this)),
+        srvSaveChampion(n.advertiseService(TMAP_STD_SERVICE_SAVE_CHAMPION,
+                                      &TmapRosNode::cbSrvSaveChampion, this)),
         mTmappingCore(new TopoMapping)
 {
 
@@ -93,5 +95,16 @@ TmapRosNode::cbSrvGetEvoOfChampion(tmapping::GetMapsRequest& req, tmapping::GetM
 {
     res.jMaps = JsonHelper::JS2Str(mTmappingCore->getChampionHistory());
     return true;
+}
+
+bool TmapRosNode::cbSrvSaveChampion(std_srvs::EmptyRequest& req, std_srvs::EmptyResponse& res)
+{
+    int r = JsonHelper::saveJson(mTmappingCore->getTopMaps(1)["maps"][0], "currentChampion", true);
+    if ( r>=0 ) {
+        cout << "save Champion map success!";
+    } else {
+        cerr << "save Champion map failure!";
+    }
+    return r >= 0;
 }
 

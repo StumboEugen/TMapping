@@ -779,25 +779,10 @@ void tmap::TmapUI::SLOT_StartMassiveTrials()
     uiDockSimulation->cbMoveUntilCover->setChecked(true);
     uiDockSimulation->sbMoveSteps->setValue(50);
     uiDockRealtime->sbMapNeeded->setValue(1);
-    uiDockSimulation->sbCarelessPercentage->setValue(25);
 
     ros::NodeHandle n;
     auto RSC_reset = n.serviceClient<std_srvs::Empty>
             (TMAP_STD_SERVICE_NAME_RESET);
-
-//    double wucha = 0.2;
-//
-//    for (int i = 0; i < uiDockSimulation->sbTrials->value(); ++i) {
-//        std_srvs::Empty e;
-//        RSC_reset.call(e);
-//        gvMain->scene()->clearSelection();
-//
-//        SLOT_RandomMove();
-//        SLOT_GetRealtimeMaps();
-//        if (gvMain->isTheRealTimeMapSimiliar()) {
-//            return;
-//        }
-//    }
 
     int nFail = 0;
     int nSuccess = 0;
@@ -938,6 +923,20 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
             break;
         }
+        case Qt::Key_S: {
+            if (mode_REALTIME->isChecked() && event->modifiers() & Qt::ControlModifier) {
+                int id = uiDockRealtime->cbCandidates->currentIndex();
+                if (id >= 0) {
+                    JsonHelper::saveJson(
+                            realtimeMaps["maps"][id], "result" + to_string(id), true);
+                }
+            }
+        }
+        case Qt::Key_T: {
+            saveImg(turnScene2Image(gvMain->scene()), "test");
+        }
+        default:
+            break;
     }
 }
 
@@ -959,8 +958,6 @@ void tmap::TmapUI::saveScenePic(QGraphicsScene* scene, std::string fileName, std
     if (img.width() > 1000) {
         img = img.scaled(1000, 1000, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
-
-
 }
 
 std::unique_ptr<QImage> tmap::TmapUI::turnScene2Image(QGraphicsScene* scene)

@@ -60,6 +60,9 @@ int tmap::JsonHelper::saveJson(const tmap::Jsobj& js, string fileName, bool addT
         timeStructP = localtime(&timeLong);
         char tmp[64];
         strftime(tmp, sizeof(tmp), "%Y%m%d_%H%M", timeStructP);
+        if (!fileName.empty()) {
+            fileName += '_';
+        }
         fileName += tmp;
     }
     fstream fs(fileName, std::ios::out | std::ios::trunc);

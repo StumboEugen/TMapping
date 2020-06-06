@@ -22,7 +22,7 @@ class TopoMapping
     size_t nChampionDefend = 0;
 
     /// 如果为0, 表示完全不限制地图生长
-    size_t nSurviverMaps = 200;
+    size_t nSurviverMaps = maxMapNumberPerStep;
 
 public:
     void setLeftGate(GateID gateID);
