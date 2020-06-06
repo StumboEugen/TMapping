@@ -1,3 +1,10 @@
+# 多假设拓扑地图建图算法
+
+<video height="640" width="640" controls="" preload="none"> 
+<source id="mp4" src="videos/33.mp4" type="video/mp4"> 
+<p>Your user agent does not support the HTML5 Video element.</p>
+</video>
+
 #安装
 #### 将代码拷贝至catkin_ws的src文件夹下
     $ git clone https://gitee.com/stumbo/Tmapping.git
