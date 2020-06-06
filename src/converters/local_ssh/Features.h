@@ -16,8 +16,7 @@
 #include <ros/message_operations.h>
 
 #include <std_msgs/Header.h>
-#include <local_ssh/Feature.h>
-#include <local_ssh/Feature.h>
+#include "Feature.h"
 
 namespace local_ssh
 {

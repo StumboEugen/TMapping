@@ -938,9 +938,6 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
             break;
         }
-        case Qt::Key_T: {
-            saveImg(turnScene2Image(gvMain->scene()), "test");
-        }
     }
 }
 

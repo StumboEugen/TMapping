@@ -26,7 +26,7 @@ class QGate : public QGraphicsItem
 public:
     explicit QGate(GatePtr data);
 
-    void changeNormalVec(const QPointF& toPointInScene);
+    void changeNormalVec(const QPointF& toPointInScene, bool withDirRestrict = false);
 
     QRectF boundingRect() const override;
 

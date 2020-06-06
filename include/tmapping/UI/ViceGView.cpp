@@ -163,7 +163,7 @@ void tmap::ViceGView::mouseMoveEvent(QMouseEvent* event)
     QGraphicsView::mouseMoveEvent(event);
 
     if (mStatus == DisplayStatus::DRAWING_GATE) {
-        mQGates.back()->changeNormalVec(mapToScene(event->pos()));
+        mQGates.back()->changeNormalVec(mapToScene(event->pos()), true);
     }
 }
 
@@ -171,7 +171,7 @@ void tmap::ViceGView::mouseReleaseEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseReleaseEvent(event);
     if (mStatus == DisplayStatus::DRAWING_GATE) {
-        mQGates.back()->changeNormalVec(mapToScene(event->pos()));
+        mQGates.back()->changeNormalVec(mapToScene(event->pos()), true);
         mStatus = DisplayStatus::BUILDING_EXP;
     }
 }
@@ -227,10 +227,14 @@ void tmap::QGate::paint(QPainter* painter, const QStyleOptionGraphicsItem* optio
     UIT::drawGate(painter, mData.get());
 }
 
-void tmap::QGate::changeNormalVec(const QPointF& toPointInScene)
+void tmap::QGate::changeNormalVec(const QPointF& toPointInScene, bool withDirRestrict)
 {
     auto diff = toPointInScene - scenePos();
-    mData->setNormalVec(UIT::QPt2TopoVec(diff).restrictDir());
+    if (withDirRestrict) {
+        mData->setNormalVec(UIT::QPt2TopoVec(diff).restrictDir());
+    } else {
+        mData->setNormalVec(UIT::QPt2TopoVec(diff));
+    }
     update();
 }
 

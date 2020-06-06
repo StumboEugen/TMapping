@@ -162,8 +162,8 @@ void MapNode::setLinkAtIndex(size_t index, const MapNodePtr& to, GateID at)
 MapNode::Link& MapNode::linkAt(size_t index)
 {
     if (mLinks.size() <= index) {
-        cout << FILE_AND_LINE <<
-             " Warning! you are accessing a link that out of range!" << index << endl;
+//        cout << FILE_AND_LINE <<
+//             " Warning! you are accessing a link that out of range!" << index << endl;
         while (mLinks.size() <= index) {
             mLinks.emplace_back();
         }

@@ -94,6 +94,13 @@
      </widget>
     </item>
     <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QPushButton" name="btnConnectGates">
       <property name="text">
        <string>Connect Gates</string>
@@ -117,19 +124,9 @@
      </widget>
     </item>
     <item>
-     <widget class="Line" name="line">
+     <widget class="Line" name="line_3">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="cbDrawFromGate">
-      <property name="text">
-       <string>Draw edge from gate</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
       </property>
      </widget>
     </item>

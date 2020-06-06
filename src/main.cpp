@@ -6,8 +6,6 @@
 #include "std_msgs/String.h"
 #include <sstream>
 
-#include "tmapping/Tmapping.h"
-
 #include "TmapRosNode.h"
 
 using namespace std;
@@ -18,5 +16,6 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "TmappingCore");
     TmapRosNode t;
     cout << "Tmapping Core started!" << endl;
+    /// 回调函数已经注册在class TmapRosNode中, 自动进行
     ros::spin();
 }
