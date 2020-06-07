@@ -856,6 +856,10 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
         }
         case Qt::Key_R: {
 
+            if (! event->modifiers() & Qt::ControlModifier) {
+                break;
+            }
+
             SLOT_GetRealtimeMaps();
 
             /// 确定对应k时刻的错误冠军是第一名地图还是第二名地图

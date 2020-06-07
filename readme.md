@@ -1,9 +1,12 @@
 # 多假设拓扑地图建图算法
 
-<video height="640" width="640" controls="" preload="none"> 
-<source id="mp4" src="videos/33.mp4" type="video/mp4"> 
-<p>Your user agent does not support the HTML5 Video element.</p>
-</video>
+## 三个建图过程的例子
+### 八点图
+![]123(videos/8g.gif)
+### 田字图
+![]123(videos/33.gif)
+### 室内大尺寸环境
+![]123(videos/big.gif)
 
 #安装
 #### 将代码拷贝至catkin_ws的src文件夹下
@@ -13,6 +16,8 @@
 如果编译报错提示找不到qt之类的可以尝试以下命令
 
     $ sudo apt-get install qt4-dev-tools qt4-doc qt4-qtconfig qt4-demos qt4-designer
+还不行的话
+
     $ sudo apt-get install ros-$ROS_DISTRO-qt-*
 #### 编译完成后, 打开建图核心
     $ rosrun tmapping main
@@ -21,22 +26,35 @@
 
 # 快速开始
 ## 简单模拟
+#### 把demo地图放到指定位置
+将文件夹`demoMaps`里的基本地图文件复制到在`/home/${USER}/tmappingMaps`中
 #### 打开建图核心以及UI
     $ rosrun tmapping main
     $ rosrun tmapping UI
-#### 把demo地图放到指定位置
-将文件夹`demoMaps`里的基本地图文件放在`/home/${USER}/tmappingMaps`中
 #### 读取地图并放置机器人
-左侧点击 `Load` 读取 demoMap, 切换至 `Simulation mode`, 点击`Connect to ROS
-`, 点击图中的一个节点(会绿色高亮). 点击左上角 `Place Robot at node`.
+在打开的界面中, 点击左侧 `Load` 读取 demoMap, 切换至 `Simulation mode`, 点击`Connect to ROS
+`, 点击选中图中的一个节点(会被绿色高亮). 再点击左上角 `Place Robot at node`.
 #### 移动机器人
-随后按住 `ctrl`, 鼠标右键点击路口, 便开始向核心发建图信息
+随后按住 `ctrl`, 鼠标右键点击路口, 机器人会随之移动, 同时向核心发建图信息
 #### 查看建图结果
-切换至 `realtime mode`, 点击 `get maps`, 选择对应排名查看要观察的结果
+切换至 `realtime mode`, 点击 `get maps`, 选择对应排名查看要观察的建图结果
 
 *可以打开另外一个UI, 一边模拟一边看建图结果, UI支持多连接 (ros::init_options::AnonymousName)*
 
-## 实际数据
+## 大规模测试模拟
+#### 重置建图core核心:
+    $ rosservice call /tmapping/srv/reset
+回到 `Simulation mode`, 选中 `move until coverage`, 点击 `Random Move`, 则机器人会随机移动, 直到覆盖整个地图
+
+此外还可以进行大规模测试,  选择需要的测试数量 `trials`, 再点击 `Start massive trials`,
+测试完毕后会统计建图正确率和所需的步数
+
+#### 保存某次随机建图的图像
+随机移动过程中, 会记录建图的走向图, 在随机建图完毕后, 可以按`ctrl+R`输出过程中的图片, 
+输出文件于tmappingMaps的子文件夹中
+(这个操作是最后为了可视化加上去的, 会影响一定的效率, 如果需要删除请查找和`TmapUI::routeImgs`有关内容)
+
+## 实际数据运行
 #### 打开建图核心以及转换器
     $ rosrun tmapping main
     $ rosrun tmapping converter_LocalSSH
@@ -196,7 +214,7 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 |`C`|建图模式下开启连接模式|
 |`F`|开始机器人的随机移动|
 |`G`|实时模式下获取当前的已建地图|
-|`R`|绘制上一次随机移动过程的图像|
+|`ctrl + R`|绘制上一次随机移动过程的图像|
 |`M`|融合两个节点数据|
 |`T`|保存当前主界面的图像为 test.png|
 
