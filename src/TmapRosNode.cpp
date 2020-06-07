@@ -34,6 +34,7 @@ static double temp;
 bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
                               tmapping::NewExpResponse& res)
 {
+    cout << "get new exp info" << endl;
 #if TMAPPING_CONFIG_LOG_TIME
     auto startTime = std::chrono::system_clock::now();
     static bool once = false;
@@ -58,6 +59,7 @@ bool TmapRosNode::cbSrvNewExp(tmapping::NewExpRequest& req,
 bool TmapRosNode::cbSrvGateMovement(tmapping::GateMovementRequest& req,
                                     tmapping::GateMovementResponse& res)
 {
+    cout << "get gate movement info" << endl;
     auto startTime = std::chrono::system_clock::now();
     auto gateID = JsonHelper::Str2JS(req.jGateMove).asInt();
     mTmappingCore->setLeftGate(gateID);
@@ -73,7 +75,10 @@ bool
 TmapRosNode::cbSrvGetMaps(tmapping::GetMapsRequest& req,
                           tmapping::GetMapsResponse& res)
 {
-    res.jMaps = JsonHelper::JS2Str(mTmappingCore->getTopMaps(req.nMapRequired));
+    cout << "Processing [GetMaps] request..." << endl;
+    auto topoMaps = mTmappingCore->getTopMaps(req.nMapRequired);
+    res.jMaps = JsonHelper::JS2Str(topoMaps);
+    cout << "Returned " << topoMaps["maps"].size() << " maps" << endl;
     return true;
 }
 
@@ -81,12 +86,14 @@ bool TmapRosNode::cbSrvSetSuriviers(tmapping::SetSurviverMapsNumRequest& req,
                                     tmapping::SetSurviverMapsNumResponse& res)
 {
     mTmappingCore->setNSurviverMaps(req.nMaps);
+    cout << "The survivor count is set to " << req.nMaps << endl;
     return true;
 }
 
 bool TmapRosNode::cbSrvReset(std_srvs::EmptyRequest& req, std_srvs::EmptyResponse& res)
 {
     mTmappingCore.reset(new TopoMapping);
+    cout << "Mapping core is reseted" << endl;
     return true;
 }
 

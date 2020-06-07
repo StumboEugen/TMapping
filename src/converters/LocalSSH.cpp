@@ -13,7 +13,7 @@ using namespace std;
 
 void tmap::LocalSSH::cbFeatures(const local_ssh::Features& msg)
 {
-    /// TODO 最早添加的数据不够鲁棒, seq=11有问题,因此只处理seq<=10的
+    /// @note 最早添加的数据不够鲁棒, seq=11有问题,因此只处理seq<=10的
     if (msg.header.seq > 10)
         return;
 

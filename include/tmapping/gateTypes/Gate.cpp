@@ -103,7 +103,7 @@ void tmap::Gate::setNormalVec(const tmap::TopoVec2& normalVec)
 
 bool tmap::Gate::alike(const tmap::GatePtr& that) const
 {
-    ///DEBUG SFAE TODO REMOVE
+    ///DEBUG SFAE
     if (abs(this->mNormalVec.len() - 1.0) > 0.1 ||
         abs(that->mNormalVec.len() - 1.0) > 0.1) {
         cerr << FILE_AND_LINE << " normalVec not unit!" << endl;

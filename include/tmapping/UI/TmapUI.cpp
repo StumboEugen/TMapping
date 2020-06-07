@@ -62,7 +62,6 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         QSizePolicy p;
         p.setHorizontalPolicy(QSizePolicy::Expanding);
         p.setVerticalPolicy(QSizePolicy::Expanding);
-//    gvMain->setScene(&this->mapScene);
         gvMain->setSizePolicy(p);
         gvMain->setMinimumSize(601, 401);
         centerLayout->addWidget(gvMain);
@@ -81,7 +80,6 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         smallWindowLayout->addWidget(infoView, 0);
 
         gvVice = new ViceGView(uiMain->centralWidget);
-//    gvVice->setScene(&this->nodeScene);
         gvVice->setFixedSize(221, 221);
         gvVice->setCursor(Qt::CrossCursor);
         gvVice->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
@@ -124,7 +122,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 , this, SLOT(SLOT_InitROS()));
     }
 
-    {
+    {   /// Exp Builder Deck的初始化
         uiDockExpBuilder->setupUi(dockExpBuilder);
         addDockWidget(Qt::RightDockWidgetArea, dockExpBuilder);
         dockExpBuilder->setShown(true);
@@ -171,7 +169,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 gvVice, SLOT(SLOT_NextLandmarkStr(QString)));
     }
 
-    {
+    {   /// Map Builder Dock 的初始化
         uiDockMapBuilder->setupUi(dockMapBuilder);
         addDockWidget(Qt::LeftDockWidgetArea, dockMapBuilder);
         dockExpBuilder->setShown(true);
@@ -212,7 +210,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
                 gvMain, SLOT(SLOT_SetMoveStrategy(int)));
     }
 
-    {
+    {   /// Simulation Dock 的初始化
         uiDockSimulation->setupUi(dockSimulation);
         addDockWidget(Qt::LeftDockWidgetArea, dockSimulation);
         dockSimulation->setShown(false);
@@ -227,22 +225,13 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
         connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
                 uiDockSimulation->cbNoDetailMoving, SLOT(setDisabled(bool)));
 
-//        connect(uiDockSimulation->btnPlaceRobot, SIGNAL(toggled(bool)),
-//                uiDockSimulation->cbAccidents, SLOT(setDisabled(bool)));
-
         connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
                 uiDockSimulation->cbAccidents, SLOT(setEnabled(bool)));
 
         connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
                 uiDockSimulation->btnRandomMove, SLOT(setEnabled(bool)));
-//        connect(uiDockSimulation->cbNoDetailMoving, SIGNAL(toggled(bool)),
-//                uiDockSimulation->sbMoveSteps, SLOT(setEnabled(bool)));
-
         connect(uiDockSimulation->btnRandomMove, SIGNAL(clicked()),
                 this, SLOT(SLOT_RandomMove()));
-
-//        connect(uiDockSimulation->cbMoveUntilCover, SIGNAL(toggled(bool)),
-//                uiDockSimulation->sbMoveSteps, SLOT(setDisabled(bool)));
 
         connect(uiDockSimulation->btnStartMassiveTrail, SIGNAL(clicked()),
                 this, SLOT(SLOT_StartMassiveTrials()));
@@ -254,7 +243,7 @@ tmap::TmapUI::TmapUI(QWidget* parent) :
 
     }
 
-    {
+    {   /// Realtime Dock 的初始化
         uiDockRealtime->setupUi(dockRealtime);
         addDockWidget(Qt::LeftDockWidgetArea, dockRealtime);
         dockRealtime->setShown(false);
@@ -301,6 +290,9 @@ void tmap::TmapUI::SLOT_BuildExp(bool start)
         auto type = cbET->itemData(cbET->currentIndex()).value<ExpDataType>();
         double size = uiDockExpBuilder->leExpSize->text().toDouble();
         gvVice->beginExpBuilding(type, size);
+        cout << "The Exp size is " << size << "m (the 5x5)\n";
+        cout << "Left click and Drag at the circle to make a gate\n";
+        cout << "Right click to make a landmark" << endl;
     } else {
         uiDockExpBuilder->btnBuildExp->setText("Build an Exp");
         auto theBuiltExp = gvVice->completeExpBuilding();
@@ -314,6 +306,8 @@ void tmap::TmapUI::SLOT_BuildExp(bool start)
 
 void tmap::TmapUI::SLOT_GateTypeChanged(int index)
 {
+    cout << "next gate's type will be "
+    << uiDockExpBuilder->cbGateType->itemText(index).data() << endl;
     gvVice->setNextGateType(
             uiDockExpBuilder->cbGateType->itemData(index).value<GateType>());
 }
@@ -329,6 +323,7 @@ void tmap::TmapUI::SLOT_EditJsonOfBuiltExpData(bool start)
     static int indexOfEditing;
     auto& exps = uiDockExpBuilder->cbBuiltExps;
     if (start) {
+        cout << "Editting the Exp's Json" << endl;
         if (exps->count() == 0) {
             uiDockExpBuilder->btnEditJson->setCheckable(false);
             uiDockExpBuilder->btnEditJson->setCheckable(true);
@@ -354,6 +349,7 @@ void tmap::TmapUI::SLOT_EditJsonOfBuiltExpData(bool start)
         }
         infoView->setTextColor(Qt::black);
         infoView->setReadOnly(true);
+        cout << "Edit the Exp's Json complete" << endl;
     }
 }
 
@@ -361,6 +357,8 @@ void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
 {
     const auto& items = gvMain->scene()->selectedItems();
     if (start) {
+        cout << "Start editting the json" <<
+        "\n WARNNING, the connection relationship will not be auto fixed" << endl;
         if (items.empty()) {
             uiDockMapBuilder->btnEditJson->setCheckable(false);
             uiDockMapBuilder->btnEditJson->setCheckable(true);
@@ -389,6 +387,7 @@ void tmap::TmapUI::SLOT_EditJsonOfNodeInFakeMap(bool start)
             infoView->append("\n Trans error!");
         }
         infoView->setTextColor(Qt::black);
+        cout << "Json editting complete" << endl;
     }
     uiDockMapBuilder->btnAddGate2Corridor->setDisabled(start);
     uiDockMapBuilder->btnConnectGates->setDisabled(start);
@@ -446,14 +445,17 @@ void tmap::TmapUI::SLOT_LoadExp()
 void tmap::TmapUI::SLOT_DragMode(bool isDrag)
 {
     if (isDrag) {
+        cout << "Drag mode is ON" << endl;
         gvMain->setDragMode(QGraphicsView::ScrollHandDrag);
     } else {
+        cout << "Drag mode is OFF" << endl;
         gvMain->setDragMode(QGraphicsView::NoDrag);
     }
 }
 
 void tmap::TmapUI::SLOT_AddFakeNode()
 {
+    cout << "A copy of exp is added to the map" << endl;
     auto& exps = uiDockExpBuilder->cbBuiltExps;
     if (exps->count() == 0) {
         return;
@@ -699,6 +701,7 @@ void tmap::TmapUI::SLOT_GetRealtimeMaps()
 
     if (RSC_getMaps.call(infoBridge)) {
         realtimeMaps = JsonHelper::Str2JS(infoBridge.response.jMaps);
+        infoView->setText("realtimeMaps received!");
 
 #ifdef TMAPPING_CONFIG_RECORD_POSS
         mChampionPoss.clear();
@@ -862,15 +865,17 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
             SLOT_GetRealtimeMaps();
 
-            /// 确定对应k时刻的错误冠军是第一名地图还是第二名地图
+            /// 确定对应k时刻错误地图的冠军是第一名地图还是第二名地图
             auto currentIndex = uiDockRealtime->cbCandidates->currentIndex();
             auto theDisplayingMap = StructedMapImpl(realtimeMaps["maps"][currentIndex]);
             const auto& possHistory = theDisplayingMap.getPossHistory();
+            /// 记录下来, 重新建图的时候进行记录
             vector<bool> isChampionAtK(possHistory.size());
             for (int i = 0; i < possHistory.size(); ++i) {
                 isChampionAtK[i] = possHistory[i] == mChampionPoss[i];
             }
 
+            /// 重置一下建图核心
             ros::NodeHandle n;
             auto RSC_reset = n.serviceClient<std_srvs::Empty>
                     (TMAP_STD_SERVICE_NAME_RESET);
@@ -879,6 +884,7 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
             uiDockRealtime->sbMapNeeded->setValue(2);
 
+            /// sentNodes里记录了上次发出去的所有移动信息, 让建图核心对相同的输入重新建图
             for (int i = 0; i < sentNodes["exp"].size(); ++i) {
 
                 tmapping::NewExp srvExp;
@@ -895,6 +901,7 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
                     return;
                 }
 
+                /// 根据实现的记录, 把错误地图冠军显示出来
                 SLOT_GetRealtimeMaps();
                 if (isChampionAtK[i]) {
                     SLOT_DisplayTheRealMap(1);
@@ -904,12 +911,17 @@ void tmap::TmapUI::keyPressEvent(QKeyEvent* event)
 
                 stringstream ss;
                 ss << setw(4) << setfill('0') << i;
+                /// 把显示的这张图保存下来
                 saveImg(turnScene2Image(gvMain->getScene4RealMap()), "WRONG_" + ss.str(),
                         uiDockMapBuilder->mapName->text().toStdString());
+                /// 同时保存一下上次随机运动时记录的机器人移动画面
+                /// (因为当你决定保存这次结果时, 上次机器人的运动信息实际已经丢失了, 所以每次都要预存)
                 saveImg(routeImgs[i], "REALMOVE_" + ss.str(),
                         uiDockMapBuilder->mapName->text().toStdString());
             }
 
+            /// 接下来是正确地图的获取, 当被篡位时正确地图并不一定就是第二名,
+            /// 但是我们可以通过地图生长树获得所有的历史形态(这一步在core完成, 我们获得的就是所有列表)
             ros::ServiceClient RSC_championHisLooker = n.serviceClient<tmapping::GetMaps>
                     (TMAP_STD_SERVICE_GET_CHAMPION_HISTORY);
             tmapping::GetMaps championHistoryMsg;

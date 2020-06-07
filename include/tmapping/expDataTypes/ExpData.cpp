@@ -56,8 +56,7 @@ GateID ExpData::findTheCloestGate(const TopoVec2& gatePos)
 
 MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
 {
-    /// TODO 完成两个未对齐数据的匹配工作
-    /// 要求: MatchResult->gatesMapping是从 [that's gate] = this's gate
+    /// MatchResult->gatesMapping是从 [that's gate] = this's gate
     /// MatchResult->mergedExpData 的gate序号和another完全相同
     /// selfWeight指的是this的权重, 比如selfWeight=3, 说明this可能是3次结果融合而成的
 
@@ -111,7 +110,9 @@ MatchResult ExpData::detailedMatch(const ExpData& that, double selfWeight) const
     thisCenter /= pointsMap.size();
     thatCenter /= pointsMap.size();
     /// from this 2 that
-    const auto setsDiff = thatCenter - thisCenter; // TODO rotate?
+    const auto setsDiff = thatCenter - thisCenter;
+
+    // TODO 最后还可以添加一步最优化的旋转
 
     /// 用于计算概率的中间变量
     double possDiffSum = 0.0;

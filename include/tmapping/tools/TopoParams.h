@@ -18,7 +18,7 @@
 
 #define TMAPPING_CONFIG_RECORD_POSS
 #define TMAPPING_CONFIG_LOG_VERBOSE false
-#define TMAPPING_CONFIG_LOG_TIME true
+#define TMAPPING_CONFIG_LOG_TIME false
 #define TMAPPING_CONFIG_DEBUG_MODE false
 
 namespace tmap
@@ -26,7 +26,7 @@ namespace tmap
 static constexpr uint64_t TOPO_JSON_VERSION = 0;
 using Jsobj = Json::Value;
 
-/// maybe one thousand years later, 128 could run out
+/// 表示Gate的序号,使用8位整形, 一个节点不太有可能有128个门
 using GateID = int8_t;
 static constexpr GateID GATEID_NO_MAPPING = -1;
 static constexpr GateID GATEID_BEGINNING_POINT = -2;
@@ -34,8 +34,11 @@ static constexpr GateID GATEID_HAVENT_LEFT = -3;
 static constexpr GateID GATEID_CORRIDOR_NO_ENDPOINT = -4;
 static constexpr GateID GATEID_NOT_FOUND = -5;
 
+/// 几何哈希的噪声冗余填充半径
 static constexpr double maxErrForGeoHash = 0.4;
+/// 默认的建图过程中每一步保留的地图数量
 static constexpr size_t maxMapNumberPerStep = 200;
+/// 算法预估的噪声标准差
 static constexpr double stdErrPerMeter = 0.1;
 static constexpr double convErrPerMeter = stdErrPerMeter * stdErrPerMeter;
 

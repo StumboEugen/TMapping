@@ -67,6 +67,7 @@ int tmap::JsonHelper::saveJson(const tmap::Jsobj& js, string fileName, bool addT
     }
     fstream fs(fileName, std::ios::out | std::ios::trunc);
     fs << JS2Str(js, false);
+    cout << "json file saved [" << fileName << "]" << endl;
     return 0;
 }
 
@@ -79,7 +80,7 @@ tmap::Jsobj tmap::JsonHelper::loadJson(const std::string& fileName)
     string errs;
     if (!parseFromStream(b, fs, &res, &errs)) {
         res = Json::nullValue;
-        cerr << FILE_AND_LINE << errs << endl;
+        cerr << FILE_AND_LINE << " Json Load Failure!\n" << errs << endl;
     }
     return res;
 }

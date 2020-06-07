@@ -54,6 +54,7 @@ void tmap::MainGView::addNode2FakeMapFromExpData(const tmap::ExpDataPtr& usedExp
 
 void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
 {
+    cout << "The nodes mobility of standard map is " << (enableMove ? "ON" : "OFF") << endl;
     mEnableFakeNodesMoving = enableMove;
     for (auto& item : mScene4FakeMap.items()) {
         if (auto qNode = dynamic_cast<QNode*>(item)) {
@@ -64,6 +65,7 @@ void tmap::MainGView::SLOT_EnableMoving4FakeNodes(bool enableMove)
 
 void tmap::MainGView::SLOT_EnableMoving4RealNodes(bool enableMove)
 {
+    cout << "The nodes mobility of realtime map is " << (enableMove ? "ON" : "OFF") << endl;
     mEnableRealNodesMoving = enableMove;
     for (auto& item : mScene4RealMap.items()) {
         if (auto qNode = dynamic_cast<QNode*>(item)) {
@@ -74,6 +76,7 @@ void tmap::MainGView::SLOT_EnableMoving4RealNodes(bool enableMove)
 
 void tmap::MainGView::SLOT_EnableGridRestriction(bool enableRes)
 {
+    cout << "Nodes Grid restriction is " << (enableRes ? "ON" : "OFF") << endl;
     mEnableNodeRestriction = enableRes;
 }
 
@@ -94,19 +97,27 @@ void tmap::MainGView::SLOT_StartDrawingEdge(bool enableDrawing)
     mIsDrawingEdge = enableDrawing;
 
     if (enableDrawing) {
+        cout << "Left click at a gate and drag to another gate (or just on the ground) to "
+                "create a new Corridor Node" << endl;
         setCursor(Qt::CrossCursor);
     } else {
+        cout << "Drawing edge mode OFF" << endl;
         setCursor(Qt::ArrowCursor);
     }
 }
 
 void tmap::MainGView::SLOT_RemoveSelectedNodes()
 {
+    int n = 0;
     for (auto& item : mScene4FakeMap.selectedItems()) {
         if (auto qNode = dynamic_cast<QNode*>(item)) {
             qNode->breakLinks();
             mNodesInFakeMap.erase(qNode->thisQnodePtr());
+            n++;
         }
+    }
+    if (n > 0) {
+        cout << "Remove " << n << " node(s)" << endl;
     }
 }
 
@@ -525,8 +536,10 @@ void tmap::MainGView::SLOT_AcceptAddingGates2Corridor(bool acceptAdding)
 {
     mAcceptAddingGate2Corridor = acceptAdding;
     if (acceptAdding) {
+        cout << "click the pos where you want to add the door, then drag the direction" << endl;
         setCursor(Qt::CrossCursor);
     } else {
+        cout << "Add Gate to Corridor mode OFF" << endl;
         setCursor(Qt::ArrowCursor);
     }
 }
@@ -602,8 +615,10 @@ void tmap::MainGView::SLOT_StartDirectLinking(bool startLink)
 {
     mIsDrawingDirectLink = startLink;
     if (startLink) {
+        cout << "Left click at a gate and drag to another gate to link them" << endl;
         setCursor(Qt::CrossCursor);
     } else {
+        cout << "Direct link mode OFF" << endl;
         setCursor(Qt::ArrowCursor);
     }
 }
