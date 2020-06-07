@@ -2,11 +2,11 @@
 
 ## 三个建图过程的例子
 ### 八点图
-![]123(videos/8g.gif)
+![](videos/8g.gif)
 ### 田字图
-![]123(videos/33.gif)
+![](videos/33.gif)
 ### 室内大尺寸环境
-![]123(videos/big.gif)
+![](videos/big.gif)
 
 #安装
 #### 将代码拷贝至catkin_ws的src文件夹下
@@ -52,15 +52,15 @@
 #### 保存某次随机建图的图像
 随机移动过程中, 会记录建图的走向图, 在随机建图完毕后, 可以按`ctrl+R`输出过程中的图片, 
 输出文件于tmappingMaps的子文件夹中
-(这个操作是最后为了可视化加上去的, 会影响一定的效率, 如果需要删除请查找和`TmapUI::routeImgs`有关内容)
+(这个功能是最后为了可视化加上去的, 会影响一定的效率, 如果需要删除请查找和`TmapUI::routeImgs`有关内容)
 
-## 实际数据运行
+## 使用实际数据
 #### 打开建图核心以及转换器
     $ rosrun tmapping main
     $ rosrun tmapping converter_LocalSSH
 
 #### 然后在 `/features_in_last_map` topic下发布你的信息
-在`LocalSSH`的构造函数更改topic名字
+topic名字在`LocalSSH`的构造函数中
 
 #### 保存建图结果
 ##### 方法1: 调用核心的service
@@ -77,11 +77,13 @@
 
 会保存在 `/home/${USER}/tmappingMaps` 下, 名为`result#_YYYYMMDD_HHmm`
 
-#### 可视化和自动化处理
-保存Qt已绘制的图像可以至`TmapUI.cpp` 中搜索 `case Qt::Key_T:`. 
-想要自动化请自行搭建实时的保存机制 :-)  可以参考 `case Qt::Key_R:`
-
 #### 查看建图结果
+保存的都是json格式的地图文件, 可以在UI中的 `build mode` 下读取查看
+
+#### 可视化和自动化处理
+保存Qt已绘制的图像的API操作方式可以至`TmapUI.cpp` 中搜索 `case Qt::Key_T:`
+
+想要自动化请自行搭建实时的保存机制 :-)  可以部分参考 `case Qt::Key_R:`
 
 #图形界面介绍
 UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶部的按钮进行切换
@@ -107,7 +109,7 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 然后在 `Exp Size`选择节点的大小, 会提供一个正方形供你进行初步的绘制, 这个size表示的是正方形的边长.
 
 点击 `Build an Exp` 开始绘制, 主界面的右下角会出现一个5x5的圆圈方阵(方阵对应的实际尺寸就是前面设置的Exp Size), 
-用鼠标左键单击圆圈开始制作节点的组成Gate, 拖拉方向选择Gate的朝向, 松开师表后Gate便被制作. 右键单击圆圈则制作地标LandMark.
+用鼠标左键单击圆圈开始制作节点的组成Gate, 拖拉方向选择Gate的朝向, 松开后Gate便被添加. 右键单击圆圈则添加地标LandMark.
 
 在 `Gate Type` 选择要添加的Gate类型.
 
@@ -121,19 +123,19 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
     但是不建议修改策略, 而是制作好后对Json直接进行微调
 
 ### Map Builder工具栏
-点击`Load`按钮便可读取对应名称的地图文件, 默认是demo.
+点击`Load`按钮便可读取对应名称的地图文件, 默认是demoMap.
 
 点击 `Add Gate to Corridor` 可以在走廊上绘制一个打开的门. 操作方式也是鼠标左键点击拖动. 这个门沿走廊的位置会被限制为0.5的整数倍.
 对应逻辑在 `MainGView::mousePressEvent` 的第二个else if分支, 搜索 `mAcceptAddingGate2Corridor`
 
-点击 `Edit Json of Selected Node` 可编辑已经在地图中的拓扑节点, 首先需要选中节点(选中的节点外框会变绿). 编辑后再次点击 `Complete
- Editting` 则完成替换. 按 `J`可以达到一样的效果 *注意, 这里没有联动地更改节点之间Gate的连接关系!*
+点击 `Edit Json of Selected Node` 可编辑已经在地图中的拓扑节点, 首先需要选中节点(选中的节点外框会变绿). 
+编辑后再次点击 `Complete Editting` 则完成替换. 按 `J`可以达到一样的效果 *注意, 这里没有联动地更改节点之间Gate的连接关系!*
  
 点击 `Delete Selected Nodes` 则可以删除选中的节点, 按`delete`或`d`可完成相同的效果. 
 
 点击 `Connect Gates` 可以连接节点之间的Gate. 使用鼠标拖拉即可. 鼠标悬浮到空悬的Gate时会出现红圈的提示. 按下连接到另一个Gate松开便完成了连接.
 
-如果 `Using Corridor to Connect` 被选中, 则绘制出的会是一个新的走廊节点, 此时走廊可以空悬至另一个单独位置, 而不需要连接第二个Gate
+如果 `Using Corridor to Connect` 被选中, 则绘制出的会是一个新的走廊节点, 此时走廊可以空悬至另一个单独位置, 而不一定需要连接第二个Gate
 
 `Enable nodes moving` 选中后允许鼠标拖动来移动拓扑节点
 
@@ -149,9 +151,9 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 
 ## 主界面
 
-前面提到了节点可以移动, 其中的连接关系会用虚线表示, 虚线也是可以删除编辑的. 选中节点后再按`shift + D`会删除这个节点相关的所有 `fakeLine`
+前面提到了节点可以移动, 其中的连接关系会用虚线`FakeLine`表示, 虚线也是可以被删除的. 选中节点后再按`shift + D`会删除这个节点相关的所有 `fakeLine`
 
-选中`fakeLine` 后, 按 `D` 可以删除之, 对应的Gate会相互连接, 远离红色端的节点会在红色位置与近红色端的节点连接.
+选中`fakeLine` 后, 按 `D` 可以删除之, 对应的Gate会相互连接, 远离红色端的节点会在红线位置与近红色端的节点连接.
 如果想要相反操作, 按 `shift+D` 便可.
 
 按住`ctrl`的同时使用`滚轮`可以缩放, 如果地图过大, 单击界面顶部的`enable Drag`按钮则可拖动界面.
@@ -163,7 +165,7 @@ UI中有三个模式, 建图模式, 模拟模式和实时模式, 单击界面顶
 在roscore已经在运行的情况下, 单击 `Connect to ROS`可以和roscore建立联系(此操作不可逆)
 
 ### Simulator 工具栏
-首先选中地图中的一个节点, 单击 `Place robot at node`, 便可放置机器人(此操作不可逆), 表示为一个红圈.
+首先选中地图中的一个节点, 单击 `Place robot at node`, 便可放置机器人(此操作不可逆), 机器人通过一个红圈表示.
 
 `no detailed moving` 指机器人是否控制机器人在节点内的详细移动.
 
